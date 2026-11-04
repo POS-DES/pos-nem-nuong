@@ -1113,7 +1113,7 @@ function vStaff(){
   return `<h2 style="margin:0">Nhân viên</h2><p class="mu" style="margin:2px 0 16px">Chuỗi ${esc(S.store.name)}</p><div class="seg" style="margin-bottom:16px">${T.map(t=>`<button class="${nvTab===t[0]?"on":""}" onclick="nvT('${t[0]}')">${t[1]}</button>`).join("")}</div>${nvTab==="ds"?nvList():nvPerm()}${stm?staffModal():""}`;
 }
 function nvList(){
-  const rows=S.staff.map(s=>{const t=nvLast(s.id),bits=[s.phone,s.role==="Chủ quán"?"Mọi quán":S.store.name,s.wage?fmt(s.wage)+"/giờ":"",t?"vào lần cuối "+tm(t)+" "+new Date(t).toLocaleDateString("vi-VN"):""].filter(Boolean).map(esc).join(" · ");
+  const rows=S.staff.slice().sort((a,b)=>(b.role==="Chủ quán")-(a.role==="Chủ quán")).map(s=>{const t=nvLast(s.id),bits=[s.phone,s.role==="Chủ quán"?"Mọi quán":S.store.name,s.wage?fmt(s.wage)+"/giờ":"",t?"vào lần cuối "+tm(t)+" "+new Date(t).toLocaleDateString("vi-VN"):""].filter(Boolean).map(esc).join(" · ");
     return `<div class="orow" onclick="editStaff(${s.id})"><span class="av">${esc((s.name.trim()[0]||"?").toUpperCase())}</span><div style="flex:1;min-width:0"><b>${esc(s.name)}${s.id===S.me?" (bạn)":""}</b><br><small class="mu">${bits}</small></div><span class="pill rl ${s.role==="Chủ quán"?"own":""}">${esc(s.role)}</span></div>`}).join("");
   return `<div class="bar" style="justify-content:flex-end"><button class="p" style="display:flex;align-items:center;gap:8px" onclick="newStaff()"><span class="ic">${ico('<path d="M12 5v14M5 12h14"/>')}</span>Thêm nhân viên</button></div><div class="card" style="padding:0;overflow:hidden">${rows||`<p class="mu" style="padding:16px;margin:0">Chưa có nhân viên.</p>`}</div>`;
 }
