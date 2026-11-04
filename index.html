@@ -231,11 +231,11 @@ const unsent=o=>o.items.reduce((a,i)=>a+i.q-i.s,0);
 const bdg=o=>unsent(o)?`<span class="pill">${unsent(o)} chưa báo bếp</span>`:"";
 const meName=()=>(S.staff.find(s=>s.id===S.me)||S.staff[0]||{name:"—"}).name;
 const today=ts=>new Date(ts).toDateString()===new Date().toDateString();
-const PERMS=[["order","Mở đơn, gọi món, báo bếp"],["move","Chuyển bàn, gộp bàn"],["discount","Giảm giá đơn"],["cancelItem","Hủy món đã báo bếp"],["pay","Thu tiền, in hóa đơn"],["kitchen","Màn hình bếp"],["shift","Mở ca, đóng ca"],["menuEdit","Sửa thực đơn"],["mapEdit","Sửa sơ đồ bàn"],["report","Xem báo cáo, lịch sử đơn"],["staffMgr","Quản lý nhân viên, phân quyền"],["settings","Cài đặt quán, thanh toán, in"],["stockCheck","Kho: kiểm kho"],["stockIn","Kho: nhập hàng, nguyên liệu"],["cost","Xem giá nhập, giá vốn, lãi gộp"],["stockPast","Kho: sửa ngày đã qua"],["schDl","Lịch ca: chỉnh hạn đăng ký"]];
+const PERMS=[["order","Mở đơn, gọi món, báo bếp"],["move","Chuyển bàn, gộp bàn"],["discount","Giảm giá đơn"],["cancelItem","Hủy món đã báo bếp"],["pay","Thu tiền, in hóa đơn"],["kitchen","Màn hình bếp"],["shift","Mở ca, đóng ca"],["menuEdit","Sửa thực đơn"],["mapEdit","Sửa sơ đồ bàn"],["report","Xem báo cáo, lịch sử đơn"],["staffMgr","Quản lý nhân viên, phân quyền"],["settings","Cài đặt quán, thanh toán, in"],["stockCheck","Kho: kiểm kho"],["stockIn","Kho: nhập hàng, nguyên liệu"],["stockEdit","Kho: sửa, xóa phiếu nhập"],["cost","Xem giá nhập, giá vốn, lãi gộp"],["stockPast","Kho: sửa ngày đã qua"],["schDl","Lịch ca: chỉnh hạn đăng ký"]];
 const RL=["Quản lý","Thu ngân","Phục vụ","Bếp"];
 const mkP=l=>{const o={};PERMS.forEach(p=>o[p[0]]=l.includes(p[0]));return o};
-const PD={"Quản lý":mkP(["order","move","discount","cancelItem","pay","kitchen","shift","menuEdit","mapEdit","report","staffMgr","settings","stockCheck","cost","stockPast","schDl"]),"Thu ngân":mkP(["order","move","discount","pay","kitchen","shift","stockCheck"]),"Phục vụ":mkP(["order","move","stockCheck"]),"Bếp":mkP(["kitchen","stockCheck","stockIn"])};
-const normP=m=>{const o={};RL.forEach(r=>{o[r]={};PERMS.forEach(p=>o[r][p[0]]=p[0]==="schDl"&&!(m&&m[r]&&"schDl" in m[r])?!!(PD[r]&&PD[r].schDl):!!(m&&m[r]&&m[r][p[0]]))});return o};
+const PD={"Quản lý":mkP(["order","move","discount","cancelItem","pay","kitchen","shift","menuEdit","mapEdit","report","staffMgr","settings","stockCheck","stockEdit","cost","stockPast","schDl"]),"Thu ngân":mkP(["order","move","discount","pay","kitchen","shift","stockCheck"]),"Phục vụ":mkP(["order","move","stockCheck"]),"Bếp":mkP(["kitchen","stockCheck","stockIn"])};
+const normP=m=>{const o={};RL.forEach(r=>{o[r]={};PERMS.forEach(p=>o[r][p[0]]=(p[0]==="schDl"||p[0]==="stockEdit")&&!(m&&m[r]&&p[0] in m[r])?!!(PD[r]&&PD[r][p[0]]):!!(m&&m[r]&&m[r][p[0]]))});return o};
 const rpm=()=>S.store.rp?normP(S.store.rp):PD;
 const PM={view:"report",reprint:"pay",cancel:"cancelItem"};
 const pv=(m,k)=>m.role==="Chủ quán"||!!((rpm()[m.role]||{})[PM[k]||k]);
@@ -830,6 +830,38 @@ function vKiem(){
   <div style="margin:10px 0"><span class="pill ${done?"pg":""}" style="${done?"":"background:#ffedd5;color:#c2410c"}">${done?"Đã chốt":"Chưa chốt"}</span> <span class="mu" id="kk_n">${n}/${S.ing.length}</span></div><p class="mu" style="margin:0 0 6px;font-size:13px">Hàng nhập về sau lúc nhân viên đếm: tick “nhập sau khi đếm” để không bị tính vào tiêu hao.</p>${srch()}
   <div class="card" style="padding:0;overflow:hidden">${S.ing.map(i=>{const x=exOn(i,kCut(i).e),ims=S.imp.filter(z=>z.iid===i.id&&dk(z.ts)===kd).sort((p,q)=>p.ts-q.ts);return `<div class="row ir" data-n="${esc(i.name.toLowerCase())}" style="padding:12px 16px;border-top:1px solid var(--bd)"><div><b>${esc(i.name)}</b><br><small class="mu">Dự kiến ${nf(x)} ${esc(i.u)}${i.f>1?` (${nf(x/i.f)} ${esc(i.pu)})`:""}</small>${ims.map(z=>`<label class="mu" style="display:flex;gap:6px;align-items:center;font-size:13px;cursor:pointer;margin-top:4px"><input type="checkbox" ${kvx[z.id]?"checked":""} onchange="kTogX(${i.id},${z.id},this.checked);view()">${tm(z.ts)} nhập ${nf(z.q)} ${esc(i.u)} · nhập sau khi đếm</label>`).join("")}</div><div class="ib" style="width:150px"><input id="kq${i.id}" type="number" min="0" placeholder="–" value="${kvk[i.id]==null?"":kvk[i.id]}" oninput="kvk[${i.id}]=this.value;kkOk()"><span class="su">${esc(i.u)}</span></div></div>`}).join("")||`<p class="mu" style="padding:16px;margin:0">Chưa có nguyên liệu.</p>`}</div>
   <div style="position:sticky;bottom:12px;margin-top:14px"><button id="kk_ok" class="p" style="width:100%;padding:14px;font-size:16px;border-radius:14px" onclick="chotKho()" ${n?"":"disabled"}>Chốt kho (${n}/${S.ing.length})</button></div>`}
+
+let imE=null;
+function editImp(id){if(!can("stockEdit"))return;imE={id,del:false};view();const q=$("#ie_q");if(q)q.select()}
+function impEditModal(){
+  const x=S.imp.find(z=>z.id===imE.id);if(!x)return"";const i=ing(x.iid)||{u:"",name:"?"},cl="imE=null;view()";
+  return `<div class="mo" onclick="if(event.target===this){${cl}}"><div class="md" style="max-width:440px"><div class="mh"><b>Sửa phiếu nhập</b><button class="mx" onclick="${cl}">×</button></div><div class="mb">
+  <div><b>${esc(i.name)}</b><br><small class="mu">${tm(x.ts)} ${new Date(x.ts).toLocaleDateString("vi-VN")} · ${esc(x.by)}</small></div>
+  <label class="mf"><span>Số lượng</span><div class="ib"><input id="ie_q" type="number" min="0" step="any" value="${x.q}" oninput="impEdCalc('q')"><span class="su">${esc(i.u)}</span></div></label>
+  <div class="r2"><label class="mf" style="flex:1;min-width:150px"><span>Thành tiền</span><div class="ib"><input id="ie_t" data-m type="text" inputmode="decimal" value="${x.cost}" oninput="impEdCalc('t')"><span class="su">đ</span></div></label><label class="mf" style="flex:1;min-width:150px"><span>Đơn giá</span><div class="ib"><input id="ie_g" data-m type="text" inputmode="decimal" value="${x.q?Math.round(x.cost/x.q*100)/100:""}" oninput="impEdCalc('g')"><span class="su">đ/${esc(i.u)}</span></div></label></div>
+  <small class="mu">Sửa số lượng sẽ cập nhật tồn kho theo phần chênh lệch.</small><small id="ie_e" style="color:#dc2626"></small></div>
+  <div class="mfoot"><button id="ie_d" style="margin-right:auto;color:#dc2626" onclick="impEdDel()">Xóa dòng</button><button onclick="${cl}">Hủy</button><button class="p" onclick="impEdSave()">Lưu</button></div></div></div>`}
+function impEdCalc(s){
+  const q=+$("#ie_q").value,g=$("#ie_g"),t=$("#ie_t");
+  if(s==="t"){if(q>0&&t.value!=="")g.value=Math.round(+t.value/q*100)/100}
+  else if(g.value!==""){t.value=Math.round(q*g.value)}}
+function impEdSave(){
+  if(!can("stockEdit")||!imE)return;const x=S.imp.find(z=>z.id===imE.id);if(!x)return;
+  const i=ing(x.iid),q=+$("#ie_q").value,c=Math.round(+$("#ie_t").value||0),e=m=>{$("#ie_e").textContent=m};
+  if(!(q>0))return e("Số lượng phải lớn hơn 0.");
+  const oq=x.q,oc=x.cost;
+  if(i)i.qty=Math.max(0,i.qty+q-oq);
+  x.q=q;x.cost=c;x.edit={ts:Date.now(),by:meName()};
+  if(i&&c>0&&!S.imp.some(z=>z.iid===x.iid&&z.ts>x.ts))i.price=Math.round(c/q*(i.f||1));
+  lg("Sửa phiếu nhập",(i?i.name:"?")+" · "+nf(oq)+" → "+nf(q)+" "+(i?i.u:"")+" · "+fmt(oc)+" → "+fmt(c));
+  imE=null;save();view()}
+function impEdDel(){
+  if(!can("stockEdit")||!imE)return;
+  if(!imE.del){imE.del=true;const b=$("#ie_d");b.textContent="Bấm lần nữa để xóa";b.style.borderColor="#dc2626";return}
+  const x=S.imp.find(z=>z.id===imE.id);if(!x)return;const i=ing(x.iid);
+  if(i)i.qty=Math.max(0,i.qty-x.q);
+  S.imp=S.imp.filter(z=>z!==x);lg("Xóa phiếu nhập",(i?i.name:"?")+" · "+nf(x.q)+" "+(i?i.u:"")+" · "+fmt(x.cost));
+  imE=null;save();view()}
 let kt="ton",kr="today",kp=null,ke=null;
 const KR=[["today","Hôm nay"],["yday","Hôm qua"],["7","7 ngày"],["30","30 ngày"],["m","Tháng này"],["pm","Tháng trước"]],ing=id=>S.ing.find(i=>i.id===id),pc=i=>i.price/(i.f||1),lowI=i=>i.min>0&&i.qty<=i.min;
 function kiem(i,v){if(v!==i.qty){S.kk.push({ts:Date.now(),by:meName(),iid:i.id,a:i.qty,b:v,d:i.qty-v});i.qty=v;return true}return false}
@@ -842,9 +874,10 @@ function vStock(){
   let pn="",body="";
   if(kp==="add"||kp==="edit")pn=ingModal(e);
   if(kp==="nhap")pn=impModal();
+  if(imE)pn+=impEditModal();
   if(kt==="ton")body=`<div class="card"><div class="bar" style="margin:0 0 8px"><b>Nguyên liệu</b><button style="margin-left:auto" onclick="kp='add';ke=null;view();$('#in_n').focus()">+ Thêm</button></div><div class="scroll"><table><tr><th>Nguyên liệu</th><th>Quy cách</th><th style="text-align:right">Giá nhập</th><th style="text-align:right">Còn</th><th></th></tr>${S.ing.map(i=>`<tr><td><b>${esc(i.name)}</b>${lowI(i)?' <span class="pill">Sắp hết</span>':""}<br><small class="mu">${esc(i.note||"")}</small></td><td>${i.f>1?nf(i.f)+" "+esc(i.u)+"/"+esc(i.pu):esc(i.u)}</td><td style="text-align:right">${fmt(i.price)}/${esc(i.pu||i.u)}</td><td style="text-align:right" class="${lowI(i)?"low":""}"><b>${nf(i.qty)} ${esc(i.u)}</b>${i.f>1?`<br><small>${nf(i.qty/i.f)} ${esc(i.pu)}</small>`:""}${lotLine(i)}</td><td><button onclick="ke=${i.id};kp='edit';view();$('#in_n').focus()">✎</button></td></tr>`).join("")||`<tr><td colspan="5" class="mu">Chưa có nguyên liệu. Bấm Thêm để tạo.</td></tr>`}</table></div></div>`;
   else if(kt==="nhap"){const[a,b]=rg(kr),G={};S.imp.filter(x=>x.ts>=a&&x.ts<b).slice().reverse().forEach(x=>(G[dk(x.ts)]=G[dk(x.ts)]||[]).push(x));
-    body=chips+(Object.keys(G).map(d=>{const g=G[d];return `<div class="card" style="padding:0;overflow:hidden;margin-bottom:12px"><div class="row" style="padding:12px 16px;background:var(--hov)"><b>${new Date(d+"T00:00").toLocaleDateString("vi-VN",{weekday:"short",day:"2-digit",month:"2-digit"})} <span class="mu">· ${g.length} dòng</span></b><b>${fmt(g.reduce((t,x)=>t+x.cost,0))}</b></div>${g.map(x=>{const i=ing(x.iid)||{u:"",name:"?"};return `<div class="row" style="padding:10px 16px;border-top:1px solid var(--bd)"><div><b>${esc(i.name)}</b> ${nf(x.q)} ${esc(i.u)}<br><small class="mu">${tm(x.ts)} · ${esc(x.by)}</small></div><div style="text-align:right"><b>${fmt(x.cost)}</b><br><small class="mu">${x.q?fmt(x.cost/x.q)+"/"+esc(i.u):""}</small></div></div>`}).join("")}</div>`}).join("")||`<p class="mu">Chưa có phiếu nhập trong khoảng này.</p>`)}
+    body=chips+(Object.keys(G).map(d=>{const g=G[d],ce=can("stockEdit");return `<div class="card" style="padding:0;overflow:hidden;margin-bottom:12px"><div class="row" style="padding:12px 16px;margin:0;border-radius:0;border-bottom:0;background:var(--hov)"><b style="flex:1">${new Date(d+"T00:00").toLocaleDateString("vi-VN",{weekday:"short",day:"2-digit",month:"2-digit"})} <span class="mu" style="font-weight:400">· ${g.length} dòng</span></b><b>${fmt(g.reduce((t,x)=>t+x.cost,0))}</b></div>${g.map(x=>{const i=ing(x.iid)||{u:"",name:"?"};return `<div class="row" style="padding:10px 16px;margin:0;border-radius:0;border-bottom:0;border-top:1px solid var(--bd)"><div style="flex:1;min-width:0"><b>${esc(i.name)}</b> ${nf(x.q)} ${esc(i.u)}<br><small class="mu">${tm(x.ts)} · ${esc(x.by)}${x.edit?" · đã sửa":""}</small></div><div style="text-align:right"><b>${fmt(x.cost)}</b><br><small class="mu">${x.q?fmt(x.cost/x.q)+"/"+esc(i.u):""}</small></div>${ce?`<button class="gi" aria-label="Sửa phiếu nhập" title="Sửa phiếu nhập" onclick="editImp(${x.id})"><span class="ic">${pnI}</span></button>`:""}</div>`}).join("")}</div>`}).join("")||`<p class="mu">Chưa có phiếu nhập trong khoảng này.</p>`)}
   else if(kt==="bc"){const[a,b]=rg(kr),ss=S.sales.filter(s=>!s.cancel&&s.ts>=a&&s.ts<b),fl=(i,x,y)=>[S.imp.filter(z=>z.iid===i.id&&z.ts>=x&&z.ts<y).reduce((t,z)=>t+z.q,0),S.kk.filter(z=>z.iid===i.id&&z.ts>=x&&z.ts<y).reduce((t,z)=>t+z.d,0),S.kk.some(z=>z.iid===i.id&&z.ts>=x&&z.ts<y)];
     const R=S.ing.map(i=>{const[n1,h1,k1]=fl(i,a,b),[n2,h2]=fl(i,b,9e15),cu=i.qty-n2+h2;const F=fifoCalc(i,a,b),SL=fifoFit(F.lots,cu,i);return{i,n:n1,h:h1,k:k1,cu,du:cu-n1+h1,hv:F.v,us:F.used,sv:SL.reduce((t,l)=>t+l.q*l.c,0)}}),chot=S.kk.some(z=>z.ts>=a&&z.ts<b),hao=R.reduce((t,r)=>t+r.hv,0),dt=sum(ss),C=(t,v,s)=>`<div class="card">${t}<b>${v}</b><small class="mu">${s||""}</small></div>`;
     body=chips+`<div class="stats">${C("Doanh thu",fmt(dt),ss.length+" đơn")}${C("Nguyên liệu tiêu hao",chot?fmt(hao):"—",chot?"Theo kiểm kho · giá lô nhập trước dùng trước":"Chưa chốt")}${C("Lãi gộp",chot?fmt(dt-hao):"—",chot?"":"Chưa chốt")}${C("Tiền nhập",fmt(S.imp.filter(z=>z.ts>=a&&z.ts<b).reduce((t,z)=>t+z.cost,0)))}${C("Tồn kho cuối",fmt(R.reduce((t,r)=>t+r.sv,0)))}</div><div class="card scroll"><table><tr><th>Nguyên liệu</th><th style="text-align:right">Tồn đầu</th><th style="text-align:right">Nhập</th><th style="text-align:right">Tiêu hao</th><th style="text-align:right">Tồn cuối</th></tr>${R.map(r=>`<tr><td>${esc(r.i.name)}</td><td style="text-align:right">${nf(r.du)} ${esc(r.i.u)}</td><td style="text-align:right">${r.n?nf(r.n)+" "+esc(r.i.u):"—"}</td><td style="text-align:right;${r.k?"":"color:var(--pr)"}">${r.k?nf(r.h)+" "+esc(r.i.u)+(r.us.length?`<br><small class="mu">${esc(lotTxt(r.i,r.us).join(" + "))}</small>`:"")+`<br><small class="mu">= ${fmt(r.hv)}</small>`:"Chưa kiểm"}</td><td style="text-align:right">${nf(r.cu)} ${esc(r.i.u)}<br><small class="mu">${fmt(r.sv)}</small></td></tr>`).join("")||`<tr><td colspan="5" class="mu">Chưa có nguyên liệu.</td></tr>`}</table></div>`}
@@ -1377,7 +1410,7 @@ const canon=v=>v===null||typeof v!=="object"?JSON.stringify(v):Array.isArray(v)?
 const hsh=s=>{let a=5381,b=52711;for(let i=0;i<s.length;i++){const c=s.charCodeAt(i);a=(a*33^c)>>>0;b=(b*31+c)>>>0}return a.toString(36)+b.toString(36)+s.length.toString(36)};
 /* del:1 = xóa ở máy này thì xóa luôn trên máy chủ. Còn lại chỉ thêm, không bao giờ xóa (lịch sử bán hàng, chấm công, kho, nhật ký). */
 const SYA={menu:{k:r=>r.id,del:1},tables:{k:r=>r.id,del:1},staff:{k:r=>r.id,del:1},areas:{k:r=>r.id,del:1},orders:{k:r=>r.no+"_"+r.ts,del:1},kitchen:{k:r=>r.id+"_"+r.ts,del:1},ing:{k:r=>r.id,del:1},
-  sales:{k:r=>r.no+"_"+r.ts},att:{k:r=>r.sid+"_"+r.in},imp:{k:r=>r.id+"_"+r.ts},kk:{k:r=>r.iid+"_"+r.ts},log:{k:r=>r.ts+"_"+hsh(r.a+"|"+r.d+"|"+r.by)}};
+  sales:{k:r=>r.no+"_"+r.ts},att:{k:r=>r.sid+"_"+r.in},imp:{k:r=>r.id+"_"+r.ts,del:1},kk:{k:r=>r.iid+"_"+r.ts},log:{k:r=>r.ts+"_"+hsh(r.a+"|"+r.d+"|"+r.by)}};
 const SYN=["ono","nid","iid","kid"];
 let SYL={},SYC={s:null,init:false},SYS={st:SY.on?"sync":"off",msg:"",t:0},SYUI={},SYB=false,SYD=false,SYV=false,syKT=0,syN=0;
 const syKey=()=>SY.code+"."+CH.cur;
