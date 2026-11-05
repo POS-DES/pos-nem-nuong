@@ -706,7 +706,8 @@ function afil(k,v){AF[k]=v;const r=attList();const s1=$("#att_sub"),t1=$("#att_t
 function arange(t){if(t==="all"){AF.from=AF.to=""}else{const n=new Date(),e=ymd(n);let f=e,u=e;if(t==="7"){const d=new Date();d.setDate(d.getDate()-6);f=ymd(d)}if(t==="m")f=ymd(new Date(n.getFullYear(),n.getMonth(),1));if(t==="y"){const d=new Date();d.setDate(d.getDate()-1);f=u=ymd(d)}AF.from=f;AF.to=u}view()}
 const leCats=()=>S.store.leCats||[...new Set(S.menu.map(m=>m.cat))].filter(c=>/lẻ/i.test(c));
 const paxCats=()=>S.store.paxCats||[...new Set(S.menu.map(m=>m.cat))].filter(c=>/buffet|lẻ/i.test(c));
-const paxAuto=o=>{const pc=paxCats();return o.items.reduce((u,i)=>pc.includes((menuOf(i.id)||{}).cat)?u+i.q:u,0)};
+const itemPax=m=>!!m&&(m.pax!=null?!!m.pax:paxCats().includes(m.cat)&&!/nước/i.test(m.name));
+const paxAuto=o=>o.items.reduce((u,i)=>itemPax(menuOf(i.id))?u+i.q:u,0);
 const paxOf=o=>o.paxM?(o.pax||0):paxAuto(o);
 function togPax(c){const l=paxCats();S.store.paxCats=l.includes(c)?l.filter(x=>x!==c):[...l,c];save();view()}
 function setPax(v){const o=ordN(cur);if(!o)return;if(String(v).trim()===""){o.paxM=false;o.pax=0}else{o.paxM=true;o.pax=Math.max(0,Math.floor(+v||0))}save();view()}
@@ -1163,6 +1164,7 @@ function menuModal(){
   <div class="mf"><span>Ảnh minh họa</span><div class="r2" style="align-items:center"><span class="mth big" id="mpv">${mimg?`<img src="${mimg}" alt="">`:"Chưa có ảnh"}</span><div style="display:flex;flex-direction:column;gap:8px"><label class="bl">Chọn ảnh<input type="file" accept="image/*" hidden onchange="mimgSet(this)"></label><button onclick="mimg='';$('#mpv').textContent='Chưa có ảnh'">Xóa ảnh</button></div></div></div>
   <label class="mf"><span>Tên món</span><input id="mm_n" value="${esc(e.name||"")}"></label>
   <div class="r2"><label class="mf" style="flex:1;min-width:150px"><span>Giá</span><div class="ib"><input id="mm_p" data-m type="text" inputmode="decimal" value="${e.price||""}" placeholder="0"><span class="su">đ</span></div></label><label class="mf" style="flex:1;min-width:150px"><span>Nhóm món</span><select id="mm_c">${(C.includes(dc)?C:[...C,dc]).map(c=>`<option ${c===dc?"selected":""}>${esc(c)}</option>`).join("")}</select></label></div>
+  <div class="row" style="border:0"><span><b>Tính là 1 khách</b><br><small class="mu">Bật cho món chính (buffet nem nướng, món lẻ). Tắt cho nước, món ăn thêm.</small></span><label class="tg"><input id="mm_x" type="checkbox" aria-label="Tính là 1 khách" ${(mmod.id?itemPax(e):paxCats().includes(dc))?"checked":""}><span></span></label></div>
   <div class="row" style="border:0"><span><b>Đang bán</b><br><small class="mu">Tắt khi hết món, món sẽ mờ đi và không gọi được.</small></span><label class="tg"><input id="mm_o" type="checkbox" aria-label="Đang bán" ${e.off?"":"checked"}><span></span></label></div></div>
   <div class="mfoot">${mmod.id?`<button id="mm_d" class="ic" style="color:#dc2626;align-items:center;gap:6px" aria-label="Xóa món" onclick="delMenuM(${mmod.id})">${trashI}</button>`:""}<button class="p" onclick="saveMenu()">Lưu</button></div></div></div>`;
 }
@@ -1170,8 +1172,8 @@ function mimgSet(inp){const f=inp.files[0];if(!f)return;const r=new FileReader()
 function saveMenu(){
   const n=$("#mm_n").value.trim(),p=+$("#mm_p").value,c=$("#mm_c").value||"Khác",on=$("#mm_o").checked;
   if(!n){$("#mm_n").focus();return}if(!(p>0)){$("#mm_p").focus();return}
-  if(mmod.id){const m=menuOf(mmod.id);if(!m)return;m.name=n;m.price=p;m.cat=c;on?delete m.off:m.off=true;mimg?m.img=mimg:delete m.img;lg("Thực đơn","Sửa món "+n)}
-  else{const m={id:++S.nid,name:n,price:p,cat:c,stock:50};if(!on)m.off=true;if(mimg)m.img=mimg;S.menu.push(m);lg("Thực đơn","Thêm món "+n)}
+  if(mmod.id){const m=menuOf(mmod.id);if(!m)return;m.name=n;m.price=p;m.cat=c;m.pax=$("#mm_x").checked;on?delete m.off:m.off=true;mimg?m.img=mimg:delete m.img;lg("Thực đơn","Sửa món "+n)}
+  else{const m={id:++S.nid,name:n,price:p,cat:c,stock:50,pax:$("#mm_x").checked};if(!on)m.off=true;if(mimg)m.img=mimg;S.menu.push(m);lg("Thực đơn","Thêm món "+n)}
   mmod=null;mdel=false;mimg="";save();view()}
 function delMenuM(id){
   if(!mdel){mdel=true;const b=$("#mm_d");b.innerHTML=trashI+"<span>Bấm lần nữa để xóa</span>";b.style.borderColor="#dc2626";return}
@@ -1364,7 +1366,7 @@ function sQuan(){const s=S.store,fl=(l,k,ex)=>`<label class="mf" style="flex:1;m
  return C("Thông tin quán",`${fl("Tên quán","name")}${fl("Địa chỉ","addr")}<div class="r2">${fl("Số điện thoại","phone")}${fl("Wifi (in cuối hóa đơn)","wifi",'placeholder="Tên wifi / mật khẩu"')}</div>`)+
  C("Thuế và phí",`<div class="r2">${nm("VAT (%)","vat")}${nm("Phí phục vụ (%)","svc")}</div><small class="mu">Áp dụng cho tất cả đơn hàng: phí phục vụ tính trên tiền sau giảm giá, VAT tính trên tiền sau giảm giá cộng phí phục vụ.</small>`)+
  C("Khuyến mãi",`<div class="bar" style="margin:0"><span>Chương trình khuyến mãi</span><button class="r" onclick="newP()">+ Thêm</button></div>${(s.promos||[]).map(p=>{const S_=st[pst(p)],a=dfm(p.from),b=dfm(p.to);return `<div class="orow" style="border:1px solid var(--bd);border-radius:12px" onclick="editP(${p.id})"><div style="flex:1;min-width:0"><b>${esc(p.name)} · ${p.t==="pct"?"giảm "+p.v+"%":p.t==="fix"?"giá "+fmt(p.v):"bớt "+fmt(p.v)+"/suất"}</b><br><small class="mu">${a[0]} ${a[1]} – ${b[0]} ${b[1]} · ${(p.items||[]).length?(p.items||[]).map(id=>(menuOf(id)||{}).name).filter(Boolean).slice(0,3).join(", ")+((p.items||[]).length>3?" +"+((p.items||[]).length-3):""):"tất cả món"}</small></div><span class="pill ${S_[1]}">${S_[0]}</span><span>✎</span></div>`}).join("")||`<small class="mu">Chưa có chương trình nào.</small>`}`)+
- C("Tính số khách",`<small class="mu">Mỗi suất thuộc các nhóm món được chọn dưới đây tính là 1 khách, cả đơn tại bàn và mang về. Ví dụ 2 suất nem nướng và 2 nước = 2 khách. Nhân viên vẫn có thể nhập tay số khách trong đơn.</small><div class="chips" style="margin:0">${catList().map(c=>`<button class="${paxCats().includes(c)?"on":""}" data-c="${esc(c)}" onclick="togPax(this.dataset.c)">${esc(c)}</button>`).join("")}</div>`)+
+ C("Tính số khách",`<small class="mu">Mỗi suất món thuộc các nhóm dưới đây tính là 1 khách, trừ món đã tắt "Tính là 1 khách" trong Thực đơn (ví dụ Buffet nước). Món có chữ "nước" trong tên mặc định không tính cho đến khi bạn bật lại. Nhân viên vẫn nhập tay số khách trong đơn được.</small><div class="chips" style="margin:0">${catList().map(c=>`<button class="${paxCats().includes(c)?"on":""}" data-c="${esc(c)}" onclick="togPax(this.dataset.c)">${esc(c)}</button>`).join("")}</div>`)+
  C("Chấm công",sAtt())+
  C("Giao diện POS",`<div class="r2">${COLS.map(c=>{const on=(s.color||"#ea580c")===c[1];return `<button onclick="S.store.color='${c[1]}';lg('Cài đặt','Đổi màu giao diện');save();view()" style="display:flex;align-items:center;gap:8px;${on?"border:2px solid var(--tx)":""}"><span style="width:22px;height:22px;border-radius:50%;background:${c[1]};display:inline-flex;align-items:center;justify-content:center;color:#fff;font-size:13px">${on?"✓":""}</span>${c[0]}</button>`}).join("")}</div>`)+
  C("Hóa đơn in",`<div class="mf"><span>Khổ giấy</span>${sg("paper","K80",[["K58","K58"],["K80","K80"],["A6","A6"],["A5","A5"],["A4","A4"]])}</div>${fl("Dòng đầu hóa đơn","hdr",'placeholder="VD: Nem nướng TH - Ngon từ 2015"')}${fl("Dòng cuối hóa đơn","ftr",'placeholder="VD: Cảm ơn quý khách, hẹn gặp lại!"')}<small class="mu">Dòng wifi ở trên cũng được in cuối hóa đơn. Bấm In lại hóa đơn trong chi tiết đơn để in thử.</small>`)+
