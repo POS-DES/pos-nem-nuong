@@ -346,6 +346,12 @@ body.ordp main{padding-bottom:96px!important}
 .card.bill{max-height:90vh}
 .bill .bf .bar button{flex:1}
 }
+/* nút hóa đơn: giãn cách + to hơn để đỡ bấm nhầm */
+.bill .bf .bfb{display:flex;flex-wrap:wrap;gap:12px 16px;margin-top:14px!important}
+.bill .bf .bfb button{min-height:50px;font-size:15px}
+.bill .bf .bfb .kb{flex:1 1 100%}
+.bill .bf .bfb .pb{flex:3 1 0}
+.bill .bf .bfb .xd{flex:2 1 0}
 </style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
 <script>
@@ -515,8 +521,8 @@ function vOrder(o){if(qrMode)return vQR(o);if(ck)return vCheckout(o);
   ${o.items.length?o.items.map((i,x)=>{const m=menuOf(i.id);if(!m)return"";const pr=i.p!=null?i.p:m.price;return `<div class="row"><span>${esc(m.name)} ${i.s>=i.q?"✓":""}<br><small>${i.p!=null?`<b style="color:var(--pr)">${fmt(pr)}</b> (gốc ${fmt(m.price)})`:fmt(pr)}${i.n?" · "+esc(i.n):""}${i.q>1?`<br>${i.q} × ${fmt(pr)} = ${fmt(pr*i.q)}`:""}</small>${(()=>{const b=pbest(i.id,pr);return b.d>0.5?`<br><small style="color:var(--pr);font-weight:600">🎁 ${esc(b.n)}: -${fmt(b.d*i.q)} → ${fmt((pr-b.d)*i.q)}</small>`:""})()}</span><button onclick="openEd(${x})" title="Sửa giá / ghi chú">✎</button><button onclick="qty(${x},-1)">−</button><b>${i.q}</b><button onclick="qty(${x},1)">+</button></div>${edI===x?edForm(i,x,m):""}`}).join(""):`<p class="mu">Chưa có món nào.</p>`}
   <div class="row"><span>Giảm giá (%)</span><input type="number" min="0" max="100" value="${o.disc}" style="width:80px" ${can("discount")?"":"disabled"} onchange="ordN(cur).disc=Math.min(100,Math.max(0,+this.value||0));save();view()"></div>
   ${fbrk(o)}</div><div class="bf"><div class="tot" style="padding-top:0"><span>Tổng</span><span>${fmt(stot(o))}</span></div>
-  <div class="bar" style="margin:10px 0 0"><button class="p" onclick="kitchenSend()" ${u?"":"disabled"} style="width:100%">Báo bếp${u?" ("+u+" món)":""}</button>
-  <button class="g" onclick="ck=true;bo=false;view()" ${o.items.length&&can("pay")?"":"disabled"}>Thanh toán</button><button onclick="clearO()">Xóa đơn</button></div></div></div></div>${obarH(o,u)}`;
+  <div class="bar bfb" style="margin:10px 0 0"><button class="p kb" onclick="kitchenSend()" ${u?"":"disabled"}>Báo bếp${u?" ("+u+" món)":""}</button>
+  <button class="g pb" onclick="ck=true;bo=false;view()" ${o.items.length&&can("pay")?"":"disabled"}>Thanh toán</button><button class="xd" onclick="clearO()">Xóa đơn</button></div></div></div></div>${obarH(o,u)}`;
 }
 let bo=false,mq="",ck=false;
 let pmSel="Tiền mặt";
@@ -563,7 +569,7 @@ function kcut(o,i,n){const m=menuOf(i.id);if(!m||n<=0)return;const nm=m.name+(i.
   for(let k=S.kitchen.length-1;k>=0&&n>0;k--){const t=S.kitchen[k];if(t.st==="done")continue;if(t.no!=null?t.no!==o.no:t.where!==wh)continue;
     for(let j=t.items.length-1;j>=0&&n>0;j--){const it=t.items[j];if(it.mid!=null?(it.mid!==i.id||(it.nt||"")!==(i.n||"")):it.name!==nm)continue;const d=Math.min(n,it.q);it.q-=d;n-=d;if(it.q<=0)t.items.splice(j,1)}
     if(!t.items.length)S.kitchen.splice(k,1)}}
-function clearO(){const o=ordN(cur);o.items.forEach(i=>{if(i.s>0)kcut(o,i,i.s)});o.items=[];o.disc=0;save();view()}
+function clearO(){const o=ordN(cur);if(!o||!o.items.length)return;if(o.items.some(i=>i.s>0)&&!can("cancelItem")){alert("Bạn không có quyền hủy món đã báo bếp.");return}if(!confirm("Xóa toàn bộ "+o.items.length+" món của đơn #"+o.no+"?"+(o.items.some(i=>i.s>0)?"\nCác món đã báo bếp sẽ bị hủy bên bếp.":"")))return;o.items.forEach(i=>{if(i.s>0)kcut(o,i,i.s)});o.items=[];o.disc=0;save();view()}
 function kitchenSend(){
   const o=ordN(cur),its=o.items.filter(i=>i.q>i.s).map(i=>({name:menuOf(i.id).name+(i.n?" ("+i.n+")":""),q:i.q-i.s,mid:i.id,nt:i.n||""}));if(!its.length)return;
   S.kitchen.push({id:++S.kid,no:o.no,where:o.tid!=null?tbl(o.tid).name:"Mang về #"+o.no,items:its,st:"new",ts:Date.now()});
