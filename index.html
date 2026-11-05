@@ -1866,6 +1866,9 @@ dvApply();chk();
 addEventListener("hashchange",()=>{const k=(location.hash||"#ban").slice(1);if(k!==PG)nav(k)});
 view();
 syBoot();
+/* Tự nhận dạng thiết bị: phone / tablet / desktop, cập nhật khi xoay màn hình hoặc đổi kích thước cửa sổ */
+function devFit(){const d=document.documentElement,w=innerWidth,ua=navigator.userAgent||'',tp=navigator.maxTouchPoints>1,touch=matchMedia('(pointer:coarse)').matches||tp,tab=/iPad|Tablet|PlayBook|Silk/i.test(ua)||(/Android/i.test(ua)&&!/Mobile/i.test(ua))||(navigator.platform==='MacIntel'&&tp);const k=w<700?'phone':(tab||(touch&&w<1400)||w<900)?'tablet':'desktop';d.dataset.dev=k;d.dataset.ori=w>innerHeight?'land':'port';d.classList.toggle('touch',touch)}
+devFit();addEventListener('resize',devFit);addEventListener('orientationchange',()=>setTimeout(devFit,250));
 </script>
 <style>
 /* Tối ưu máy tính + điện thoại */
@@ -1878,7 +1881,16 @@ aside{height:calc(100dvh - env(safe-area-inset-top,0px))}
 #mbar{padding-left:max(4px,env(safe-area-inset-left));padding-right:max(4px,env(safe-area-inset-right))}
 @media(min-width:701px){.grid{grid-template-columns:repeat(auto-fill,minmax(160px,1fr))}}
 @media(min-width:1500px){main{max-width:1400px;margin:0 auto}}
-@media(max-width:700px){main :not(.scroll):not(.sc)>table{display:block;max-width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch}.bar{gap:6px}.bar>button,.bar>select,.bar>.dt2,.bar>.dt{flex:1 1 auto}}
+@media(max-width:700px){main :not(.scroll):not(.sc)>table{display:block;max-width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch}}
+/* Riêng cho máy tính bảng */
+[data-dev=tablet] main{padding:18px 20px}
+[data-dev=tablet] .grid{grid-template-columns:repeat(auto-fill,minmax(170px,1fr))}
+[data-dev=tablet][data-ori=port] aside{width:76px;padding:12px 8px}
+[data-dev=tablet][data-ori=port] aside a{justify-content:center;padding:11px 0;position:relative}
+[data-dev=tablet][data-ori=port] aside .lb,[data-dev=tablet][data-ori=port] aside .sw .t,[data-dev=tablet][data-ori=port] aside .chev{display:none}
+[data-dev=tablet][data-ori=port] aside .sw{justify-content:center;padding:4px}
+[data-dev=tablet][data-ori=port] aside .bd{position:absolute;top:2px;right:6px;margin:0}
+@media(max-width:900px){[data-dev=tablet][data-ori=port] #obar{left:76px}}
 @media(max-height:480px) and (orientation:landscape){#mbar a{flex-direction:row;justify-content:center;padding:4px}#mbar .lb{font-size:12px}}
 </style>
 
