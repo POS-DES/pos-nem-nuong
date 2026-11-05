@@ -189,6 +189,7 @@ aside a.on .ic{color:var(--pr)}
 </style>
 <style id="mobile">
 #mtop,#mbar,#msheet{display:none}
+.of-dates,.of-quick{display:contents}.on-m{display:none}
 @media(max-width:700px){
 html{-webkit-text-size-adjust:100%}
 aside#side{display:none!important}
@@ -226,6 +227,17 @@ td,th{padding:8px 6px}
 .mh,.mfoot{padding:12px 14px}.mb{padding:14px}
 .r2>*{flex:1 1 100%}
 .kpis{grid-template-columns:repeat(2,minmax(0,1fr))}
+.of1{flex-direction:column;flex-wrap:nowrap;align-items:stretch;gap:8px;margin-bottom:8px}
+.of1 .of-q{order:-1;min-width:0!important;width:100%;flex:none!important}
+.of-dates{display:flex;align-items:center;gap:8px}.of-dates .dt2{display:flex;flex:1;min-width:0}.of-dates .dtx{width:0;flex:1 1 0;min-width:0}
+.of-quick{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;padding-bottom:2px}.of-quick button{flex:none;white-space:nowrap;border-radius:99px;padding:6px 14px}
+.of2{display:grid!important;grid-template-columns:1fr 1fr;gap:8px;margin:0 0 10px!important}.of2 select{min-width:0!important;width:100%}.of2 button{width:100%}
+.of3{display:grid!important;grid-template-columns:repeat(4,1fr);gap:6px!important;margin-bottom:10px}.of3 button{padding:8px 2px;min-width:0;font-size:14px}
+.ordr{display:grid!important;grid-template-columns:1fr auto;grid-template-areas:"i t" "i p";gap:2px 12px;align-items:center;padding:12px 14px}
+.ordr .on-d{display:none}.ordr .on-m{display:inline;font-weight:500;font-size:13px}
+.ordr .oi{grid-area:i}.ordr .oi small{display:block;line-height:1.5;margin-top:2px}.ordr .oi b:first-child{font-size:16px}
+.ordr .ot{grid-area:t;min-width:0!important;font-size:16px;text-align:right}
+.ordr .pill{grid-area:p;justify-self:end}
 }
 </style>
 
@@ -480,14 +492,14 @@ function olist(){
     if(OF.tab==="open"&&x.st!=="o")return false;if(OF.tab==="paid"&&x.st!=="p")return false;if(OF.tab==="cancel"&&x.st!=="c")return false;
     return !q||(x.no+" "+x.title+" "+x.meta.join(" ")+" "+x.txt).toLowerCase().includes(q)}).sort((a,b)=>b.ts-a.ts);
   const T=[["all","Tất cả"],["open","Đang mở"],["paid","Đã thu"],["cancel","Đã hủy"]],PL={o:["Đang mở","po"],p:["Đã thanh toán","pg"],c:["Đã hủy",""]};
-  const tabs=`<div class="bar" style="gap:4px">${T.map(t=>`<button class="${OF.tab===t[0]?"p":""}" onclick="ofil('tab','${t[0]}')">${t[1]}</button>`).join("")}</div>`;
-  const rows=R.map(x=>`<div class="orow" onclick="${x.k==="s"?`openSale(${x.no})`:`openO(${x.no})`}"><b class="mu" style="width:48px">#${x.no}</b><div style="flex:1;min-width:0"><b>${esc(x.title)}</b><br><small>${x.meta.filter(Boolean).map(esc).join(" · ")}</small></div><span class="pill ${x.pc!=null?x.pc:PL[x.st][1]}">${x.lb||PL[x.st][0]}</span><b style="min-width:90px;text-align:right${x.st==="c"?";text-decoration:line-through":""}">${fmt(x.total)}</b></div>`).join("");
+  const tabs=`<div class="bar of3" style="gap:4px">${T.map(t=>`<button class="${OF.tab===t[0]?"p":""}" onclick="ofil('tab','${t[0]}')">${t[1]}</button>`).join("")}</div>`;
+  const rows=R.map(x=>`<div class="orow ordr" onclick="${x.k==="s"?`openSale(${x.no})`:`openO(${x.no})`}"><b class="mu on-d" style="width:48px">#${x.no}</b><div class="oi" style="flex:1;min-width:0"><b>${esc(x.title)}</b><b class="mu on-m"> #${x.no}</b><br><small>${x.meta.filter(Boolean).map(esc).join(" · ")}</small></div><span class="pill ${x.pc!=null?x.pc:PL[x.st][1]}">${x.lb||PL[x.st][0]}</span><b class="ot" style="min-width:90px;text-align:right${x.st==="c"?";text-decoration:line-through":""}">${fmt(x.total)}</b></div>`).join("");
   return {sub:`${R.length} đơn · trang này thu ${fmt(R.filter(x=>x.st==="p").reduce((a,x)=>a+x.total,0))}`,html:tabs+`<div class="card" style="padding:0;overflow:hidden">${rows||`<p class="mu" style="padding:16px;margin:0">Không tìm thấy đơn nào.</p>`}</div>`};
 }
 function vOrders(){const r=olist();return `<h2 style="margin:0">Đơn hàng</h2><p class="mu" id="osub" style="margin:2px 0 12px">${r.sub}</p>
-<div class="bar">${dtf("from")}<span class="mu">→</span>${dtf("to")}<input type="search" placeholder="Mã đơn, số đơn, bàn, khách, nhân viên" value="${esc(OF.q)}" oninput="ofil('q',this.value)" style="flex:1;min-width:200px"><button onclick="drange('d')">Hôm nay</button><button onclick="drange('y')">Hôm qua</button><button onclick="drange('7')">7 ngày</button><button onclick="drange('m')">Tháng này</button><button onclick="OF.from=OF.to='';view()">Tất cả ngày</button></div>${ofBar()}<div id="ol">${r.html}</div>${vSale()}`}
+<div class="bar of1"><div class="of-dates">${dtf("from")}<span class="mu">→</span>${dtf("to")}</div><input type="search" class="of-q" placeholder="Tìm mã đơn, bàn, khách, nhân viên" value="${esc(OF.q)}" oninput="ofil('q',this.value)" style="flex:1;min-width:200px"><div class="of-quick"><button onclick="drange('d')">Hôm nay</button><button onclick="drange('y')">Hôm qua</button><button onclick="drange('7')">7 ngày</button><button onclick="drange('m')">Tháng này</button><button onclick="OF.from=OF.to='';view()">Tất cả ngày</button></div></div>${ofBar()}<div id="ol">${r.html}</div>${vSale()}`}
 function ofBar(){const nm=[...new Set([...S.staff.map(x=>x.name),...S.sales.map(x=>x.staff),...S.sales.map(x=>x.payBy)].filter(Boolean))].filter(n=>isOwner()||!ownN().includes(n)),mt=["Tiền mặt","Chuyển khoản"],sel=(k,all,o)=>`<select onchange="ofil('${k}',this.value)" style="min-width:150px"><option value="">${all}</option>${o.map(x=>`<option value="${esc(x[0])}" ${OF[k]===x[0]?"selected":""}>${esc(x[1])}</option>`).join("")}</select>`;
-  return `<div class="bar" style="margin-top:8px">${sel("staff","Tất cả nhân viên",nm.map(n=>[n,n]))}${sel("ty","Tất cả loại đơn",[["t","Tại bàn"],["s","Ship ngoài"]])}${sel("me","Mọi hình thức thu",mt.map(n=>[n,n]))}<button onclick="OF.staff=OF.ty=OF.me='';view()">Bỏ lọc</button></div>`}
+  return `<div class="bar of2" style="margin-top:8px">${sel("staff","Tất cả nhân viên",nm.map(n=>[n,n]))}${sel("ty","Tất cả loại đơn",[["t","Tại bàn"],["s","Ship ngoài"]])}${sel("me","Mọi hình thức thu",mt.map(n=>[n,n]))}<button onclick="OF.staff=OF.ty=OF.me='';view()">Bỏ lọc</button></div>`}
 const dfmt8=d=>d.slice(0,2)+(d.length>2?"/"+d.slice(2,4):"")+(d.length>4?"/"+d.slice(4):"");
 function fmk(el,e,max,fn){
   const v=el.value,pos=el.selectionStart==null?v.length:el.selectionStart,atEnd=pos>=v.length;
