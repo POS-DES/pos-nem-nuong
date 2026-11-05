@@ -360,6 +360,7 @@ function view(){
   $("#side").classList.add("lo");
   const V={ban:()=>ordN(cur)?vOrder(ordN(cur)):vTables(),bep:vKitchen,donhang:vOrders,chamcong:vAtt,kho:vStock,baocao:vReport,tonghop:vSum,menu:vMenu,sodo:vMap,nhanvien:vStaff,caidat:vSet};
   applyColor();$("#app").innerHTML=loginBn()+(GATE&&!GATE.ok&&!isOwner()?lockHtml():!navOk(k)?`<div class="card" style="max-width:480px;margin:60px auto;text-align:center"><h3>Chưa có quyền</h3><p class="mu">Vai trò của bạn chưa được cấp quyền dùng mục này. Hãy nhờ chủ quán cấp trong Nhân viên → Phân quyền.</p></div>`:V[k]());
+  const rph=$("#rphrs");if(rph)rph.scrollLeft=+rph.dataset.sl||0;
 }
 function leave(){qrMode=false;edI=null;sv=null;cx=false;const o=ordN(cur);if(o&&!o.items.length){S.orders=S.orders.filter(x=>x!==o);save()}cur=null}
 function back(){leave();view()}
@@ -986,6 +987,7 @@ function vReport(){
   /* theo giờ */
   let h0=5,h1=23;AL.forEach(z=>{const h=new Date(z.ts).getHours();h0=Math.min(h0,h);h1=Math.max(h1,h)});
   const G=[];for(let h=h0;h<=h1;h++)G.push({t:h+"h",bars:R.map(r=>{const v=r.L.filter(z=>new Date(z.ts).getHours()===h).reduce((t,z)=>t+z.total,0);return{v,c:r.c,lab:v&&!chain?smAx(v):null,tip:`${h}h${chain?" · "+r.name:""}: ${fmt(v)}`}})});
+  const hFi=G.findIndex(g=>g.bars.some(x=>x.v>0)),hSl=Math.max(0,(hFi<0?0:hFi-1))*56;
   /* theo ngày */
   const nd=Math.round((b-a)/DAY),dr=[];for(let i=nd-1;i>=0;i--){const u=a+i*DAY,v=u+DAY,per=R.map(r=>r.L.filter(z=>z.ts>=u&&z.ts<v));dr.push({u,per,n:per.reduce((t,l)=>t+l.length,0),rev:per.reduce((t,l)=>t+sum(l),0)})}
   const dtab=nd>1?`<div class="card"><b style="font-size:16px">Theo ngày</b><div class="scroll" style="margin-top:10px"><table class="nw"><tr><th>Ngày</th><th style="text-align:right">Đơn</th><th style="text-align:right">Doanh thu</th><th style="text-align:right">TB / đơn</th>${chain?R.map(r=>`<th style="text-align:right"><span class="dot" style="background:${r.c}"></span>${esc(r.name)}</th>`).join(""):""}</tr>${dr.map(d=>`<tr><td>${new Date(d.u).toLocaleDateString("vi-VN",{weekday:"short",day:"2-digit",month:"2-digit"})}</td><td style="text-align:right">${d.n}</td><td style="text-align:right"><b>${fmt(d.rev)}</b></td><td style="text-align:right">${d.n?fmt(d.rev/d.n):"—"}</td>${chain?d.per.map(l=>`<td style="text-align:right">${l.length?fmt(sum(l)):"—"}</td>`).join(""):""}</tr>`).join("")}</table></div></div>`:"";
@@ -1012,7 +1014,7 @@ function vReport(){
   ${rpF.rng==="custom"?`<div class="r2" style="align-items:center;margin-bottom:12px"><span class="mu">Từ</span><input type="date" value="${rpF.from}" max="${dk(Date.now())}" onchange="rpF.from=this.value||rpF.from;view()"><span class="mu">đến</span><input type="date" value="${rpF.to}" max="${dk(Date.now())}" onchange="rpF.to=this.value||rpF.to;view()"></div>`:""}
   <div class="kpis">${K("Doanh thu",fmt(rev),"color:var(--pr)")}${K("Số đơn",n)}${K("Trung bình / đơn",fmt(n?rev/n:0))}${K("Số khách",T("pax"))}${K("Đã giảm giá",fmt(T("dis")))}${K("Phí phục vụ",fmt(T("sv")))}${K("VAT",fmt(T("vat")))}${K("Hủy",T("xn")+" đơn · "+fmt(T("xv")))}</div>
   <div style="display:flex;flex-direction:column;gap:14px">${cmp}
-  <div class="card" style="min-width:0"><div class="bar" style="margin:0 0 6px"><b style="font-size:16px">Theo giờ trong ngày</b>${chain?`<span style="margin-left:auto;display:flex;gap:12px;flex-wrap:wrap">${R.map(r=>`<span><span class="dot" style="background:${r.c}"></span>${esc(r.name)}</span>`).join("")}</span>`:""}</div><div class="scroll">${smCols(G,{h:300,vals:false,noAxis:true,rx:10,fw:56,maxw:40,aria:"Doanh thu theo giờ"})}</div></div>
+  <div class="card" style="min-width:0"><div class="bar" style="margin:0 0 6px"><b style="font-size:16px">Theo giờ trong ngày</b>${chain?`<span style="margin-left:auto;display:flex;gap:12px;flex-wrap:wrap">${R.map(r=>`<span><span class="dot" style="background:${r.c}"></span>${esc(r.name)}</span>`).join("")}</span>`:""}</div><div class="scroll" id="rphrs" data-sl="${hSl}">${smCols(G,{h:300,vals:false,noAxis:true,rx:10,fw:56,maxw:40,aria:"Doanh thu theo giờ"})}</div></div>
   ${dtab}
   <div class="kpis" style="grid-template-columns:repeat(auto-fit,minmax(min(320px,100%),1fr));margin:0"><div class="card" style="min-width:0"><b style="font-size:16px">Món bán chạy</b>${topH||`<p class="mu">Chưa có dữ liệu.</p>`}</div><div class="card" style="min-width:0"><b style="font-size:16px">Thanh toán</b>${pay}</div></div>${detail}</div>`;
 }
