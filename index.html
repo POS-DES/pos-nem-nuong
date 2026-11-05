@@ -964,7 +964,11 @@ const sum=a=>a.reduce((x,s)=>x+s.total,0);
 let rpF={rng:"today",from:"",to:""},rpS="store",rpCp=0,rpTxt="";
 function rbSet(k,v){if(k==="scope")rpS=v;else{rpF[k]=v;if(k==="rng"&&v==="custom"&&!rpF.from)rpF.from=rpF.to=dk(Date.now())}rpTxt="";view()}
 function rpRange(){if(rpF.rng==="custom"){const f=rpF.from?new Date(rpF.from+"T00:00").getTime():new Date().setHours(0,0,0,0),e=rpF.to?new Date(rpF.to+"T00:00").getTime():f;return[Math.min(f,e),Math.max(f,e)+DAY]}return rg(rpF.rng)}
-function rpStores(){const all=CH.list.map((x,i)=>{const d=x.id===CH.cur?S:ldk(x.key);return d&&d.store?{id:x.id,d,name:d.store.name||"Quán",c:SMC[i%SMC.length]}:null}).filter(Boolean);const own=isOwner();return{all,use:all.filter(x=>x.id===CH.cur)}}
+function rpStores(){const all=CH.list.map((x,i)=>{const d=x.id===CH.cur?S:ldk(x.key);return d&&d.store?{id:x.id,d,name:d.store.name||"Quán",c:SMC[i%SMC.length]}:null}).filter(Boolean);const own=isOwner();let use;
+  if(own&&rpS==="chain"&&all.length>1)use=all;
+  else if(own&&rpS!=="store"&&all.some(x=>x.id===rpS))use=all.filter(x=>x.id===rpS);
+  else use=all.filter(x=>x.id===CH.cur);
+  return{all,use}}
 function rpInfo(x,a,b){const sl=x.d.sales||[],L=sl.filter(z=>!z.cancel&&z.ts>=a&&z.ts<b),X=sl.filter(z=>z.cancel&&z.ts>=a&&z.ts<b),i=smInfo(x,a,b,a,a),f=k=>L.reduce((t,z)=>t+(z[k]||0),0);
   return{...x,L,X,chot:i.chot,haoV:i.haoV,impV:i.impV,low:i.low,pct:i.pct,rev:sum(L),n:L.length,pax:f("pax"),dis:f("pd")+f("md"),sv:f("sv"),vat:f("vat"),xn:X.length,xv:sum(X)}}
 function rpCsv(){const{use}=rpStores(),[a,b]=rpRange(),q=v=>'"'+String(v==null?"":v).replace(/"/g,'""')+'"',rows=[["Quán","Mã hóa đơn","Số","Ngày giờ","Loại","Bàn / Khách","Thu ngân","Hình thức","Tạm tính","Khuyến mãi","Giảm giá","Phí phục vụ","VAT","Tổng","Số khách","Trạng thái"]];
@@ -974,7 +978,7 @@ function rpExport(){const t=rpCsv(),ok=()=>{rpCp=1;view();setTimeout(()=>{rpCp=0
   try{navigator.clipboard.writeText(t).then(ok,no)}catch(e){no()}}
 function rpOpen(id){rpS=id;rpTxt="";view();scrollTo(0,0)}
 function vReport(){
-  const own=isOwner(),{all,use}=rpStores(),multi=false,[a,b]=rpRange(),R=use.map(x=>rpInfo(x,a,b)),chain=R.length>1;
+  const own=isOwner(),{all,use}=rpStores(),[a,b]=rpRange(),R=use.map(x=>rpInfo(x,a,b)),chain=R.length>1;
   if(!R.length)return `<h2>Báo cáo</h2><p class="mu">Chưa có dữ liệu.</p>`;
   R.forEach(r=>{if(!chain)r.c="var(--pr)"});
   const T=k=>R.reduce((t,r)=>t+r[k],0),AL=R.flatMap(r=>r.L),rev=T("rev"),n=T("n"),anyChot=R.some(r=>r.chot),hao=T("haoV");
@@ -1000,8 +1004,9 @@ function vReport(){
   let detail="";
   if(!chain){const m={};R[0].L.forEach(z=>{const k=z.payBy||z.staff||"—",o=m[k]||(m[k]={n:0,v:0});o.n++;o.v+=z.total});const rows=Object.entries(m).sort((x,y)=>y[1].v-x[1].v);
     detail=`<div class="card"><b style="font-size:16px">Theo nhân viên thu</b><div class="scroll"><table class="nw"><tr><th>Nhân viên</th><th style="text-align:right">Đơn</th><th style="text-align:right">Doanh thu</th></tr>${rows.map(x=>`<tr><td>${esc(x[0])}</td><td style="text-align:right">${x[1].n}</td><td style="text-align:right"><b>${fmt(x[1].v)}</b></td></tr>`).join("")||`<tr><td colspan="3" class="mu">Chưa có đơn.</td></tr>`}</table></div></div>`}
-  return `<div class="bar" style="align-items:flex-start;margin-bottom:12px"><div><h2 style="margin:0">Báo cáo</h2><p class="mu" style="margin:2px 0 0">${esc(R[0].name)}${R[0].d.store.addr?" · "+esc(R[0].d.store.addr):""}</p></div>
+  return `<div class="bar" style="align-items:flex-start;margin-bottom:12px"><div><h2 style="margin:0">Báo cáo</h2><p class="mu" style="margin:2px 0 0">${chain?"Cả chuỗi · "+R.length+" quán":esc(R[0].name)+(R[0].d.store.addr?" · "+esc(R[0].d.store.addr):"")}</p></div>
    <button style="margin-left:auto;display:flex;align-items:center;gap:8px" onclick="rpExport()"><span class="ic">${ico('<path d="M12 4v11M7 11l5 5 5-5M5 20h14"/>')}</span>${rpCp?"Đã sao chép CSV":"Xuất CSV"}</button></div>
+  ${own&&all.length>1?`<div class="bar" style="gap:10px;margin:0 0 12px;flex-wrap:wrap"><div class="seg"><button class="${rpS==="store"?"on":""}" onclick="rbSet('scope','store')">Quán này</button><button class="${rpS==="chain"?"on":""}" onclick="rbSet('scope','chain')">Cả chuỗi</button></div>${rpS!=="store"&&rpS!=="chain"?`<button onclick="rbSet('scope','chain')">← Về cả chuỗi</button>`:""}</div>`:""}
   ${rpTxt?`<div class="card" style="margin-bottom:12px"><div class="bar" style="margin:0 0 8px"><b>Dữ liệu CSV</b><button style="margin-left:auto" onclick="rpTxt='';view()">Đóng</button></div><small class="mu">Trình duyệt không cho tự sao chép. Chọn toàn bộ ô dưới đây rồi sao chép.</small><textarea id="rp_t" readonly rows="6" style="width:100%;margin-top:8px;font:12px monospace" onfocus="this.select()">${esc(rpTxt)}</textarea></div>`:""}
   <div class="bar" style="gap:10px;margin:0 0 12px"><div class="seg" style="max-width:100%;overflow-x:auto">${RG.map(t=>`<button class="${rpF.rng===t[0]?"on":""}" onclick="rbSet('rng','${t[0]}')">${t[1]}</button>`).join("")}</div></div>
   ${rpF.rng==="custom"?`<div class="r2" style="align-items:center;margin-bottom:12px"><span class="mu">Từ</span><input type="date" value="${rpF.from}" max="${dk(Date.now())}" onchange="rpF.from=this.value||rpF.from;view()"><span class="mu">đến</span><input type="date" value="${rpF.to}" max="${dk(Date.now())}" onchange="rpF.to=this.value||rpF.to;view()"></div>`:""}
