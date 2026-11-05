@@ -1012,7 +1012,7 @@ function vReport(){
   ${rpF.rng==="custom"?`<div class="r2" style="align-items:center;margin-bottom:12px"><span class="mu">Từ</span><input type="date" value="${rpF.from}" max="${dk(Date.now())}" onchange="rpF.from=this.value||rpF.from;view()"><span class="mu">đến</span><input type="date" value="${rpF.to}" max="${dk(Date.now())}" onchange="rpF.to=this.value||rpF.to;view()"></div>`:""}
   <div class="kpis">${K("Doanh thu",fmt(rev),"color:var(--pr)")}${K("Số đơn",n)}${K("Trung bình / đơn",fmt(n?rev/n:0))}${K("Số khách",T("pax"))}${K("Đã giảm giá",fmt(T("dis")))}${K("Phí phục vụ",fmt(T("sv")))}${K("VAT",fmt(T("vat")))}${K("Hủy",T("xn")+" đơn · "+fmt(T("xv")))}</div>
   <div style="display:flex;flex-direction:column;gap:14px">${cmp}
-  <div class="card" style="min-width:0"><div class="bar" style="margin:0 0 6px"><b style="font-size:16px">Theo giờ trong ngày</b>${chain?`<span style="margin-left:auto;display:flex;gap:12px;flex-wrap:wrap">${R.map(r=>`<span><span class="dot" style="background:${r.c}"></span>${esc(r.name)}</span>`).join("")}</span>`:""}</div>${smCols(G,{h:300,vals:false,noAxis:true,rx:10,aria:"Doanh thu theo giờ",maxw:44})}</div>
+  <div class="card" style="min-width:0"><div class="bar" style="margin:0 0 6px"><b style="font-size:16px">Theo giờ trong ngày</b>${chain?`<span style="margin-left:auto;display:flex;gap:12px;flex-wrap:wrap">${R.map(r=>`<span><span class="dot" style="background:${r.c}"></span>${esc(r.name)}</span>`).join("")}</span>`:""}</div><div class="scroll">${smCols(G,{h:300,vals:false,noAxis:true,rx:10,fw:56,maxw:40,aria:"Doanh thu theo giờ"})}</div></div>
   ${dtab}
   <div class="kpis" style="grid-template-columns:repeat(auto-fit,minmax(min(320px,100%),1fr));margin:0"><div class="card" style="min-width:0"><b style="font-size:16px">Món bán chạy</b>${topH||`<p class="mu">Chưa có dữ liệu.</p>`}</div><div class="card" style="min-width:0"><b style="font-size:16px">Thanh toán</b>${pay}</div></div>${detail}</div>`;
 }
@@ -1036,16 +1036,16 @@ function smRange(){
   return[a,b,pa,pb]}
 function goStore(id,pg){pg=pg||"baocao";if(pg==="baocao"){const[a,b]=smRange();rpTxt="";rpF.rng=smF.rng==="today"?"today":["7","m","pm"].includes(smF.rng)?smF.rng:"custom";if(rpF.rng==="custom"){rpF.from=dk(a);rpF.to=dk(b-DAY)}}nav(pg);scrollTo(0,0);switchStore(id)}
 function smCols(G,o){
-  o=o||{};const W=o.w||900,H=o.h||300,L=o.noAxis?10:52,Rg=8,T=o.cap?42:24,B=o.sub?60:34,iw=W-L-Rg,ih=H-T-B,mx=Math.max(1,...G.flatMap(g=>g.bars.map(x=>x.v)));
+  o=o||{};const H=o.h||300,L=o.noAxis?10:52,Rg=8,T=o.cap?42:24,B=o.sub?60:34,W=o.fw?L+Rg+o.fw*G.length:(o.w||900),iw=W-L-Rg,ih=H-T-B,mx=Math.max(1,...G.flatMap(g=>g.bars.map(x=>x.v)));
   const mag=Math.pow(10,Math.floor(Math.log10(mx/4))),step=[1,2,2.5,5,10].map(k=>k*mag).find(v=>mx/v<=5)||mag*10,top=Math.ceil(mx/step)*step,nt=Math.round(top/step),Y=v=>T+ih-v/top*ih;
-  const slot=iw/G.length,nb=Math.max(...G.map(g=>g.bars.length)),gap=nb>1?3:0,bw=Math.max(3,Math.min(o.maxw||64,(slot*.8-gap*(nb-1))/nb)),ev=Math.ceil(G.length/12),maxc=Math.max(4,Math.floor(slot*ev/6.8));
+  const slot=iw/G.length,nb=Math.max(...G.map(g=>g.bars.length)),gap=nb>1?3:0,bw=Math.max(3,Math.min(o.maxw||64,(slot*.8-gap*(nb-1))/nb)),ev=o.fw?1:Math.ceil(G.length/12),maxc=Math.max(4,Math.floor(slot*ev/6.8));
   let gr="",bs="",lb="";
   if(!o.noAxis)for(let i=0;i<=nt;i++){const v=i*step,y=Y(v);gr+=`<line x1="${L}" x2="${W-Rg}" y1="${y}" y2="${y}" style="stroke:var(--bd)"/><text x="${L-8}" y="${y+4}" text-anchor="end" font-size="11" style="fill:var(--mu)">${smAx(Math.round(v))}</text>`}
   G.forEach((g,i)=>{const tw=g.bars.length*bw+(g.bars.length-1)*gap;let x=L+slot*i+(slot-tw)/2;
     g.bars.forEach(x2=>{const h=Math.max(0,x2.v)/top*ih,y=T+ih-h,inner=`${x2.id?`<rect x="${x}" y="${T}" width="${bw}" height="${ih}" fill="transparent"/>`:""}${h>0?`<rect x="${x}" y="${y}" width="${bw}" height="${h}" rx="${o.rx||2}" style="fill:${x2.c};fill-opacity:${x2.fo||1}"/>`:""}${o.vals&&x2.lab!=null?`${x2.cap?`<text x="${x+bw/2}" y="${(h>0?y:T+ih)-19}" text-anchor="middle" font-size="10" style="fill:var(--mu)">${esc(x2.cap)}</text>`:""}<text x="${x+bw/2}" y="${(h>0?y:T+ih)-5}" text-anchor="middle" font-size="11" font-weight="600" style="fill:var(--tx)">${x2.lab}</text>`:""}<title>${esc(x2.tip||"")}</title>`;
       bs+=x2.id?`<g class="cb" role="link" tabindex="0" aria-label="${esc((x2.tip||"")+(x2.act?" — xem chi tiết":" — mở báo cáo"))}" onclick="${x2.act||`goStore('${x2.id}')`}" onkeydown="if(event.key==='Enter'){${x2.act||`goStore('${x2.id}')`}}">${inner}</g>`:`<g>${inner}</g>`;x+=bw+gap});
     if(i%ev===0){const t=g.t.length>maxc?g.t.slice(0,maxc-1)+"…":g.t,cx=L+slot*i+slot/2;lb+=`<text x="${cx}" y="${H-(o.sub?32:10)}" text-anchor="middle" font-size="12" ${o.sub?'font-weight="600"':""} style="fill:var(--${o.sub?"tx":"mu"})"><title>${esc(g.t)}</title>${esc(t)}</text>${g.sub?`<text x="${cx}" y="${H-12}" text-anchor="middle" font-size="12" font-weight="600" style="fill:${g.subc||"var(--mu)"}">${esc(g.sub)}</text>`:""}`}});
-  return `<svg viewBox="0 0 ${W} ${H}" style="width:100%;height:auto;display:block" role="group" aria-label="${esc(o.aria||"Biểu đồ")}">${gr}${bs}${lb}</svg>`}
+  return `<svg viewBox="0 0 ${W} ${H}" style="${o.fw?`width:${W}px;height:${H}px;min-width:${W}px`:"width:100%;height:auto"};display:block" role="group" aria-label="${esc(o.aria||"Biểu đồ")}">${gr}${bs}${lb}</svg>`}
 function smInfo(x,a,b,pa,pb){
   const d=x.d,sl=d.sales||[],inR=(z,u,v)=>!z.cancel&&z.ts>=u&&z.ts<v,L=sl.filter(z=>inR(z,a,b)),P=sl.filter(z=>inR(z,pa,pb)),ig=d.ing||[],by={};ig.forEach(i=>by[i.id]=i);
   const imp=(d.imp||[]).filter(z=>z.ts>=a&&z.ts<b),kk=(d.kk||[]).filter(z=>z.ts>=a&&z.ts<b),impV=imp.reduce((t,z)=>t+(z.cost||0),0),haoV=ig.reduce((t,i)=>t+fifoCalc(i,a,b,d).v,0);
