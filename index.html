@@ -471,7 +471,7 @@ function view(){
   const pend=S.kitchen.filter(t=>t.st!=="done").length;
   const me=S.staff.find(s=>s.id===S.me)||S.staff[0]||{name:"—",role:""};
   document.title=S.store.name;
-  $("#side").innerHTML=`<div class="sw"><span class="logo">${ico(IC.store)}</span><div class="t"><b>${esc(S.store.name)}</b><small>${esc(me.name)} · ${esc(me.role)}</small></div>${needLogin()?"":`<span class="chev ic">${ico('<path d="m7 15 5 5 5-5M7 9l5-5 5 5"/>')}</span><select title="Đổi người thao tác" onchange="S.me=+this.value;save();view()">${S.staff.map(s=>`<option value="${s.id}" ${s.id===S.me?"selected":""}>${esc(s.name)} · ${esc(s.role)}</option>`).join("")}</select>`}</div>`+
+  $("#side").innerHTML=`<div class="sw"><span class="logo">${ico(IC.store)}</span><div class="t"><b>${esc(S.store.name)}</b><small>${esc(me.name)} · ${esc(me.role)}</small></div>${isOwner()&&CH.list.length>1?stSw():needLogin()?"":`<span class="chev ic">${ico('<path d="m7 15 5 5 5-5M7 9l5-5 5 5"/>')}</span><select title="Đổi người thao tác" onchange="S.me=+this.value;save();view()">${S.staff.map(s=>`<option value="${s.id}" ${s.id===S.me?"selected":""}>${esc(s.name)} · ${esc(s.role)}</option>`).join("")}</select>`}</div>`+
    NAV.filter(n=>navOk(n[0])).map(n=>`<a href="#${n[0]}" onclick="return nav('${n[0]}')" class="${n[0]===k?"on":""}" title="${n[1]}"><span class="ic">${ico(IC[n[0]])}</span><span class="lb">${n[1]}</span>${n[0]==="bep"&&kcnt()?`<i class="bd kb">${kcnt()}</i>`:""}</a>`).join("")+(`<a class="lgo" href="#" onclick="logout();return false" title="Đăng xuất"><span class="ic">${ico('<path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/>')}</span><span class="lb">Đăng xuất</span></a>${syPill()}`);mobShell(k);
   $("#side").classList.add("lo");
   const V={ban:()=>ordN(cur)?vOrder(ordN(cur)):vTables(),bep:vKitchen,donhang:vOrders,chamcong:vAtt,kho:vStock,baocao:vReport,tonghop:vSum,menu:vMenu,sodo:vMap,nhanvien:vStaff,caidat:vSet};
@@ -1538,6 +1538,11 @@ function addStore(){const n=$("#sn_n").value.trim();if(!n){$("#sn_n").focus();re
   const id="s"+Date.now().toString(36),key="posquanan2_"+id;
   try{localStorage.setItem(key,JSON.stringify(d))}catch(e){}
   lg("Chuỗi quán","Thêm quán "+n);CH.list.push({id,key});smod=false;switchStore(id)}
+const stName=x=>x.id===CH.cur?S.store.name:(((ldk(x.key)||{}).store||{}).name||"Quán");
+function stSw(){return `<span class="chev ic">${ico('<path d="m7 15 5 5 5-5M7 9l5-5 5 5"/>')}</span><select title="Đổi cơ sở" onchange="stPick(this.value)">${CH.list.map(x=>`<option value="${esc(String(x.id))}" ${x.id===CH.cur?"selected":""}>${esc(stName(x))}</option>`).join("")}</select>`}
+function stPick(v){if(v==="__mg"){sTab="chuoi";PG==="caidat"?view():nav("caidat");return}const x=CH.list.find(z=>String(z.id)===String(v));if(x)swStore(x.id)}
+function swStore(id){const m=S.staff.find(s=>s.id===S.me)||{},ph=m.phone,pw=m.pw;switchStore(id);
+  if(needLogin()&&!sessOk()&&ph&&pw){const o=S.staff.find(s=>s.role==="Chủ quán"&&s.phone===ph&&s.pw===pw);if(o){SESS=o.id;S.me=o.id;try{localStorage.setItem("posquanan2_sess",o.id)}catch(e){}view()}}}
 function switchStore(id){const x=CH.list.find(z=>z.id===id);if(!x||id===CH.cur){view();return}save();CH.cur=id;SK=x.key;try{localStorage.setItem(CHK,JSON.stringify(CH))}catch(e){}S=load();cur=null;sv=null;chk()}
 let DV=(()=>{try{return JSON.parse(localStorage.getItem("posquanan2_dev"))}catch(e){}})()||{theme:"auto",fs:100};
 function dvApply(){const r=document.documentElement;DV.theme==="auto"?r.removeAttribute("data-theme"):r.setAttribute("data-theme",DV.theme);r.style.zoom=DV.fs/100}
