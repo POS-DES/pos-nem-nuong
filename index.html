@@ -239,13 +239,24 @@ td,th{padding:8px 6px}
 
 <style id="ordui">
 .omenu{min-width:0}
+.ohead{position:sticky;top:env(safe-area-inset-top,0px);z-index:30;background:var(--bg);margin:-30px -36px 10px;padding:30px 36px 0}
+.ohead .osr{margin:0 0 8px}
+.pbn{display:flex;gap:8px;overflow-x:auto;padding-bottom:8px;scrollbar-width:none}.pbn::-webkit-scrollbar{display:none}
+.pcd{flex:none;display:flex;align-items:center;gap:10px;padding:7px 12px 7px 8px;border-radius:12px;background:color-mix(in srgb,var(--pr) 9%,var(--card));border:1px solid color-mix(in srgb,var(--pr) 35%,transparent);max-width:100%}
+.pbn .pcd:only-child{flex:1}
+.pic{width:30px;height:30px;border-radius:9px;background:var(--pr);color:#fff;align-items:center;justify-content:center;flex:none}.pic svg{width:17px;height:17px}
+.ptx{display:flex;flex-direction:column;line-height:1.25;min-width:0}.ptx b{font-size:14px}.ptx small{color:var(--mu);font-size:12px}
+.kmp{display:flex;align-items:center;flex-wrap:wrap;gap:4px 8px}.kmp b{color:var(--pr);font-size:16px}.kmp s{color:var(--mu);font-size:13px}
+.kmb{font-style:normal;background:var(--pr);color:#fff;border-radius:6px;padding:1px 6px;font-size:12px;font-weight:700}
+.ohead .chips{margin:0;padding-bottom:8px}
+@media(max-width:700px){.ohead{margin:-14px -12px 8px;padding:10px 12px 0;border-bottom:1px solid var(--bd)}body.ordp #mtop{display:none!important}}
 .omenu .grid{grid-template-columns:repeat(auto-fill,minmax(148px,1fr));gap:10px}
 .omenu .item{position:relative;padding:8px;gap:2px;user-select:none}
 .omenu .mi{aspect-ratio:16/10}
 .omenu .item:active{transform:scale(.97)}
 .qb{position:absolute;top:6px;right:6px;min-width:24px;height:24px;padding:0 7px;border-radius:99px;background:var(--pr);color:#fff;font-style:normal;font-weight:700;font-size:13px;display:flex;align-items:center;justify-content:center;box-shadow:0 1px 4px rgba(0,0,0,.3)}
 .ordw{align-items:start}
-.card.bill{padding:0!important;position:sticky;top:12px;max-height:calc(100vh - 24px);display:flex;flex-direction:column;overflow:hidden}
+.card.bill{padding:0!important;position:sticky;top:calc(var(--oh,0px) + 12px);max-height:calc(100vh - var(--oh,0px) - 24px);display:flex;flex-direction:column;overflow:hidden}
 .bill .bh{display:flex;align-items:center;justify-content:space-between;padding:14px 16px 6px}
 .bill .bb{overflow-y:auto;flex:1;min-height:0;padding:0 16px 8px}
 .bill .bf{padding:10px 16px 14px;border-top:1px solid var(--bd);background:var(--card)}
@@ -258,8 +269,68 @@ td,th{padding:8px 6px}
 .bill .bx{display:block}
 .obk{display:block;position:fixed;inset:0;z-index:65;background:rgba(0,0,0,.45)}
 #obar{display:flex;position:fixed;left:236px;right:0;bottom:0;z-index:45;gap:8px;align-items:stretch;padding:8px 12px calc(8px + env(safe-area-inset-bottom,0px));background:var(--card);border-top:1px solid var(--bd);box-shadow:0 -4px 16px rgba(0,0,0,.08)}
-#obar .obv{flex:1;min-width:0;display:flex;align-items:center;justify-content:space-between;gap:8px;padding:8px 14px;border-radius:12px}
-#obar .obk2{padding:0 18px;border-radius:12px;font-weight:700;white-space:nowrap}
+#obar{gap:12px;padding:10px 14px calc(10px + env(safe-area-inset-bottom,0px));border-radius:18px 18px 0 0;box-shadow:0 -8px 24px rgba(0,0,0,.12)}
+#obar .obv{flex:1;min-width:0;display:flex;align-items:center;gap:12px;padding:0;border:0;background:none;text-align:left;min-height:48px}
+#obar .ocart{position:relative;flex:none;width:48px;height:48px;border-radius:14px;background:color-mix(in srgb,var(--pr) 14%,var(--card));color:var(--pr);display:flex;align-items:center;justify-content:center}
+#obar .ocart svg{width:24px;height:24px}
+#obar .ocart i{position:absolute;top:-6px;right:-6px;min-width:22px;height:22px;padding:0 6px;border-radius:99px;background:var(--pr);color:#fff;font-style:normal;font-weight:700;font-size:12px;display:flex;align-items:center;justify-content:center;border:2px solid var(--card)}
+#obar .otx{min-width:0;display:flex;flex-direction:column;line-height:1.2}
+#obar .otx small{color:var(--mu);font-size:12px}
+#obar .odl{display:flex;align-items:center;gap:6px;flex-wrap:nowrap;overflow:hidden;white-space:nowrap}
+#obar .odl s{color:var(--mu)}
+#obar .odc{background:color-mix(in srgb,var(--pr) 16%,var(--card));color:var(--pr);font-weight:700;border-radius:99px;padding:1px 8px;font-size:12px}
+#obar .otx{overflow:hidden}
+#obar .oml{display:flex;align-items:center;gap:8px;white-space:nowrap}
+#obar .otl{display:flex;align-items:baseline;gap:8px;white-space:nowrap}
+#obar .otl s{color:var(--mu);font-size:13px}
+#obar .ocv{margin-left:auto;flex:none;color:var(--mu)}
+#obar .ocv svg{width:20px;height:20px}
+#obar .otx b{font-size:20px;letter-spacing:-.01em;font-variant-numeric:tabular-nums}
+#obar .obk2{flex:none;min-height:48px;padding:0 20px;border-radius:14px;font-weight:700;font-size:16px;white-space:nowrap;display:flex;align-items:center;gap:8px}
+#obar .obk2 em{font-style:normal;background:rgba(255,255,255,.25);border-radius:99px;min-width:24px;height:24px;padding:0 7px;display:flex;align-items:center;justify-content:center;font-size:13px}
+#obar .okb{flex:none;width:64px;min-height:48px;border-radius:14px;padding:0;position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font-size:11px;font-weight:600;color:var(--mu)}
+#obar .okb .ic svg{width:20px;height:20px}
+#obar .okb.hot{color:var(--pr);border-color:var(--pr);background:color-mix(in srgb,var(--pr) 10%,var(--card))}
+#obar .okb i{position:absolute;top:-6px;right:-4px;min-width:20px;height:20px;padding:0 5px;border-radius:99px;background:var(--pr);color:#fff;font-style:normal;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;border:2px solid var(--card)}
+.ckl{display:flex;gap:12px;align-items:flex-start;padding:14px 0;border-bottom:1px solid var(--bd)}
+.ckq{flex:none;min-width:36px;height:28px;border-radius:8px;background:var(--hov);font-weight:700;font-size:14px;display:flex;align-items:center;justify-content:center}
+.ckn{flex:1;min-width:0;line-height:1.35}.ckn b{font-size:15px}
+.ckp{text-align:right;white-space:nowrap}.ckp b{font-size:15px;font-variant-numeric:tabular-nums}.ckp s{display:block;color:var(--mu);font-size:13px}
+.ckt{display:inline-block;margin-top:4px;background:color-mix(in srgb,var(--pr) 14%,var(--card));color:var(--pr);font-size:12px;font-weight:700;border-radius:99px;padding:2px 9px}
+.cks{display:flex;justify-content:space-between;gap:12px;padding:5px 0;color:var(--mu);font-size:14px}.cks.d{color:var(--pr);font-weight:600}
+.ckto{margin-top:10px;border-radius:14px;padding:14px 16px;background:color-mix(in srgb,var(--pr) 10%,var(--card));display:flex;align-items:center;justify-content:space-between}
+.ckto b{font-size:26px;color:var(--pr);letter-spacing:-.01em;font-variant-numeric:tabular-nums}
+.cksv{margin-top:10px;text-align:center;color:var(--ok);font-weight:600;font-size:13px}
+.ckc{background:var(--card);border:1px solid var(--bd);border-radius:16px;padding:14px 16px;box-shadow:var(--sh)}
+.cch{font-weight:700;font-size:15px;margin-bottom:6px}
+.cth{flex:none;width:52px;height:52px;border-radius:12px;background:var(--hov);color:var(--mu);font-weight:700;display:flex;align-items:center;justify-content:center;overflow:hidden}.cth img{width:100%;height:100%;object-fit:cover}
+.ckl:last-of-type{border-bottom:0}
+.ckp{display:flex;flex-direction:column;align-items:flex-end;gap:2px}
+.cks.tt{margin-top:6px;padding-top:12px;border-top:1px dashed var(--bd);color:var(--tx);font-weight:600}.cks.tt b{font-size:22px;color:var(--pr)}
+.cksv2{margin-top:12px;display:flex;align-items:center;justify-content:center;gap:8px;padding:9px 12px;border-radius:10px;background:color-mix(in srgb,var(--ok) 12%,var(--card));color:var(--ok);font-size:13px}.cksv2 b{font-weight:700}.cksv2 svg{width:16px;height:16px}
+.vch{display:flex;align-items:stretch;border:1px solid color-mix(in srgb,var(--pr) 40%,transparent);border-radius:12px;overflow:hidden;background:color-mix(in srgb,var(--pr) 6%,var(--card));margin-top:8px}
+.vl{position:relative;flex:none;width:70px;background:var(--pr);color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;font-size:10px;font-weight:700;letter-spacing:.04em;padding:10px 4px}
+.vl svg{width:22px;height:22px}
+.vl:before,.vl:after{content:"";position:absolute;right:-7px;width:14px;height:14px;border-radius:50%;background:var(--card);border:1px solid color-mix(in srgb,var(--pr) 40%,transparent)}
+.vl:before{top:-8px}.vl:after{bottom:-8px}
+.vr{flex:1;min-width:0;padding:10px 12px;display:flex;flex-direction:column;justify-content:center;line-height:1.35}
+.vv{align-self:center;padding-right:14px;color:var(--pr);font-weight:700;white-space:nowrap}
+.rd{display:flex;align-items:center;gap:12px;padding:12px;margin-top:8px;border:1.5px solid var(--bd);border-radius:14px;cursor:pointer}
+.rd.on{border-color:var(--pr);background:color-mix(in srgb,var(--pr) 6%,var(--card))}
+.rd.dis{opacity:.5;cursor:not-allowed}
+.rd .pi{width:42px;height:42px;border-radius:12px;display:flex;align-items:center;justify-content:center;flex:none}.rd .pi svg{width:22px;height:22px}
+.rt{flex:1;min-width:0;display:flex;flex-direction:column;line-height:1.3}
+.rb{flex:none;width:22px;height:22px;border-radius:50%;border:2px solid var(--bd)}
+.rd.on .rb{border-color:var(--pr);background:radial-gradient(var(--pr) 0 42%,transparent 46%)}
+.ckbar{position:sticky;bottom:0;z-index:20;display:flex;align-items:center;gap:12px;margin-top:4px;padding:12px 16px calc(12px + env(safe-area-inset-bottom,0px));background:var(--card);border:1px solid var(--bd);border-radius:16px;box-shadow:0 -6px 24px rgba(0,0,0,.1)}
+.ckbt{flex:1;min-width:0;display:flex;flex-direction:column;line-height:1.2}.ckbt b{font-size:22px;color:var(--pr);font-variant-numeric:tabular-nums}.ckbt .sv{color:var(--ok);font-weight:600}
+.ckbar button.p{flex:none;min-height:48px;padding:0 22px;border-radius:14px;font-weight:700;font-size:15px}
+@media(max-width:700px){.ckbar{margin:4px -12px 0;border-radius:16px 16px 0 0;border-width:1px 0 0}body.ordp main:has(.ckbar){padding-bottom:0!important}}
+.ckw{max-width:560px;margin:0 auto;display:flex;flex-direction:column;gap:12px}
+.pm{display:flex;align-items:center;gap:14px;padding:14px 16px;border-radius:16px;text-align:left;font-weight:600;font-size:16px;min-height:72px;width:100%}
+.pm .pi{width:46px;height:46px;border-radius:13px;display:flex;align-items:center;justify-content:center;flex:none}
+.pm .pi svg{width:24px;height:24px}
+#obar .obk2:disabled{background:var(--hov);color:var(--mu);border-color:var(--bd);opacity:1}
 .card.bill .bar{flex-wrap:wrap}
 }
 @media(max-width:700px){
@@ -268,7 +339,7 @@ body.ordp #mbar{display:none!important}
 body.ordp main{padding-bottom:96px!important}
 .omenu .grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
 .omenu .item b{font-size:14px;line-height:1.25}
-.omenu .chips{margin:0 -12px 8px;padding:0 12px 8px}
+.ohead .chips{margin:0;padding-bottom:8px}
 .card.bill{max-height:90vh}
 .bill .bf .bar button{flex:1}
 }
@@ -396,9 +467,9 @@ function view(){
   $("#side").classList.add("lo");
   const V={ban:()=>ordN(cur)?vOrder(ordN(cur)):vTables(),bep:vKitchen,donhang:vOrders,chamcong:vAtt,kho:vStock,baocao:vReport,tonghop:vSum,menu:vMenu,sodo:vMap,nhanvien:vStaff,caidat:vSet};
   applyColor();document.body.classList.toggle("ordp",k==="ban"&&!!ordN(cur));$("#app").innerHTML=loginBn()+(GATE&&!GATE.ok&&!isOwner()?lockHtml():!navOk(k)?`<div class="card" style="max-width:480px;margin:60px auto;text-align:center"><h3>Chưa có quyền</h3><p class="mu">Vai trò của bạn chưa được cấp quyền dùng mục này. Hãy nhờ chủ quán cấp trong Nhân viên → Phân quyền.</p></div>`:V[k]());
-  const rph=$("#rphrs");if(rph)rph.scrollLeft=+rph.dataset.sl||0;
+  {const oh=$(".ohead");document.documentElement.style.setProperty("--oh",oh?oh.offsetHeight+"px":"0px")}const rph=$("#rphrs");if(rph)rph.scrollLeft=+rph.dataset.sl||0;
 }
-function leave(){bo=false;qrMode=false;edI=null;sv=null;cx=false;const o=ordN(cur);if(o&&!o.items.length){S.orders=S.orders.filter(x=>x!==o);save()}cur=null}
+function leave(){bo=false;mq="";ck=false;qrMode=false;edI=null;sv=null;cx=false;const o=ordN(cur);if(o&&!o.items.length){S.orders=S.orders.filter(x=>x!==o);save()}cur=null}
 function back(){leave();view()}
 
 /* ===== Bàn ===== */
@@ -423,23 +494,45 @@ function vQR(o){
   return `<div class="bar"><button onclick="qrMode=false;view()">← Quay lại</button><b>Chuyển khoản · ${o.tid!=null?esc(tbl(o.tid).name):"#"+o.no}</b></div>
   <div class="card qr" style="max-width:360px;text-align:center;margin:0 auto">${ok?`<img alt="Mã QR chuyển khoản" src="${qrUrl(vietqr(amt,"DON "+o.no))}"><div class="tot" style="justify-content:center">${fmt(amt)}</div><p class="mu">${esc(bn)} · ${esc(b.acc)}<br>${esc(b.name)}<br>Nội dung: DON ${o.no}</p><button class="g" style="width:100%" onclick="pay('Chuyển khoản')">Đã nhận tiền</button>`:`<p>Chưa cài đặt ngân hàng nhận tiền.</p><a href="#caidat" onclick="return nav('caidat')">Đến Cài đặt</a>`}</div>`;
 }
-function vOrder(o){if(qrMode)return vQR(o);
-  const cats=["Tất cả",...catList()],list=sortM(S.menu.filter(m=>cat==="Tất cả"||m.cat===cat)),u=unsent(o),t=o.tid!=null?tbl(o.tid):null;
-  return `<div class="bar"><button onclick="back()">← Quay lại</button><b>${t?esc(t.name):"Đơn mang về #"+o.no}</b><span class="mu">${esc(o.staff)}</span></div>
-  <div class="two ordw"><div class="omenu"><div class="chips">${cats.map(c=>`<button class="${c===cat?"on":""}" onclick="cat=this.dataset.c;view()" data-c="${esc(c)}">${esc(c)}</button>`).join("")}</div>
-  <div class="grid">${list.map(m=>`<div class="card item ${m.off?"off":""}" onclick="add(${m.id})">${qn(o,m.id)?`<i class="qb">${qn(o,m.id)}</i>`:""}${m.img?`<img class="mi" src="${m.img}" alt="">`:""}<b>${esc(m.name)}</b><span class="mu">${m.off?"Hết món":fmt(m.price)}</span></div>`).join("")}</div></div>
+function vOrder(o){if(qrMode)return vQR(o);if(ck)return vCheckout(o);
+  const cats=["Tất cả",...catList()],list=sortM(S.menu.filter(m=>(cat==="Tất cả"||m.cat===cat)&&(!mq.trim()||m.name.toLowerCase().includes(mq.trim().toLowerCase())))),u=unsent(o),t=o.tid!=null?tbl(o.tid):null;
+  return `<div class="ohead"><div class="bar" style="margin:0 0 10px;flex-wrap:nowrap"><button onclick="back()" aria-label="Quay lại" style="font-size:18px;padding:8px 14px">←</button><div style="min-width:0"><b style="font-size:16px">${t?esc(t.name):"Đơn mang về"}</b> <span class="mu">#${o.no}</span><br><small class="mu">Mở ${tm(o.ts||Date.now())} · ${esc(o.staff)}</small></div></div>
+  <div class="ib osr"><span class="ic su">${ico('<circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/>')}</span><input id="omq" type="search" placeholder="Tìm món" value="${esc(mq)}" style="text-align:left" oninput="mq=this.value;view();const e=$('#omq');e.focus();e.setSelectionRange(e.value.length,e.value.length)"></div>
+  ${promoStrip()}<div class="chips">${cats.map(c=>`<button class="${c===cat?"on":""}" onclick="cat=this.dataset.c;view()" data-c="${esc(c)}">${esc(c)}</button>`).join("")}</div></div>
+  <div class="two ordw"><div class="omenu"><div class="grid">${list.map(m=>`<div class="card item ${m.off?"off":""}" onclick="add(${m.id})">${qn(o,m.id)?`<i class="qb">${qn(o,m.id)}</i>`:""}${m.img?`<img class="mi" src="${m.img}" alt="">`:""}<b>${esc(m.name)}</b>${m.off?`<span class="mu">Hết món</span>`:(()=>{const b=pbest(m.id,m.price);return b.d>0.5?`<span class="kmp"><b>${fmt(m.price-b.d)}</b><s>${fmt(m.price)}</s><em class="kmb">-${Math.round(b.d/m.price*100)}%</em></span>`:`<span class="mu">${fmt(m.price)}</span>`})()}</div>`).join("")}</div></div>
   ${bo?`<div class="obk" onclick="bo=false;view()"></div>`:""}<div class="card bill ${bo?"open":""}"><div class="bh"><b style="font-size:16px">Hóa đơn</b><button class="bx" onclick="bo=false;view()" aria-label="Đóng">×</button></div><div class="bb">
   ${o.tid==null?`<div class="row"><span>Khách</span><input value="${esc(o.cust)}" style="width:150px" onchange="ordN(cur).cust=this.value;save()"></div>`:""}
   <div class="row"><span>Số khách<br><small class="mu">${o.paxM?"Nhập tay · xóa trống để tự tính":"Tự tính: mỗi suất buffet/món lẻ = 1 khách"}</small></span><input type="number" min="0" inputmode="numeric" placeholder="0" value="${paxOf(o)||""}" style="width:80px" onchange="setPax(this.value)"></div>
-  ${o.items.length?o.items.map((i,x)=>{const m=menuOf(i.id);if(!m)return"";const pr=i.p!=null?i.p:m.price;return `<div class="row"><span>${esc(m.name)} ${i.s>=i.q?"✓":""}<br><small>${i.p!=null?`<b style="color:var(--pr)">${fmt(pr)}</b> (gốc ${fmt(m.price)})`:fmt(pr)}${i.n?" · "+esc(i.n):""}${i.q>1?`<br>${i.q} × ${fmt(pr)} = ${fmt(pr*i.q)}`:""}</small></span><button onclick="openEd(${x})" title="Sửa giá / ghi chú">✎</button><button onclick="qty(${x},-1)">−</button><b>${i.q}</b><button onclick="qty(${x},1)">+</button></div>${edI===x?edForm(i,x,m):""}`}).join(""):`<p class="mu">Chưa có món nào.</p>`}
+  ${o.items.length?o.items.map((i,x)=>{const m=menuOf(i.id);if(!m)return"";const pr=i.p!=null?i.p:m.price;return `<div class="row"><span>${esc(m.name)} ${i.s>=i.q?"✓":""}<br><small>${i.p!=null?`<b style="color:var(--pr)">${fmt(pr)}</b> (gốc ${fmt(m.price)})`:fmt(pr)}${i.n?" · "+esc(i.n):""}${i.q>1?`<br>${i.q} × ${fmt(pr)} = ${fmt(pr*i.q)}`:""}</small>${(()=>{const b=pbest(i.id,pr);return b.d>0.5?`<br><small style="color:var(--pr);font-weight:600">🎁 ${esc(b.n)}: -${fmt(b.d*i.q)} → ${fmt((pr-b.d)*i.q)}</small>`:""})()}</span><button onclick="openEd(${x})" title="Sửa giá / ghi chú">✎</button><button onclick="qty(${x},-1)">−</button><b>${i.q}</b><button onclick="qty(${x},1)">+</button></div>${edI===x?edForm(i,x,m):""}`}).join(""):`<p class="mu">Chưa có món nào.</p>`}
   <div class="row"><span>Giảm giá (%)</span><input type="number" min="0" max="100" value="${o.disc}" style="width:80px" ${can("discount")?"":"disabled"} onchange="ordN(cur).disc=Math.min(100,Math.max(0,+this.value||0));save();view()"></div>
   ${fbrk(o)}</div><div class="bf"><div class="tot" style="padding-top:0"><span>Tổng</span><span>${fmt(stot(o))}</span></div>
   <div class="bar" style="margin:10px 0 0"><button class="p" onclick="kitchenSend()" ${u?"":"disabled"} style="width:100%">Báo bếp${u?" ("+u+" món)":""}</button>
-  <button class="g" onclick="pay('Tiền mặt')" ${o.items.length&&can("pay")?"":"disabled"}>Tiền mặt</button><button class="p" onclick="qrMode=true;view()" ${o.items.length&&can("pay")?"":"disabled"}>Chuyển khoản</button><button onclick="clearO()">Xóa đơn</button></div></div></div></div>${obarH(o,u)}`;
+  <button class="g" onclick="ck=true;bo=false;view()" ${o.items.length&&can("pay")?"":"disabled"}>Thanh toán</button><button onclick="clearO()">Xóa đơn</button></div></div></div></div>${obarH(o,u)}`;
 }
-let bo=false;
+let bo=false,mq="",ck=false;
+let pmSel="Tiền mặt";
+function vCheckout(o){const t=o.tid!=null?tbl(o.tid):null,u=unsent(o),ok=o.items.length&&can("pay"),F=fees(o),sav=F.pd+F.md,cash=pmSel==="Tiền mặt",V={};
+  const rows=o.items.map(i=>{const m=menuOf(i.id);if(!m)return"";const pr=i.p!=null?i.p:m.price,b=pbest(i.id,pr),dd=b.d>0.5,g=pr*i.q;if(dd){const v=V[b.n]||(V[b.n]={d:0,q:0});v.d+=b.d*i.q;v.q+=i.q}
+    return `<div class="ckl"><span class="cth">${m.img?`<img src="${m.img}" alt="">`:esc((m.name.trim()[0]||"?").toUpperCase())}</span><div class="ckn"><b>${esc(m.name)}</b>${i.n?`<br><small class="mu">${esc(i.n)}</small>`:""}<br><small class="mu">${fmt(pr)}/suất</small>${dd?` <span class="ckt">-${Math.round(b.d/pr*100)}%</span>`:""}</div><div class="ckp">${dd?`<s>${fmt(g)}</s><b>${fmt(g-b.d*i.q)}</b>`:`<b>${fmt(g)}</b>`}<small class="mu">x${i.q}</small></div></div>`}).join("");
+  const tag='<path d="M20.6 13.4 13.4 20.6a2 2 0 0 1-2.8 0L3 13V3h10l7.6 7.6a2 2 0 0 1 0 2.8Z"/><circle cx="7.5" cy="7.5" r="1.5"/>',vc=(n,sub,v)=>`<div class="vch"><div class="vl"><span class="ic">${ico(tag)}</span>VOUCHER</div><div class="vr"><b>${esc(n)}</b><small class="mu">${sub}</small></div><div class="vv">-${fmt(v)}</div></div>`;
+  const vch=Object.keys(V).map(n=>vc(n,"Áp dụng cho "+V[n].q+" suất",V[n].d)).join("")+(F.md>0.5?vc("Giảm giá đơn "+o.disc+"%","Áp dụng cho cả đơn",F.md):"");
+  const sr=(l,v,c)=>`<div class="cks ${c||""}"><span>${l}</span><span>${v}</span></div>`,
+  sum=sr("Tổng tiền hàng",fmt(F.sub))+(F.pd>0.5?sr("Giảm giá khuyến mãi","-"+fmt(F.pd),"d"):"")+(F.md>0.5?sr("Giảm giá đơn ("+o.disc+"%)","-"+fmt(F.md),"d"):"")+(F.sv>0.5?sr("Phí phục vụ ("+S.store.svc+"%)","+"+fmt(F.sv)):"")+(F.vat>0.5?sr("VAT ("+S.store.vat+"%)","+"+fmt(F.vat)):"")+`<div class="cks tt"><span>Tổng thanh toán</span><b>${fmt(stot(o))}</b></div>`;
+  const ic=p=>`<span class="ic">${ico(p)}</span>`,rd=(v,n,d,pi,cl)=>`<div class="rd ${pmSel===v?"on":""} ${ok?"":"dis"}" onclick="${ok?`pmSel='${v}';view()`:""}"><span class="pi" style="background:color-mix(in srgb,${cl} 16%,var(--card));color:${cl}">${ic(pi)}</span><span class="rt"><b>${n}</b><small class="mu">${d}</small></span><span class="rb"></span></div>`;
+  return `<div class="ohead"><div class="bar" style="margin:0 0 10px;flex-wrap:nowrap"><button onclick="ck=false;view()" aria-label="Quay lại" style="font-size:18px;padding:8px 14px">←</button><div style="min-width:0"><b style="font-size:16px">Thanh toán</b><br><small class="mu">${t?esc(t.name):"Đơn mang về"} · #${o.no}${paxOf(o)?" · "+paxOf(o)+" khách":""}</small></div></div></div>
+  <div class="ckw">
+  ${u?`<div class="ckc" style="border-color:var(--pr);display:flex;align-items:center;gap:12px;flex-wrap:wrap"><span style="flex:1;min-width:160px"><b>Còn ${u} món chưa báo bếp</b><br><small class="mu">Báo bếp trước khi thu tiền nếu khách còn cần món này.</small></span><button class="p" onclick="kitchenSend()">Báo bếp</button></div>`:""}
+  <div class="ckc"><div class="cch">Món đã gọi <small class="mu">· ${o.items.reduce((a,i)=>a+i.q,0)} suất</small></div>${rows||`<p class="mu">Chưa có món nào.</p>`}</div>
+  <div class="ckc"><div class="cch">Ưu đãi</div>${vch||`<small class="mu">Đơn này chưa có ưu đãi nào được áp dụng.</small>`}</div>
+  <div class="ckc"><div class="cch">Chi tiết thanh toán</div>${sum}${sav>0.5?`<div class="cksv2"><span class="ic">${ico(tag)}</span>Bạn đã tiết kiệm <b>${fmt(sav)}</b> cho đơn này</div>`:""}</div>
+  <div class="ckc"><div class="cch">Phương thức thanh toán</div>${rd("Tiền mặt","Tiền mặt","Thu trực tiếp tại quầy","M2 6h20v12H2zM12 9.5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5ZM6 12h.01M18 12h.01","var(--ok)")}${rd("Chuyển khoản","Chuyển khoản","Quét mã QR theo số tiền của đơn","M3 3h7v7H3zM14 3h7v7h-7zM3 14h7v7H3zM14 14h3v3h-3zM20 14v.01M14 20h3M20 17v4","var(--pr)")}</div>
+  <div class="ckbar"><div class="ckbt"><small class="mu">Tổng thanh toán</small><b>${fmt(stot(o))}</b>${sav>0.5?`<small class="sv">Tiết kiệm ${fmt(sav)}</small>`:""}</div><button class="p" onclick="${cash?"pay('Tiền mặt')":"qrMode=true;view()"}" ${ok?"":"disabled"}>${cash?"Xác nhận đã thu tiền":"Hiện mã QR"}</button></div></div>`}
+function pbest(id,pr){let b=0,bn="";actP().forEach(p=>{const L=p.items||[];if(p.t==="fix"?!L.includes(id):(L.length&&!L.includes(id)))return;const d=pdisc(p,pr);if(d>b){b=d;bn=p.name}});return{d:b,n:bn}}
+function promoStrip(){const P=actP();if(!P.length)return"";const ic=ico('<path d="M20.6 13.4 13.4 20.6a2 2 0 0 1-2.8 0L3 13V3h10l7.6 7.6a2 2 0 0 1 0 2.8Z"/><circle cx="7.5" cy="7.5" r="1.5"/>');return `<div class="pbn">${P.map(p=>{const td=new Date(p.to).toDateString()===new Date().toDateString(),v=p.t==="pct"?"Giảm "+p.v+"%":p.t==="fix"?"Đồng giá "+fmt(p.v):"Bớt "+fmt(p.v)+"/suất";return `<div class="pcd"><span class="ic pic">${ic}</span><div class="ptx"><b>${esc(p.name)}</b><small>${v}${td?" · đến "+tm(p.to):""}</small></div></div>`}).join("")}</div>`}
 const qn=(o,id)=>o.items.filter(i=>i.id===id).reduce((a,i)=>a+i.q,0);
-function obarH(o,u){const n=o.items.reduce((a,i)=>a+i.q,0);return `<div id="obar"><button class="obv" onclick="bo=true;view()"><span style="text-align:left;min-width:0"><b>${n?n+" món":"Chưa có món"}</b>${n?`<br><small class="mu">${fmt(stot(o))} · bấm để xem đơn</small>`:`<br><small class="mu">Chọn món để bắt đầu</small>`}</span><span class="ic">${ico('<path d="m6 15 6-6 6 6"/>')}</span></button><button class="p obk2" onclick="kitchenSend()" ${u?"":"disabled"}>Báo bếp${u?" ("+u+")":""}</button></div>`}
+function obarH(o,u){const n=o.items.reduce((a,i)=>a+i.q,0),F=fees(o),dc=F.pd+F.md>0.5,bag=ico('<path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/>'),up=ico('<path d="m6 15 6-6 6 6"/>');
+  const tx=n?`<small class="oml">${n} món${dc?`<span class="odc">Tiết kiệm ${fmt(F.pd+F.md)}</span>`:""}</small><span class="otl"><b>${fmt(stot(o))}</b>${dc?`<s>${fmt(F.sub)}</s>`:""}</span>`:`<small class="oml">Chưa có món</small><span class="otl"><b style="font-size:16px;color:var(--mu)">Chọn món để bắt đầu</b></span>`;
+  return `<div id="obar"><button class="obv" onclick="bo=true;view()" aria-label="Xem đơn"><span class="ocart ic">${bag}</span><span class="otx">${tx}</span><span class="ic ocv">${up}</span></button><button class="okb ${u?"hot":""}" onclick="kitchenSend()" ${u?"":"disabled"} aria-label="Báo bếp"><span class="ic">${ico(IC.bep)}</span>${u?`<i>${u}</i>`:""}<span>${u||!n?"Báo bếp":"Đã báo"}</span></button><button class="p obk2" onclick="ck=true;bo=false;view()" ${n&&can("pay")?"":"disabled"}>Thanh toán</button></div>`}
 function add(id){const m=menuOf(id);if(!m||m.off)return;const o=ordN(cur),i=o.items.find(x=>x.id===id&&x.p==null&&!x.n);i?i.q++:o.items.push({id,q:1,s:0,p:null,n:""});save();view()}
 function openEd(x){edI=edI===x?null:x;view()}
 function edForm(i,x,m){return `<div class="card" style="margin:6px 0;background:var(--hov)"><div class="row"><span>Giá / suất</span><input id="ep" data-m type="text" inputmode="decimal" value="${i.p!=null?i.p:m.price}" style="width:110px"></div>
@@ -456,11 +549,15 @@ function saveEd(x,reset){
 }
 function qty(x,d){const o=ordN(cur),i=o.items[x];
   if(d>0&&i.p!=null){const b=o.items.find(y=>y.id===i.id&&y.p==null&&!y.n);b?b.q++:o.items.splice(x+1,0,{id:i.id,q:1,s:0,p:null,n:""});edI=null;save();view();return}
-  i.q+=d;i.s=Math.min(i.s,i.q);if(i.q<=0){o.items.splice(x,1);edI=null}save();view()}
-function clearO(){const o=ordN(cur);o.items=[];o.disc=0;save();view()}
+  const s0=i.s;i.q+=d;i.s=Math.min(i.s,i.q);if(s0>i.s)kcut(o,i,s0-i.s);if(i.q<=0){o.items.splice(x,1);edI=null}save();view()}
+function kcut(o,i,n){const m=menuOf(i.id);if(!m||n<=0)return;const nm=m.name+(i.n?" ("+i.n+")":""),wh=o.tid!=null?(tbl(o.tid)||{}).name:"Mang về #"+o.no;
+  for(let k=S.kitchen.length-1;k>=0&&n>0;k--){const t=S.kitchen[k];if(t.st==="done")continue;if(t.no!=null?t.no!==o.no:t.where!==wh)continue;
+    for(let j=t.items.length-1;j>=0&&n>0;j--){const it=t.items[j];if(it.mid!=null?(it.mid!==i.id||(it.nt||"")!==(i.n||"")):it.name!==nm)continue;const d=Math.min(n,it.q);it.q-=d;n-=d;if(it.q<=0)t.items.splice(j,1)}
+    if(!t.items.length)S.kitchen.splice(k,1)}}
+function clearO(){const o=ordN(cur);o.items.forEach(i=>{if(i.s>0)kcut(o,i,i.s)});o.items=[];o.disc=0;save();view()}
 function kitchenSend(){
-  const o=ordN(cur),its=o.items.filter(i=>i.q>i.s).map(i=>({name:menuOf(i.id).name+(i.n?" ("+i.n+")":""),q:i.q-i.s}));if(!its.length)return;
-  S.kitchen.push({id:++S.kid,where:o.tid!=null?tbl(o.tid).name:"Mang về #"+o.no,items:its,st:"new",ts:Date.now()});
+  const o=ordN(cur),its=o.items.filter(i=>i.q>i.s).map(i=>({name:menuOf(i.id).name+(i.n?" ("+i.n+")":""),q:i.q-i.s,mid:i.id,nt:i.n||""}));if(!its.length)return;
+  S.kitchen.push({id:++S.kid,no:o.no,where:o.tid!=null?tbl(o.tid).name:"Mang về #"+o.no,items:its,st:"new",ts:Date.now()});
   o.items.forEach(i=>i.s=i.q);bo=false;save();view();
 }
 function pay(m){
@@ -468,7 +565,7 @@ function pay(m){
   const items=o.items.map(i=>{const x=menuOf(i.id);return {id:i.id,orig:x?x.price:0,name:(x?x.name:"?")+(i.n?" ("+i.n+")":""),q:i.q,price:i.p!=null?i.p:(x?x.price:0)}});
   const now=Date.now(),d=new Date(now),code=String(d.getFullYear()).slice(2)+String(d.getMonth()+1).padStart(2,"0")+String(d.getDate()).padStart(2,"0")+String.fromCharCode(65+Math.random()*26|0,65+Math.random()*26|0)+String(Math.random()*1e4|0).padStart(4,"0");
   const F=fees(o);S.sales.push({ts:now,opened:o.ts,no:o.no,code,type:o.tid!=null?"ban":"ship",table:o.tid!=null?tbl(o.tid).name:"Mang về",cust:o.cust,pax:paxOf(o),staff:o.staff,payBy:meName(),sub:F.sub,pd:F.pd,pn:F.pn,disc:o.disc,md:F.md,sv:F.sv,vat:F.vat,total:F.total,method:m,ref:(m==="Tiền mặt"?"TM":"QP")+String(Math.random()*1e6|0).padStart(6,"0"),items});
-  o.paid={method:m,ts:Date.now()};qrMode=false;edI=null;save();cur=null;view();
+  o.paid={method:m,ts:Date.now()};qrMode=false;ck=false;edI=null;save();cur=null;view();
 }
 
 /* ===== Bếp ===== */
