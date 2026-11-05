@@ -187,6 +187,31 @@ aside a.on .ic{color:var(--pr)}
 .sw{background:var(--card);border:1px solid var(--bd);box-shadow:var(--sh)}
 .ng{padding:6px 0;border-top:1px solid var(--bd)}.ng:first-of-type{border-top:0}.nh{display:flex;align-items:center;gap:8px;padding:6px 4px 2px}
 </style>
+<style id="mobile">
+@media(max-width:700px){
+html{-webkit-text-size-adjust:100%}
+aside{width:56px!important;padding:10px 6px!important}
+aside a{padding:11px 0!important;border-radius:10px}
+.sw{padding:2px!important;margin-bottom:8px}
+.logo{width:40px;height:40px}
+.bd{right:2px}
+main{padding:14px 10px 24px!important}
+h2{font-size:22px}
+input,select,textarea{font-size:16px!important}
+button{min-height:40px}
+table{display:block;max-width:100%;overflow-x:auto}
+td,th{padding:8px 6px}
+.seg{max-width:100%;overflow-x:auto}
+.seg button,.chips button{white-space:nowrap}
+.card{padding:12px!important}
+.mo,.ov{padding:8px!important}
+.mo .md,.ov .md{max-width:100%!important;max-height:94vh}
+.mh,.mfoot{padding:12px 14px}.mb{padding:14px}
+.r2>*{flex:1 1 100%}
+.kpis{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+</style>
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
 <script>
 const $=s=>document.querySelector(s);
@@ -511,7 +536,7 @@ function vWeek(){
   dc=o=>{const cur=o.dt.getTime()===at.getTime(),has=o.h>0||o.su>0;
     return `<div class="card" style="padding:10px;min-width:0;${cur?"border-color:var(--pr);background:var(--busy)":""}"><div style="display:flex;justify-content:space-between;align-items:baseline"><b style="${cur?"color:var(--pr)":""}">${WD[o.dt.getDay()]}${cur?" · nay":""}</b><small>${f(o.dt)}</small></div><div style="margin:6px 0;display:flex;flex-direction:column;gap:4px;align-items:flex-start">${shLine(o)}</div>${has||cur?`<div style="font-size:13px;display:flex;flex-direction:column;gap:2px;border-top:1px dashed var(--bd);padding-top:6px">${rw("Làm",hm(o.h))}${rw("Tiền giờ",fmt(o.pay))}${rw("Hoa hồng",fmt(o.hh))}${rw("Tổng",fmt(o.t),1)}${has?`<i style="display:block;height:6px;border-radius:99px;background:var(--pr);width:${mx?Math.max(4,Math.round(o.t/mx*100)):0}%;margin-top:4px"></i>`:""}</div>`:""}</div>`},
   lbl=wko===0?"Tuần này":wko===1?"Tuần sau":wko===-1?"Tuần trước":f(D[0].dt)+" – "+f(D[6].dt);
-  return `<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:10px;margin-bottom:12px"><div class="card"><small>Hôm nay · ${WD[at.getDay()]} ${f(at)}</small><div style="font-size:26px;font-weight:700;color:var(--pr);margin:2px 0">${fmt(td.t)}</div><small>Tiền giờ ${fmt(td.pay)} · Hoa hồng ${fmt(td.hh)} (${td.su} suất)</small><div style="margin-top:8px;display:flex;flex-wrap:wrap;gap:6px;align-items:center"><small>Ca hôm nay:</small>${shLine(td)}</div><small style="display:block;margin-top:4px">Đã làm ${hm(td.h)}</small></div><div class="card"><small>Ngày mai · ${WD[tm1.dt.getDay()]} ${f(tm1.dt)}</small><div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;align-items:center">${shLine(tm1,1)}</div></div></div><div class="card" style="margin-bottom:12px"><div class="bar" style="margin:0 0 8px"><b style="font-size:16px">Lịch làm việc</b><span style="display:flex;gap:6px;align-items:center;margin-left:auto"><button aria-label="Tuần trước" onclick="wkGo(-1)">‹</button><b>${lbl}</b><button aria-label="Tuần sau" ${wko>=1?"disabled":""} onclick="wkGo(1)">›</button></span></div><p class="mu" style="margin:0 0 12px">${f(D[0].dt)} – ${f(D[6].dt)} · ${nW} ngày có làm · ${hm(sH)} · hoa hồng ${fmt(sC)} · tổng ${fmt(sT)}</p><div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(128px,1fr));gap:8px">${D.map(dc).join("")}</div></div>`}
+  return `<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(240px,100%),1fr));gap:10px;margin-bottom:12px"><div class="card"><small>Hôm nay · ${WD[at.getDay()]} ${f(at)}</small><div style="font-size:26px;font-weight:700;color:var(--pr);margin:2px 0">${fmt(td.t)}</div><small>Tiền giờ ${fmt(td.pay)} · Hoa hồng ${fmt(td.hh)} (${td.su} suất)</small><div style="margin-top:8px;display:flex;flex-wrap:wrap;gap:6px;align-items:center"><small>Ca hôm nay:</small>${shLine(td)}</div><small style="display:block;margin-top:4px">Đã làm ${hm(td.h)}</small></div><div class="card"><small>Ngày mai · ${WD[tm1.dt.getDay()]} ${f(tm1.dt)}</small><div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;align-items:center">${shLine(tm1,1)}</div></div></div><div class="card" style="margin-bottom:12px"><div class="bar" style="margin:0 0 8px"><b style="font-size:16px">Lịch làm việc</b><span style="display:flex;gap:6px;align-items:center;margin-left:auto"><button aria-label="Tuần trước" onclick="wkGo(-1)">‹</button><b>${lbl}</b><button aria-label="Tuần sau" ${wko>=1?"disabled":""} onclick="wkGo(1)">›</button></span></div><p class="mu" style="margin:0 0 12px">${f(D[0].dt)} – ${f(D[6].dt)} · ${nW} ngày có làm · ${hm(sH)} · hoa hồng ${fmt(sC)} · tổng ${fmt(sT)}</p><div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(128px,1fr));gap:8px">${D.map(dc).join("")}</div></div>`}
 function vAtt0(){
   const me=S.staff.find(s=>s.id===S.me)||S.staff[0],open=S.att.find(a=>a.sid===me.id&&!a.out),n=new Date();
   const mk=S.att.filter(a=>a.sid===me.id&&a.out&&new Date(a.in).getMonth()===n.getMonth()&&new Date(a.in).getFullYear()===n.getFullYear());
@@ -943,11 +968,11 @@ function vReport(){
   ${rpTxt?`<div class="card" style="margin-bottom:12px"><div class="bar" style="margin:0 0 8px"><b>Dữ liệu CSV</b><button style="margin-left:auto" onclick="rpTxt='';view()">Đóng</button></div><small class="mu">Trình duyệt không cho tự sao chép. Chọn toàn bộ ô dưới đây rồi sao chép.</small><textarea id="rp_t" readonly rows="6" style="width:100%;margin-top:8px;font:12px monospace" onfocus="this.select()">${esc(rpTxt)}</textarea></div>`:""}
   <div class="bar" style="gap:10px;margin:0 0 12px"><div class="seg" style="max-width:100%;overflow-x:auto">${RG.map(t=>`<button class="${rpF.rng===t[0]?"on":""}" onclick="rbSet('rng','${t[0]}')">${t[1]}</button>`).join("")}</div></div>
   ${rpF.rng==="custom"?`<div class="r2" style="align-items:center;margin-bottom:12px"><span class="mu">Từ</span><input type="date" value="${rpF.from}" max="${dk(Date.now())}" onchange="rpF.from=this.value||rpF.from;view()"><span class="mu">đến</span><input type="date" value="${rpF.to}" max="${dk(Date.now())}" onchange="rpF.to=this.value||rpF.to;view()"></div>`:""}
-  <div class="kpis" style="grid-template-columns:repeat(auto-fit,minmax(240px,1fr))">${K("Doanh thu",fmt(rev),"color:var(--pr)")}${K("Số đơn",n)}${K("Trung bình / đơn",fmt(n?rev/n:0))}${K("Số khách",T("pax"))}${K("Đã giảm giá",fmt(T("dis")))}${K("Phí phục vụ",fmt(T("sv")))}${K("VAT",fmt(T("vat")))}${K("Hủy",T("xn")+" đơn · "+fmt(T("xv")))}</div>
+  <div class="kpis" style="grid-template-columns:repeat(auto-fit,minmax(min(240px,100%),1fr))">${K("Doanh thu",fmt(rev),"color:var(--pr)")}${K("Số đơn",n)}${K("Trung bình / đơn",fmt(n?rev/n:0))}${K("Số khách",T("pax"))}${K("Đã giảm giá",fmt(T("dis")))}${K("Phí phục vụ",fmt(T("sv")))}${K("VAT",fmt(T("vat")))}${K("Hủy",T("xn")+" đơn · "+fmt(T("xv")))}</div>
   <div style="display:flex;flex-direction:column;gap:14px">${cmp}
   <div class="card" style="min-width:0"><div class="bar" style="margin:0 0 6px"><b style="font-size:16px">Theo giờ trong ngày</b>${chain?`<span style="margin-left:auto;display:flex;gap:12px;flex-wrap:wrap">${R.map(r=>`<span><span class="dot" style="background:${r.c}"></span>${esc(r.name)}</span>`).join("")}</span>`:""}</div>${smCols(G,{h:260,vals:!chain,aria:"Doanh thu theo giờ",maxw:34})}</div>
   ${dtab}
-  <div class="kpis" style="grid-template-columns:repeat(auto-fit,minmax(320px,1fr));margin:0"><div class="card" style="min-width:0"><b style="font-size:16px">Món bán chạy</b>${topH||`<p class="mu">Chưa có dữ liệu.</p>`}</div><div class="card" style="min-width:0"><b style="font-size:16px">Thanh toán</b>${pay}</div></div>${detail}</div>`;
+  <div class="kpis" style="grid-template-columns:repeat(auto-fit,minmax(min(320px,100%),1fr));margin:0"><div class="card" style="min-width:0"><b style="font-size:16px">Món bán chạy</b>${topH||`<p class="mu">Chưa có dữ liệu.</p>`}</div><div class="card" style="min-width:0"><b style="font-size:16px">Thanh toán</b>${pay}</div></div>${detail}</div>`;
 }
 const SMC=["#2f6fd6","#e8632b","#14a38b","#8b5cf6","#d4a017","#d9468f"],upR=ico('<path d="M7 17 17 7M8 7h9v9"/>'),dnR=ico('<path d="M7 7l10 10M17 8v9H8"/>');
 let smF={rng:"today",from:"",to:"",st:"all",gr:"day"};
@@ -1049,7 +1074,7 @@ function vSum(){
   ${owner&&ALL.length>1?`<div class="chips"><button class="${smF.st==="all"?"on":""}" onclick="smSet('st','all')">Tất cả cơ sở</button>${ALL.map(x=>`<button class="${smF.st===x.id?"on":""}" onclick="smSet('st','${x.id}')"><span class="dot" style="background:${x.c}"></span>${esc(x.name)}</button>`).join("")}</div>`:""}
   <div class="kpis">${K("Doanh thu",fmt(tot.rev),smDlH(tot.rev,pt.rev))}${K("Số đơn",tot.n,smDlH(tot.n,pt.n))}${K("Trung bình / đơn",fmt(tot.avg),smDlH(tot.avg,pt.avg))}${kpi4}${kpi5}</div>
   <div style="display:flex;flex-direction:column;gap:14px">${notes}
-  <div class="kpis" style="grid-template-columns:repeat(auto-fit,minmax(420px,1fr));margin:0">
+  <div class="kpis" style="grid-template-columns:repeat(auto-fit,minmax(min(420px,100%),1fr));margin:0">
    <div class="card" style="min-width:0"><b style="font-size:16px">Doanh thu theo cơ sở</b><br>${hint}<div style="margin-top:8px">${tot.n?smCols(gBr,{w:520,h:280,vals:true,aria:"Doanh thu theo cơ sở",maxw:84}):noSale}</div></div>
    <div class="card" style="min-width:0"><b style="font-size:16px">Tiêu hao nguyên liệu so với nhập</b><br><small class="mu">Bấm vào cột Nhập hoặc Tiêu hao để xem chi tiết từng nguyên liệu</small>
     <div class="bar" style="gap:14px;margin:8px 0 0"><span><span class="dot" style="background:${R.length===1?R[0].c:"var(--mu)"};opacity:.35;border-radius:3px"></span>Nhập vào (tiền hàng đã nhập)</span><span><span class="dot" style="background:${R.length===1?R[0].c:"var(--mu)"};border-radius:3px"></span>Tiêu hao (tiền nguyên liệu đã dùng)</span></div>
@@ -1059,7 +1084,7 @@ function vSum(){
    <div style="margin-top:6px">${tot.n?smCols(gT,{vals:showV,aria:"Doanh thu theo thời gian",maxw:40}):noSale}</div></div>
   ${cmp}
   <div class="card"><b style="font-size:16px">Chi tiết theo ngày</b><div class="scroll" style="margin-top:10px"><table><tr><th>Ngày</th><th style="text-align:right">Đơn</th><th style="text-align:right">Doanh thu</th><th style="text-align:right">TB / đơn</th><th style="text-align:right">VAT</th></tr>${drows||`<tr><td colspan="5" class="mu">Chưa có đơn.</td></tr>`}</table></div></div>
-  <div class="kpis" style="grid-template-columns:repeat(auto-fit,minmax(280px,1fr));margin:0"><div class="card"><b style="font-size:16px">Món bán chạy</b>${tops.map(t=>`<div class="row"><span>${esc(t[0])}</span><b>${t[1]}</b></div>`).join("")||`<p class="mu">Chưa có dữ liệu.</p>`}</div>
+  <div class="kpis" style="grid-template-columns:repeat(auto-fit,minmax(min(280px,100%),1fr));margin:0"><div class="card"><b style="font-size:16px">Món bán chạy</b>${tops.map(t=>`<div class="row"><span>${esc(t[0])}</span><b>${t[1]}</b></div>`).join("")||`<p class="mu">Chưa có dữ liệu.</p>`}</div>
   <div class="card"><b style="font-size:16px">Hình thức thanh toán</b>${[["Tiền mặt",cash],["Chuyển khoản",bank]].map(x=>`<div class="row" style="flex-wrap:wrap"><span>${x[0]}</span><b>${fmt(x[1])}</b><div class="sbar" style="width:100%"><i style="width:${tot.rev?Math.round(x[1]/tot.rev*100):0}%;background:var(--pr)"></i></div></div>`).join("")}</div></div>
   ${ops}</div>${smDet?smDetModal(R,a,b):""}`;
 }
