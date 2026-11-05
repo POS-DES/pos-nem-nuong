@@ -494,7 +494,7 @@ function tGroups(){
   let h=`<div class="grid"><div class="card tb ship" onclick="newShip()"><b class="shiph">${SV(BIKE,18)}Ship ngoài</b><b>+ Đơn mới</b></div>${free.map(tT).join("")}</div>`;
   A.forEach(a=>{const L=S.tables.filter(t=>t.area===a.id);if(L.length)h+=`<h3>${esc(a.name)}</h3><div class="grid">${L.map(tT).join("")}</div>`});
   return h}
-function vTables(){
+function vTables(){const n0=S.orders.length;S.orders=S.orders.filter(o=>o.paid||o.items.length||o.no===cur);if(S.orders.length!==n0)save();
   const oc=S.orders.filter(o=>o.tid!=null&&o.items.length).length,sh=S.orders.filter(o=>o.tid==null&&o.items.length);
   return `<div class="bar"><div><h2 style="margin:0">Bàn</h2><span class="mu">${oc}/${S.tables.length} bàn có khách · ${sh.length} đơn mang về / ship</span></div><button class="p r" onclick="newShip()">+ Tạo đơn</button></div>
   ${tGroups()}
@@ -521,7 +521,7 @@ function vOrder(o){if(qrMode)return vQR(o);if(ck)return vCheckout(o);
   <div class="row"><span>Giảm giá (%)</span><input type="number" min="0" max="100" value="${o.disc}" style="width:80px" ${can("discount")?"":"disabled"} onchange="ordN(cur).disc=Math.min(100,Math.max(0,+this.value||0));save();view()"></div>
   ${fbrk(o)}</div><div class="bf"><div class="tot" style="padding-top:0"><span>Tổng</span><span>${fmt(stot(o))}</span></div>
   <div class="bar bfb" style="margin:10px 0 0"><button class="p kb" onclick="kitchenSend()" ${u?"":"disabled"}>Báo bếp${u?" ("+u+" món)":""}</button>
-  <button class="g pb" onclick="ck=true;bo=false;view()" ${o.items.length&&can("pay")?"":"disabled"}>Thanh toán</button><button class="xd" onclick="clearO()">Xóa đơn</button></div></div></div></div>${obarH(o,u)}`;
+  <button class="g pb" onclick="ck=true;bo=false;view()" ${o.items.length&&can("pay")?"":"disabled"}>Thanh toán</button><button class="xd" onclick="clearO()" ${o.items.length&&(can("cancelItem")||!o.items.some(i=>i.s>0))?"":"disabled"}>Xóa đơn</button></div></div></div></div>${obarH(o,u)}`;
 }
 let bo=false,mq="",ck=false;
 let pmSel="Tiền mặt";
@@ -569,7 +569,7 @@ function kcut(o,i,n){const m=menuOf(i.id);if(!m||n<=0)return;const nm=m.name+(i.
   for(let k=S.kitchen.length-1;k>=0&&n>0;k--){const t=S.kitchen[k];if(t.st==="done")continue;if(t.no!=null?t.no!==o.no:t.where!==wh)continue;
     for(let j=t.items.length-1;j>=0&&n>0;j--){const it=t.items[j];if(it.mid!=null?(it.mid!==i.id||(it.nt||"")!==(i.n||"")):it.name!==nm)continue;const d=Math.min(n,it.q);it.q-=d;n-=d;if(it.q<=0)t.items.splice(j,1)}
     if(!t.items.length)S.kitchen.splice(k,1)}}
-function clearO(){const o=ordN(cur);if(!o||!o.items.length)return;if(o.items.some(i=>i.s>0)&&!can("cancelItem")){alert("Bạn không có quyền hủy món đã báo bếp.");return}if(!confirm("Xóa toàn bộ "+o.items.length+" món của đơn #"+o.no+"?"+(o.items.some(i=>i.s>0)?"\nCác món đã báo bếp sẽ bị hủy bên bếp.":"")))return;o.items.forEach(i=>{if(i.s>0)kcut(o,i,i.s)});o.items=[];o.disc=0;save();view()}
+function clearO(){const o=ordN(cur);if(!o||!o.items.length)return;if(o.items.some(i=>i.s>0)&&!can("cancelItem"))return;o.items.forEach(i=>{if(i.s>0)kcut(o,i,i.s)});o.items=[];o.disc=0;save();view()}
 function kitchenSend(){
   const o=ordN(cur),its=o.items.filter(i=>i.q>i.s).map(i=>({name:menuOf(i.id).name+(i.n?" ("+i.n+")":""),q:i.q-i.s,mid:i.id,nt:i.n||""}));if(!its.length)return;
   S.kitchen.push({id:++S.kid,no:o.no,where:o.tid!=null?tbl(o.tid).name:"Mang về #"+o.no,items:its,st:"new",ts:Date.now()});
