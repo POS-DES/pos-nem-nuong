@@ -794,7 +794,7 @@ function vWeek(){
   lbl=wko===0?"Tuần này":wko===1?"Tuần sau":wko===-1?"Tuần trước":f(D[0].dt)+" – "+f(D[6].dt);
   return `<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(240px,100%),1fr));gap:10px;margin-bottom:12px"><div class="card"><small>Hôm nay · ${WD[at.getDay()]} ${f(at)}</small><div style="font-size:26px;font-weight:700;color:var(--pr);margin:2px 0">${fmt(td.t)}</div><small>Tiền giờ ${fmt(td.pay)} · Hoa hồng ${fmt(td.hh)} (${td.su} suất)</small><div style="margin-top:8px;display:flex;flex-wrap:wrap;gap:6px;align-items:center"><small>Ca hôm nay:</small>${shLine(td)}</div><small style="display:block;margin-top:4px">Đã làm ${hm(td.h)}</small></div><div class="card"><small>Ngày mai · ${WD[tm1.dt.getDay()]} ${f(tm1.dt)}</small><div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;align-items:center">${shLine(tm1,1)}</div></div></div><div class="card" style="margin-bottom:12px"><div class="bar" style="margin:0 0 8px"><b style="font-size:16px">Lịch làm việc</b><span style="display:flex;gap:6px;align-items:center;margin-left:auto"><button aria-label="Tuần trước" onclick="wkGo(-1)">‹</button><b>${lbl}</b><button aria-label="Tuần sau" ${wko>=1?"disabled":""} onclick="wkGo(1)">›</button></span></div><p class="mu" style="margin:0 0 12px">${f(D[0].dt)} – ${f(D[6].dt)} · ${nW} ngày có làm · ${hm(sH)} · hoa hồng ${fmt(sC)} · tổng ${fmt(sT)}</p><div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(128px,1fr));gap:8px">${D.map(dc).join("")}</div></div>`}
 function vAtt0(){
-  const me=S.staff.find(s=>s.id===S.me)||S.staff[0],open=S.att.find(a=>a.sid===me.id&&!a.out),n=new Date(),gt=open?"":clockGate(me);
+  attHeal();const me=S.staff.find(s=>s.id===S.me)||S.staff[0],open=S.att.find(a=>a.sid===me.id&&!a.out),n=new Date(),gt=open?"":clockGate(me);
   const mk=S.att.filter(a=>a.sid===me.id&&a.out&&new Date(a.in).getMonth()===n.getMonth()&&new Date(a.in).getFullYear()===n.getFullYear());
   const mn=Math.round(mk.reduce((x,a)=>x+(a.out-a.in),0)/6e4),dur=mn>=60?Math.floor(mn/60)+" giờ "+(mn%60)+" phút":mn+" phút";
   return `<h2 style="margin-top:0">Chấm công</h2><div class="card bar" style="padding:16px;margin-bottom:14px"><div><small>${esc(me.name)} · ${esc(me.role)}</small><div style="font-size:22px;font-weight:700">${open?"Vào ca lúc "+tm(open.in):"Chưa vào ca"}</div><small>Tháng này: ${mk.length} ca · ${dur}</small></div><button class="${open?"":"g"}" style="margin-left:auto;padding:12px 22px;font-size:16px${open?";background:#dc2626;border-color:#dc2626;color:#fff;font-weight:600":""}" onclick="clock()"${!open&&gt?" disabled":""}>${open?"Ra ca":"Vào ca"}</button></div>${!open&&gt?`<div class="card" style="margin-bottom:14px;border-color:#d97706"><small style="color:#d97706">${esc(gt)}</small></div>`:""}${!open&&sh&&!gt?shiftForm(me):""}${open&&so?closeForm(me,open):""}
@@ -929,7 +929,7 @@ function clock(){
     }
     a.out=Date.now();S.att.forEach(x=>{if(x!==a&&x.sid===s.id&&!x.out)x.out=a.out});s.on=false;sh=so=false;save();view();return}
   if(!sh&&["Thu ngân","Bếp","Phục vụ"].includes(s.role)){sh=true;view();return}
-  const r={sid:s.id,name:s.name,in:Date.now(),out:null};
+  const r={sid:s.id,name:s.name,in:Date.now(),out:null};r.sk=r.sid+"_"+r.in+"_"+Math.random().toString(36).slice(2,6);
   if(sh&&s.role==="Thu ngân"){const v=$("#c0").value;if(v===""||+v<0){$("#c0").focus();return}r.cash0=+v}
   if(sh&&s.role==="Bếp"){const ch=[];S.ing.forEach(m=>{if(kiem(m,Math.max(0,+$("#k"+m.id).value||0)))ch.push(m.name)});r.kho={ch:ch.length,note:$("#kn").value.trim()}}
   if(sh&&s.role==="Phục vụ")r.tb=S.tables.filter(x=>$("#tb"+x.id).checked).map(x=>x.name);
@@ -981,7 +981,20 @@ function togLe(c){const l=leCats();S.store.leCats=l.includes(c)?l.filter(x=>x!==
 const PAYC=()=>{const c=S.store.pay||{};return{std:0,otx:c.otx!=null&&c.otx!==""?Math.max(0,+c.otx||0):1,rnd:+c.rnd||0}};
 /* Chỉ tính công trong ca đã đăng ký: tuần đã chốt có lịch mà bản ghi không thuộc ca nào thì không tính; bản ghi trùng (chấm công lặp cùng ca) chỉ tính một lần */
 /* bản ghi chấm công trùng hệt nhau (cùng người, cùng giờ vào, cùng giờ ra) chỉ hiện và tính một lần */
-const attDupX=x=>{const i=S.att.indexOf(x),m=t=>Math.floor((t||0)/6e4);return i>0&&S.att.some((y,j)=>j<i&&y.sid===x.sid&&m(y.in)===m(x.in)&&m(y.out)===m(x.out)&&!!y.out===!!x.out)};
+/* Tự sửa chấm công lỗi: (1) hai bản ghi trùng khóa đồng bộ nên ghi đè nhau, bản ghi thì hiện lúc có lúc mất; (2) bản ghi "đang làm" thừa, mở cùng lúc với bản đã ra ca (bấm Vào ca hai lần). Bản thừa được đóng và ẩn, bản có ra ca và tiền cuối ca được giữ. */
+function attHeal(){
+  let ch=false;const by={};
+  S.att.forEach(x=>{const k=attKey(x);(by[k]=by[k]||[]).push(x)});
+  Object.values(by).forEach(g=>{if(g.length<2)return;
+    const keep=g.find(x=>x.out&&x.cash1!=null)||g.find(x=>x.out)||g[0];
+    keep.fx=Date.now();
+    g.forEach(x=>{if(x!==keep)x.sk=attKey(x)+"_"+Math.random().toString(36).slice(2,6)});ch=true});
+  S.att.forEach(x=>{if(x.out||x.gh)return;
+    const y=S.att.find(z=>z!==x&&!z.gh&&z.sid===x.sid&&z.out&&Math.abs(z.in-x.in)<=6e5&&x.in<z.out);
+    if(y){x.out=y.out;x.gh=1;x.fx=Date.now();ch=true}});
+  if(ch){S.staff.forEach(s=>{s.on=S.att.some(x=>x.sid===s.id&&!x.out)});save()}
+  return ch}
+const attDupX=x=>{if(x.gh)return true;const i=S.att.indexOf(x),m=t=>Math.floor((t||0)/6e4);return i>0&&S.att.some((y,j)=>j<i&&y.sid===x.sid&&m(y.in)===m(x.in)&&m(y.out)===m(x.out)&&!!y.out===!!x.out)};
 const attGov=x=>{const d=new Date(x.in);d.setDate(d.getDate()-((d.getDay()+6)%7));const wk=ovKey(d.getTime()),r=(S.sch||{})[wk];if(!r||!schLocked(wk))return false;return Object.values(r.as||{}).some(m=>Object.values(m).some(a=>(Array.isArray(a)?a:[a]).some(z=>z&&z.h>0)))||Object.values(r.reg||{}).some(m=>Object.values(m).some(z=>z&&z.h>0))};
 const attDup=(x,o)=>{if(!o)return false;const ix=S.att.indexOf(x),now=Date.now();return S.att.some((y,iy)=>{if(y===x||y.sid!==x.sid)return false;const yo=shOf(y);if(!yo||yo.st!==o.st)return false;if(!(y.in<x.in||(y.in===x.in&&iy<ix)))return false;return (y.out||now)>x.in})};
 function attPay(x,w){w=wOv(x,w);const c=PAYC();const o0=shOf(x);if(attDupX(x)||attDup(x,o0)||(!o0&&attGov(x)))return{h:0,reg:0,ot:0,pay:0};const ss=regS(x),pi=ss>x.in?ss:x.in;let h=Math.max(0,((x.out||Date.now())-pi)/36e5);if(c.rnd>0){const m=c.rnd/60;h=Math.round(h/m)*m}const sd=regH(x),reg=sd>0?Math.min(h,sd):h,ot=h-reg;return{h,reg,ot,pay:Math.round(w*(reg+ot*c.otx)*hx(x.in))}}
@@ -1000,13 +1013,13 @@ const r2=n=>Math.round(n*100)/100;
 const stT=(k,s)=>{const q=k.split("-"),t=s.split(":").map(Number);return new Date(+q[0],+q[1]-1,+q[2],t[0],t[1]||0,0,0).getTime()};
 function dayShifts(sid,k){const d=pD(k);d.setDate(d.getDate()-((d.getDay()+6)%7));const wk=ovKey(d.getTime()),r=(S.sch||{})[wk];if(!r||!schLocked(wk))return[];
   return schMerge(schShifts(r,sid,k)).map(c=>{const st=c.s?stT(k,c.s):0;return{h:+c.h,s:c.s||"",st,en:st?st+c.h*36e5:0}})}
-function shAtt(sid,c,k){const L=S.att.filter(x=>x.sid===sid&&ovKey(x.in)===k);if(!L.length)return null;if(!c.st)return L[0];let b=null,bd=1e18;L.forEach(x=>{const o=shOf(x),d=Math.abs(x.in-c.st);if(o&&o.st===c.st&&d<bd){b=x;bd=d}});return b}
+function shAtt(sid,c,k){const L=S.att.filter(x=>x.sid===sid&&!x.gh&&ovKey(x.in)===k);if(!L.length)return null;if(!c.st)return L[0];let b=null,bd=1e18;L.forEach(x=>{const o=shOf(x),d=Math.abs(x.in-c.st);if(o&&o.st===c.st&&d<bd){b=x;bd=d}});return b}
 function mOf(x){const o=shOf(x),en=x.out||Date.now(),r=attPay(x,0),m={o,late:0,eo:0,pre:0,post:0,ot:r.ot,h:r.h,raw:(en-x.in)/36e5};
   if(o&&o.st){const e=o.st+o.h*36e5,L=Math.round((x.in-o.st)/6e4);m.late=L>GR()?L:0;m.pre=Math.max(0,Math.round((o.st-x.in)/6e4));if(x.out){m.post=Math.max(0,Math.round((x.out-e)/6e4));m.eo=Math.max(0,Math.round((e-x.out)/6e4))}}
   return m}
 const hnI=a=>{const m=mOf(a);return m.late?`<br><small style="color:var(--bad);font-weight:600">Trễ ${dm(m.late)}</small>`:""};
 const hnD=a=>{const m=mOf(a);return(m.post?`<br><small class="mu">Làm thêm sau ca ${dm(m.post)}</small>`:"")+(m.eo?`<br><small style="color:var(--bad)">Về sớm ${dm(m.eo)}</small>`:"")};
-function todayRows(){const now=Date.now(),k=ovKey(now),gr=GR();
+function todayRows(){attHeal();const now=Date.now(),k=ovKey(now),gr=GR();
   return S.staff.filter(nvOk).map(s=>{const sh=dayShifts(s.id,k),used=new Set(),it=[];
     sh.forEach(c=>{const x=shAtt(s.id,c,k),rg=c.st?tm(c.st)+"–"+tm(c.en):c.h+" giờ";if(x)used.add(x);
       if(x){const lt=c.st?Math.round((x.in-c.st)/6e4):0,bad=lt>gr;it.push({rg,bad,t:(x.out?"⚪ Đã ra ca · "+tm(x.in)+"–"+tm(x.out):"🟢 Đang làm · vào "+tm(x.in))+(bad?" · trễ "+dm(lt):"")})}
