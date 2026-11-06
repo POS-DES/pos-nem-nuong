@@ -510,11 +510,11 @@ function vTables(){const n0=S.orders.length;S.orders=S.orders.filter(o=>o.paid||
   const oc=S.orders.filter(o=>o.tid!=null&&o.items.length).length,sh=S.orders.filter(o=>o.tid==null&&o.items.length);
   return `<div class="bar"><div><h2 style="margin:0">Bàn</h2><span class="mu">${oc}/${S.tables.length} bàn có khách · ${sh.length} đơn mang về / ship</span></div><button class="p r" onclick="newShip()">+ Tạo đơn</button></div>
   ${tGroups()}
-  <h3>Mang về / ship ngoài</h3><div class="grid">${sh.map(o=>`<div class="card tb ${o.paid?"dirty":"shipo"}" style="cursor:pointer" onclick="${o.paid?"":"cur="+o.no+";view()"}"><div class="top"><b>#${dnum(o)}</b><span class="mu">${SV(BIKE,18)}</span></div><small>${esc(o.cust||"Khách lẻ")}</small><b>${fmt(stot(o))}</b>${o.paid?`<span class="pill" style="background:#dcfce7;color:#166534">Đã thanh toán · ${esc(o.paid.method)}</span><button class="g" onclick="event.stopPropagation();clean(${o.no})">Hoàn thành</button>`:`${bdg(o)}<small>Chưa thanh toán · thu khi giao</small>`}${who(o)}</div>`).join("")||`<span class="mu">Chưa có đơn mang về.</span>`}</div>`;
+  <h3>Mang về / ship ngoài</h3><div class="grid">${sh.map(o=>`<div class="card tb ${o.paid?"dirty":"shipo"}" style="cursor:pointer" onclick="${o.paid?"openSale("+o.no+")":"cur="+o.no+";view()"}"><div class="top"><b>#${dnum(o)}</b><span class="mu">${SV(BIKE,18)}</span></div><small>${esc(o.cust||"Khách lẻ")}</small><b>${fmt(stot(o))}</b>${o.paid?`<span class="pill" style="background:#dcfce7;color:#166534">Đã thanh toán · ${esc(o.paid.method)}</span><button class="g" onclick="event.stopPropagation();clean(${o.no})">Hoàn thành</button>`:`${bdg(o)}<small>Chưa thanh toán · thu khi giao</small>`}${who(o)}</div>`).join("")||`<span class="mu">Chưa có đơn mang về.</span>`}</div>${vSale()}`;
 }
 function newOrder(tid){const o={no:++S.ono,dn:dnNext(),tid,cust:tid==null?"Khách lẻ":"",staff:meName(),items:[],disc:0,ts:Date.now()};S.orders.push(o);save();cur=o.no;cat="Tất cả";view()}
 function clean(no){S.orders=S.orders.filter(o=>o.no!==no);save();view()}
-function openT(id){const o=ordT(id);if(o){if(o.paid)return;cur=o.no;cat="Tất cả";view()}else newOrder(id)}
+function openT(id){const o=ordT(id);if(o){if(o.paid){openSale(o.no);return}cur=o.no;cat="Tất cả";view()}else newOrder(id)}
 function newShip(){newOrder(null)}
 function vQR(o){
   const b=bank(),amt=stot(o),ok=b.bin&&b.acc,bn=(BANKS.find(x=>x[0]===b.bin)||[0,""])[1];
