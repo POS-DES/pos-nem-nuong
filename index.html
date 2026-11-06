@@ -794,10 +794,10 @@ function vWeek(){
   lbl=wko===0?"Tuần này":wko===1?"Tuần sau":wko===-1?"Tuần trước":f(D[0].dt)+" – "+f(D[6].dt);
   return `<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(240px,100%),1fr));gap:10px;margin-bottom:12px"><div class="card"><small>Hôm nay · ${WD[at.getDay()]} ${f(at)}</small><div style="font-size:26px;font-weight:700;color:var(--pr);margin:2px 0">${fmt(td.t)}</div><small>Tiền giờ ${fmt(td.pay)} · Hoa hồng ${fmt(td.hh)} (${td.su} suất)</small><div style="margin-top:8px;display:flex;flex-wrap:wrap;gap:6px;align-items:center"><small>Ca hôm nay:</small>${shLine(td)}</div><small style="display:block;margin-top:4px">Đã làm ${hm(td.h)}</small></div><div class="card"><small>Ngày mai · ${WD[tm1.dt.getDay()]} ${f(tm1.dt)}</small><div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;align-items:center">${shLine(tm1,1)}</div></div></div><div class="card" style="margin-bottom:12px"><div class="bar" style="margin:0 0 8px"><b style="font-size:16px">Lịch làm việc</b><span style="display:flex;gap:6px;align-items:center;margin-left:auto"><button aria-label="Tuần trước" onclick="wkGo(-1)">‹</button><b>${lbl}</b><button aria-label="Tuần sau" ${wko>=1?"disabled":""} onclick="wkGo(1)">›</button></span></div><p class="mu" style="margin:0 0 12px">${f(D[0].dt)} – ${f(D[6].dt)} · ${nW} ngày có làm · ${hm(sH)} · hoa hồng ${fmt(sC)} · tổng ${fmt(sT)}</p><div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(128px,1fr));gap:8px">${D.map(dc).join("")}</div></div>`}
 function vAtt0(){
-  const me=S.staff.find(s=>s.id===S.me)||S.staff[0],open=S.att.find(a=>a.sid===me.id&&!a.out),n=new Date();
+  const me=S.staff.find(s=>s.id===S.me)||S.staff[0],open=S.att.find(a=>a.sid===me.id&&!a.out),n=new Date(),gt=open?"":clockGate(me);
   const mk=S.att.filter(a=>a.sid===me.id&&a.out&&new Date(a.in).getMonth()===n.getMonth()&&new Date(a.in).getFullYear()===n.getFullYear());
   const mn=Math.round(mk.reduce((x,a)=>x+(a.out-a.in),0)/6e4),dur=mn>=60?Math.floor(mn/60)+" giờ "+(mn%60)+" phút":mn+" phút";
-  return `<h2 style="margin-top:0">Chấm công</h2><div class="card bar" style="padding:16px;margin-bottom:14px"><div><small>${esc(me.name)} · ${esc(me.role)}</small><div style="font-size:22px;font-weight:700">${open?"Vào ca lúc "+tm(open.in):"Chưa vào ca"}</div><small>Tháng này: ${mk.length} ca · ${dur}</small></div><button class="${open?"":"g"}" style="margin-left:auto;padding:12px 22px;font-size:16px${open?";background:#dc2626;border-color:#dc2626;color:#fff;font-weight:600":""}" onclick="clock()">${open?"Ra ca":"Vào ca"}</button></div>${!open&&sh?shiftForm(me):""}${open&&so?closeForm(me,open):""}
+  return `<h2 style="margin-top:0">Chấm công</h2><div class="card bar" style="padding:16px;margin-bottom:14px"><div><small>${esc(me.name)} · ${esc(me.role)}</small><div style="font-size:22px;font-weight:700">${open?"Vào ca lúc "+tm(open.in):"Chưa vào ca"}</div><small>Tháng này: ${mk.length} ca · ${dur}</small></div><button class="${open?"":"g"}" style="margin-left:auto;padding:12px 22px;font-size:16px${open?";background:#dc2626;border-color:#dc2626;color:#fff;font-weight:600":""}" onclick="clock()"${!open&&gt?" disabled":""}>${open?"Ra ca":"Vào ca"}</button></div>${!open&&gt?`<div class="card" style="margin-bottom:14px;border-color:#d97706"><small style="color:#d97706">${esc(gt)}</small></div>`:""}${!open&&sh&&!gt?shiftForm(me):""}${open&&so?closeForm(me,open):""}
   ${vToday()}
   <div class="bar" style="margin:18px 0 6px"><h3 style="margin:0">Lịch sử chấm công</h3></div><div class="bar" style="margin:0 0 6px">${dtg("at","from")}<span class="mu">→</span>${dtg("at","to")}<button onclick="arange('d')">Hôm nay</button><button onclick="arange('y')">Hôm qua</button><button onclick="arange('7')">7 ngày</button><button onclick="arange('m')">Tháng này</button><button onclick="arange('all')">Tất cả ngày</button></div><p class="mu" id="att_sub" style="margin:0 0 8px">${attSum()}</p><div class="card scroll"><table><thead><tr><th>Ngày</th><th>Nhân viên</th><th>Vai trò</th><th>Vào</th><th>Ra</th><th>Thời lượng</th><th>Đối chiếu tiền</th><th>Ghi chú ca</th></tr></thead><tbody id="att_tb">${attTb()}</tbody></table></div>${vRank()}${vShip()}${vPay()}${canPay()?vRep():""}${aeM?attEdModal():""}`;
 }
@@ -893,9 +893,32 @@ function shiftForm(me){
   else{t="Bàn phụ trách";b=`<label class="mu">Chọn các bàn bạn phụ trách trong ca này</label><div class="bar" style="margin:8px 0 0">${S.tables.map(x=>`<label style="display:inline-flex;gap:6px;align-items:center;padding:6px 10px;border:1px solid var(--bd);border-radius:10px"><input type="checkbox" id="tb${x.id}">${esc(x.name)}</label>`).join("")}</div>`}
   return `<div class="card" style="margin-bottom:14px"><b>${t}</b><div style="margin-top:10px">${b}</div><div class="bar" style="margin:12px 0 0"><button class="g" onclick="clock()">Xác nhận vào ca</button><button onclick="sh=false;view()">Hủy</button></div></div>`;
 }
+/* Giới hạn vào ca: chỉ vào được khi có ca đã xếp (tuần đã chốt lịch), từ 60 phút trước giờ bắt đầu đến hết giờ ca; ca đã ra rồi thì không vào lại. Chủ quán không bị giới hạn. */
+const CLK_EARLY=60;
+function clockGate(s){
+  if(!s||s.role==="Chủ quán")return"";
+  const now=Date.now(),k=ovKey(now),y=ovKey(now-864e5);
+  if(!(attGov({in:now})||attGov({in:now-864e5})))return"";
+  const L=[];[y,k].forEach(kk=>dayShifts(s.id,kk).forEach(c=>L.push({kk,c})));
+  let up=null,last=null;
+  for(const{kk,c}of L){
+    const rg=c.st?tm(c.st)+"–"+tm(c.en):c.h+" giờ";
+    if(c.st){
+      if(now>c.en){if(!last||c.en>last.en)last={en:c.en,rg};continue}
+      if(now<c.st-CLK_EARLY*6e4){if(!up||c.st<up.st)up={st:c.st,rg};continue}
+    }else if(kk!==k)continue;
+    const x=shAtt(s.id,c,kk);
+    if(x&&x.out)return"Bạn đã ra ca "+rg+" rồi. Nếu bấm nhầm, nhờ chủ quán chỉnh giờ.";
+    return"";
+  }
+  if(up)return"Ca "+up.rg+" bắt đầu lúc "+tm(up.st)+". Bạn vào ca được từ "+tm(up.st-CLK_EARLY*6e4)+".";
+  if(last)return"Ca "+last.rg+" của bạn đã kết thúc. Không thể vào ca nữa.";
+  return"Hôm nay bạn không có ca nên chưa thể vào ca. Cần làm thêm thì nhờ chủ quán xếp ca.";
+}
 function clock(){
   const s=S.staff.find(x=>x.id===S.me)||S.staff[0];if(!s)return;
   const a=S.att.find(x=>x.sid===s.id&&!x.out);
+  if(!a){const g=clockGate(s);if(g){sh=false;view();return}if(S.att.some(x=>x.sid===s.id&&Date.now()-x.in<6e4))return}
   if(a){
     if(s.role==="Thu ngân"&&a.cash0!=null){
       if(!so){so=true;view();return}
@@ -904,7 +927,7 @@ function clock(){
       if(+v!==e&&!cm&&(!g||!evd.length)){$("#er").textContent=!g?"Cần nhập giải trình khi tiền không khớp.":"Cần đính kèm ít nhất 1 ảnh bằng chứng.";return}
       a.cash1=+v;a.exp=e;if(cm){a.comp=e-(+v);a.gt="Không giải trình được, bù "+fmt(e-(+v))+" (trừ vào lương)"}else if(+v!==e){a.gt=g;a.ev=evd.slice()}evd=[];
     }
-    a.out=Date.now();s.on=false;sh=so=false;save();view();return}
+    a.out=Date.now();S.att.forEach(x=>{if(x!==a&&x.sid===s.id&&!x.out)x.out=a.out});s.on=false;sh=so=false;save();view();return}
   if(!sh&&["Thu ngân","Bếp","Phục vụ"].includes(s.role)){sh=true;view();return}
   const r={sid:s.id,name:s.name,in:Date.now(),out:null};
   if(sh&&s.role==="Thu ngân"){const v=$("#c0").value;if(v===""||+v<0){$("#c0").focus();return}r.cash0=+v}
@@ -932,13 +955,14 @@ const attKey=a=>a.sk||a.sid+"_"+a.in,hmS=t=>{const d=new Date(t);return hz(d.get
 function attEd(key){if(!isOwner())return;const a=S.att.find(x=>attKey(x)===key);if(!a)return;aeM={key};view();const i=$("#ae_in");if(i)i.select()}
 function attEdX(){aeM=null;view()}
 function attEdModal(){const a=aeM&&S.att.find(x=>attKey(x)===aeM.key);if(!a)return"";const o=shOf(a),d=new Date(a.in);
-  return `<div class="mo" onclick="if(event.target===this)attEdX()"><div class="md" style="max-width:420px"><div class="mh"><div><b>Sửa giờ chấm công · ${esc(a.name)}</b><br><small class="mu">${d.toLocaleDateString("vi-VN")}${a.adj?" · đã chỉnh trước đó (gốc "+tm(a.adj.in0)+")":""}</small></div><button class="mx" onclick="attEdX()">×</button></div><div class="mb" style="gap:12px"><label class="mf"><span>Giờ vào</span><input id="ae_in" value="${fm12(hmS(a.in))}" placeholder="9h"></label>${o&&o.st?`<button type="button" onclick="$('#ae_in').value='${fm12(hmS(o.st))}'">Lấy giờ bắt đầu ca (${fm12(hmS(o.st))})</button>`:""}${a.out?`<label class="mf"><span>Giờ ra</span><input id="ae_out" value="${fm12(hmS(a.out))}" placeholder="16h"></label>`:`<small class="mu">Nhân viên đang trong ca nên chưa có giờ ra.</small>`}<label class="mf"><span>Lý do (không bắt buộc)</span><input id="ae_n" placeholder="VD: vào làm từ 9h, chưa có phần mềm"></label><small id="ae_e" style="color:#dc2626;display:block"></small></div><div class="mfoot"><button onclick="attEdX()">Hủy</button><button class="p" onclick="attEdSave()">Lưu</button></div></div></div>`}
+  return `<div class="mo" onclick="if(event.target===this)attEdX()"><div class="md" style="max-width:420px"><div class="mh"><div><b>Sửa giờ chấm công · ${esc(a.name)}</b><br><small class="mu">${d.toLocaleDateString("vi-VN")}${a.adj?" · đã chỉnh trước đó (gốc "+tm(a.adj.in0)+")":""}</small></div><button class="mx" onclick="attEdX()">×</button></div><div class="mb" style="gap:12px"><label class="mf"><span>Giờ vào</span><input id="ae_in" value="${fm12(hmS(a.in))}" placeholder="9h"></label>${o&&o.st?`<button type="button" onclick="$('#ae_in').value='${fm12(hmS(o.st))}'">Lấy giờ bắt đầu ca (${fm12(hmS(o.st))})</button>`:""}<label class="mf"><span>Giờ ra${a.out?"":" (để trống nếu nhân viên vẫn đang làm; điền để đóng ca bị treo/trùng)"}</span><input id="ae_out" value="${a.out?fm12(hmS(a.out)):""}" placeholder="16h"></label><label class="mf"><span>Lý do (không bắt buộc)</span><input id="ae_n" placeholder="VD: vào làm từ 9h, chưa có phần mềm"></label><small id="ae_e" style="color:#dc2626;display:block"></small></div><div class="mfoot"><button onclick="attEdX()">Hủy</button><button class="p" onclick="attEdSave()">Lưu</button></div></div></div>`}
 function attEdSave(){if(!isOwner()||!aeM)return;const a=S.att.find(x=>attKey(x)===aeM.key),er=t=>{$("#ae_e").textContent=t};if(!a)return;
   const ti=pTime($("#ae_in").value);if(!ti)return er("Nhập giờ vào hợp lệ, ví dụ 9h hoặc 9h30.");
   const base=new Date(a.in),mk=(t,add)=>{const q=t.split(":").map(Number),x=new Date(base);x.setHours(q[0],q[1]||0,0,0);return x.getTime()+(add||0)*864e5};
   const nin=mk(ti);if(nin>Date.now()+6e4)return er("Giờ vào không được ở tương lai.");
-  let nout=a.out;if(a.out){const to=pTime($("#ae_out").value);if(!to)return er("Nhập giờ ra hợp lệ, ví dụ 16h hoặc 16h30.");nout=mk(to);if(nout<=nin)nout=mk(to,1);if(nout>Date.now()+6e4)return er("Giờ ra không được ở tương lai.");if(nout-nin>864e5)return er("Một ca không được dài quá 24 giờ.")}
+  let nout=a.out;const ov=$("#ae_out").value.trim();if(a.out||ov){const to=pTime($("#ae_out").value);if(!to)return er("Nhập giờ ra hợp lệ, ví dụ 16h hoặc 16h30.");nout=mk(to);if(nout<=nin)nout=mk(to,1);if(nout>Date.now()+6e4)return er("Giờ ra không được ở tương lai.");if(nout-nin>864e5)return er("Một ca không được dài quá 24 giờ.")}
   if(nin===a.in&&nout===a.out){aeM=null;view();return}
+  if(!a.out&&nout){const st=S.staff.find(x=>x.id===a.sid);if(st&&!S.att.some(x=>x!==a&&x.sid===a.sid&&!x.out))st.on=false}
   if(!a.sk)a.sk=a.sid+"_"+a.in;
   const ad=a.adj||{in0:a.in,out0:a.out||null},note=$("#ae_n").value.trim(),oi=a.in,oo=a.out;
   a.adj={in0:ad.in0,out0:ad.out0,by:meName(),at:Date.now(),note};a.in=nin;a.out=nout;
