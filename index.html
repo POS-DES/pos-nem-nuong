@@ -398,7 +398,7 @@ const ordN=n=>S.orders.find(o=>o.no===n);
 const menuOf=id=>S.menu.find(m=>m.id===id);
 const ssub=o=>o.items.reduce((a,i)=>{const m=menuOf(i.id);return a+(m?(i.p!=null?i.p:m.price)*i.q:0)},0);
 const stot=o=>fees(o).total;
-const unsent=o=>o.items.reduce((a,i)=>a+i.q-i.s,0);
+const noK=m=>{if(!S.nk)S.nk=(S.cats||[...new Set(S.menu.map(x=>x.cat))]).filter(c=>/buffet/i.test(c));return !!m&&S.nk.includes(m.cat)};const needK=i=>!noK(menuOf(i.id));const unsent=o=>o.items.reduce((a,i)=>a+(needK(i)?i.q-i.s:0),0);
 const kcnt=()=>S.kitchen.filter(t=>t.st!=="done").reduce((a,t)=>a+t.items.reduce((b,i)=>b+i.q,0),0);
 const ago=ts=>{const m=Math.max(0,Math.floor((Date.now()-(ts||Date.now()))/6e4));return m<1?"Vừa mở":m<60?m+" phút":Math.floor(m/60)+"g"+String(m%60).padStart(2,"0")+"p"};
 const fmtc=ts=>{const s=Math.max(0,Math.floor((Date.now()-ts)/1000)),m=Math.floor(s/60),p=n=>String(n).padStart(2,"0");return m<60?p(m)+":"+p(s%60):Math.floor(m/60)+"g"+p(m%60)+"p"};
@@ -560,7 +560,7 @@ function promoStrip(){const P=actP();if(!P.length)return"";const ic=ico('<path d
 const qn=(o,id)=>o.items.filter(i=>i.id===id).reduce((a,i)=>a+i.q,0);
 function obarH(o,u){const n=o.items.reduce((a,i)=>a+i.q,0),F=fees(o),dc=F.pd+F.md>0.5,bag=ico('<path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/>'),up=ico('<path d="m6 15 6-6 6 6"/>');
   const tx=n?`<small class="oml">${n} món${dc?`<span class="odc">Tiết kiệm ${fmt(F.pd+F.md)}</span>`:""}</small><span class="otl"><b>${fmt(stot(o))}</b>${dc?`<s>${fmt(F.sub)}</s>`:""}</span>`:`<small class="oml">Chưa có món</small><span class="otl"><b style="font-size:16px;color:var(--mu)">Chọn món để bắt đầu</b></span>`;
-  return `<div id="obar"><button class="obv" onclick="bo=true;view()" aria-label="Xem đơn"><span class="ocart ic">${bag}</span><span class="otx">${tx}</span><span class="ic ocv">${up}</span></button><button class="okb ${u?"hot":""}" onclick="kitchenSend()" ${u?"":"disabled"} aria-label="Báo bếp"><span class="ic">${ico(IC.bep)}</span>${u?`<i>${u}</i>`:""}<span>${u||!n?"Báo bếp":"Đã báo"}</span></button><button class="p obk2" onclick="ck=true;bo=false;view()" ${n&&can("pay")?"":"disabled"}>Thanh toán</button></div>`}
+  return `<div id="obar"><button class="obv" onclick="bo=true;view()" aria-label="Xem đơn"><span class="ocart ic">${bag}</span><span class="otx">${tx}</span><span class="ic ocv">${up}</span></button><button class="okb ${u?"hot":""}" onclick="kitchenSend()" ${u?"":"disabled"} aria-label="Báo bếp"><span class="ic">${ico(IC.bep)}</span>${u?`<i>${u}</i>`:""}<span>${u||!n?"Báo bếp":o.items.every(i=>!needK(i))?"Không báo bếp":"Đã báo"}</span></button><button class="p obk2" onclick="ck=true;bo=false;view()" ${n&&can("pay")?"":"disabled"}>Thanh toán</button></div>`}
 function add(id){const m=menuOf(id);if(!m||m.off)return;const o=ordN(cur),i=o.items.find(x=>x.id===id&&x.p==null&&!x.n);i?i.q++:o.items.push({id,q:1,s:0,p:null,n:""});save();view()}
 function openEd(x){edI=edI===x?null:x;view()}
 function edForm(i,x,m){return `<div class="card" style="margin:6px 0;background:var(--hov)"><div class="row"><span>Giá / suất</span><input id="ep" data-m type="text" inputmode="decimal" value="${i.p!=null?i.p:m.price}" style="width:110px"></div>
@@ -584,9 +584,9 @@ function kcut(o,i,n){const m=menuOf(i.id);if(!m||n<=0)return;const nm=m.name+(i.
     if(!t.items.length)S.kitchen.splice(k,1)}}
 function clearO(){const o=ordN(cur);if(!o||!o.items.length)return;if(o.items.some(i=>i.s>0)&&!can("cancelItem"))return;o.items.forEach(i=>{if(i.s>0)kcut(o,i,i.s)});o.items=[];o.disc=0;save();view()}
 function kitchenSend(){
-  const o=ordN(cur),its=o.items.filter(i=>i.q>i.s).map(i=>({name:menuOf(i.id).name+(i.n?" ("+i.n+")":""),q:i.q-i.s,mid:i.id,nt:i.n||""}));if(!its.length)return;
+  const o=ordN(cur),its=o.items.filter(i=>needK(i)&&i.q>i.s).map(i=>({name:menuOf(i.id).name+(i.n?" ("+i.n+")":""),q:i.q-i.s,mid:i.id,nt:i.n||""}));if(!its.length)return;
   S.kitchen.push({id:++S.kid,no:o.no,where:o.tid!=null?tbl(o.tid).name:"Mang về #"+dnum(o),items:its,st:"new",ts:Date.now()});
-  o.items.forEach(i=>i.s=i.q);bo=false;save();view();
+  o.items.forEach(i=>{if(needK(i))i.s=i.q});bo=false;save();view();
 }
 function pay(m){
   const o=ordN(cur);if(!o||!o.items.length||o.paid)return;
@@ -808,13 +808,14 @@ const fm12=s=>{const q=String(s).split(":").map(Number),p=q[1]||0;return q[0]+"h
 function schRec(){const A=S.sch||(S.sch={});return A[wkv]||(A[wkv]={reg:{}})}
 const canAs=()=>can("staffMgr");
 const toMin=s=>{const q=s.split(":").map(Number);return q[0]*60+(q[1]||0)};
-const AVP={s:["06:00","12:00"],c:["12:00","17:00"],t:["17:00","23:00"]};
+const AVP={s:["06:00","12:00"],c:["12:00","17:00"],t:["17:00","23:00"]},AVN={s:"Sáng",c:"Chiều",t:"Tối"};
+function schAvSum(m){if(m.any)return"Đang chọn: Cả ngày (rảnh suốt ngày)";if(m.off)return"Đang chọn: Bận";if(m.a&&m.b){const k=Object.keys(AVP).find(x=>m.a===AVP[x][0]&&m.b===AVP[x][1]);return"Đang chọn: "+(k?AVN[k]+" · ":"")+"rảnh từ "+fm12(m.a)+" đến "+fm12(m.b)}if(m.a||m.b)return"Nhập đủ giờ từ và đến";return"Chưa chọn giờ rảnh"}
 function endT(s,h){if(!s||!(h>0))return"";const q=s.split(":").map(Number),t=q[0]*60+(q[1]||0)+Math.round(h*60),m=t%1440;return fm12(hz(Math.floor(m/60))+":"+hz(m%60))+(t>=1440?" (hôm sau)":"")}
-function schModal(){const m=schm,s=S.staff.find(x=>x.id===m.sid)||{name:"?"},q=m.k.split("-"),cl="schm=null;view()",as=canAs(),other=as&&s.id!==S.me,ro=false,av=m.any?"Freetime":m.off?"Bận":m.a?"Rảnh "+fm12(m.a)+"–"+fm12(m.b):"",bt=(id,t,f)=>`<button type="button" ${id?`id="${id}"`:""} onclick="${f}">${t}</button>`,
+function schModal(){const m=schm,s=S.staff.find(x=>x.id===m.sid)||{name:"?"},q=m.k.split("-"),cl="schm=null;view()",as=canAs(),other=as&&s.id!==S.me,ro=false,av=m.any?"Freetime":m.off?"Bận":m.a?"Rảnh "+fm12(m.a)+"–"+fm12(m.b):"",bt=(id,t,f)=>`<button type="button" ${id?`id="${id}"`:""} onclick="${f}">${t}</button>`,sb=k=>`<small style="display:block;font-weight:400;font-size:11.5px;opacity:.8;line-height:1.25;margin-top:1px">${fm12(AVP[k][0])}–${fm12(AVP[k][1])}</small>`,
   pre=Object.keys(AVP).some(x=>m.a===AVP[x][0]&&m.b===AVP[x][1]),cust=!m.any&&!m.off&&!!(m.a||m.b)&&!pre,wd=["Chủ nhật","Thứ 2","Thứ 3","Thứ 4","Thứ 5","Thứ 6","Thứ 7"][new Date(+q[0],+q[1]-1,+q[2]).getDay()],
   wrap='style="flex-wrap:wrap;overflow:visible;padding:0;margin:0"',
   avail=ro?`<div class="sm-card"><div class="sm-h">Nhân viên đã đăng ký</div><div style="font-weight:700;font-size:16px${m.off?";color:#dc2626":""}">${av}</div></div>`
-   :`<div class="sm-card"><div class="sm-h">${other?"Giờ rảnh của "+esc(s.name)+" <small class=\"mu\" style=\"font-weight:400\">(bạn có thể chỉnh)</small>":"Bạn rảnh giờ nào?"}</div><div class="chips" ${wrap}>${bt("av_all","Cả ngày","schAv('all')")}${bt("av_s","Sáng","schAv('s')")}${bt("av_c","Chiều","schAv('c')")}${bt("av_t","Tối","schAv('t')")}${bt("av_off","Bận","schAv('off')")}${bt("av_x","Giờ khác…","schX()")}</div><div id="av_box" class="r2" style="${cust?"":"display:none;"}align-items:center;margin-top:10px">Từ <input id="av_a" value="${esc(m.a?fm12(m.a):"")}" placeholder="12h" oninput="schAvIn()" style="width:80px"> đến <input id="av_b" value="${esc(m.b?fm12(m.b):"")}" placeholder="23h" oninput="schAvIn()" style="width:80px"></div></div>`,
+   :`<div class="sm-card"><div class="sm-h">${other?"Giờ rảnh của "+esc(s.name)+" <small class=\"mu\" style=\"font-weight:400\">(bạn có thể chỉnh)</small>":"Bạn rảnh giờ nào?"}</div><div class="chips" ${wrap}>${bt("av_all","Cả ngày","schAv('all')")}${bt("av_s","Sáng"+sb("s"),"schAv('s')")}${bt("av_c","Chiều"+sb("c"),"schAv('c')")}${bt("av_t","Tối"+sb("t"),"schAv('t')")}${bt("av_off","Bận","schAv('off')")}${bt("av_x","Giờ khác…","schX()")}</div><div id="av_sum" class="mu" style="margin-top:10px;font-size:13px;font-weight:600">${schAvSum(m)}</div><div id="av_box" class="r2" style="${cust?"":"display:none;"}align-items:center;margin-top:10px">Từ <input id="av_a" value="${esc(m.a?fm12(m.a):"")}" placeholder="12h" oninput="schAvIn()" style="width:80px"> đến <input id="av_b" value="${esc(m.b?fm12(m.b):"")}" placeholder="23h" oninput="schAvIn()" style="width:80px"></div></div>`,
   shifts=as?`<div class="sm-card"><div class="sm-h">${other?"Xếp ca cho "+esc(s.name):"Xếp ca"}</div>${m.sh.map((c,i)=>`<div class="sm-shift"><div class="bar" style="margin:0 0 8px"><b>Ca ${i+1}</b>${i?`<button type="button" class="gi d r" aria-label="Xóa ca ${i+1}" onclick="schRmSh(${i})"><span class="ic">${trashI}</span></button>`:""}</div>
    <div class="r2" style="flex-wrap:nowrap;gap:8px"><label class="mf" style="flex:1;min-width:0"><span>Bắt đầu</span><input id="sh_s${i}" value="${esc(c.s?fm12(c.s):"")}" placeholder="18h" oninput="schPv()"></label><label class="mf" style="flex:1;min-width:0"><span>Kết thúc</span><input id="sh_e${i}" value="${esc(c.s&&c.h>0?endT(c.s,c.h).replace(" (hôm sau)",""):"")}" placeholder="12h" oninput="schPv()"></label><label class="mf" style="flex:1;min-width:0"><span>Số giờ</span><input id="sh_h${i}" readonly tabindex="-1" value="${c.h}" placeholder="tự tính" style="background:transparent;border-style:dashed"></label></div>
    
@@ -843,6 +844,7 @@ function schPv(){const m=schm;if(!m||!$("#sc_p"))return;const on=(id,v)=>{const 
   let msg="",nt="";if($("#av_a")&&(($("#av_a").value&&pTime($("#av_a").value)===null)||($("#av_b").value&&pTime($("#av_b").value)===null)))msg="Chưa hiểu giờ rảnh, ví dụ: 12h, 17h30";
   (m.sh||[]).forEach((c,i)=>{const hi=$("#sh_h"+i);if(!hi)return;const r=pTime($("#sh_s"+i).value),en=$("#sh_e"+i).value.trim(),e2=pTime(en);let h=0;if(r&&e2){let d=toMin(e2)-toMin(r);if(d<0)d+=1440;h=Math.round(d/60*100)/100}hi.value=h>0?h:"";if(r&&e2&&h>0&&toMin(e2)<toMin(r)&&!nt)nt="Ca "+(i+1)+" kết thúc vào hôm sau ("+h+" giờ), kiểm tra lại nếu nhập nhầm";if(!msg&&en&&e2===null)msg="Ca "+(i+1)+": chưa hiểu giờ kết thúc, ví dụ 12h, 16h30";
     if(!msg&&r&&h>0){if(m.off)msg="⚠ Nhân viên báo bận ngày này";else if(m.a&&m.b){const st=toMin(r);if(st<toMin(m.a)||st+Math.round(h*60)>toMin(m.b))msg="⚠ Ca "+(i+1)+" nằm ngoài giờ rảnh ("+fm12(m.a)+"–"+fm12(m.b)+")"}}});
+  if($("#av_sum"))$("#av_sum").textContent=schAvSum(m);
   $("#sc_p").textContent=msg||nt}
 function schSave(){const m=schm,e=t=>{$("#sc_e").textContent=t};let reg=null;const L=[];
   if(m.any)reg={any:true};else if(m.off)reg={off:true};else if(m.a&&m.b)reg={a:m.a,b:m.b};else if(m.a||m.b)return e("Nhập đủ giờ rảnh từ và đến.");
@@ -1432,10 +1434,11 @@ function mGroups(){
   const row=(c,i)=>{
     if(gEd===c)return `<div class="grow"><input id="g_e" value="${esc(c)}" style="flex:1;min-width:0" onkeydown="if(event.key==='Enter')renCat(${i});if(event.key==='Escape'){gEd=null;gErr='';view()}"><button class="p" onclick="renCat(${i})">Lưu</button><button onclick="gEd=null;gErr='';view()">Hủy</button></div>`;
     const n=cnt(c),t=C.find(x=>x!==c),msg=gDel!==c?"":n&&!t?"Cần tạo nhóm khác để chuyển món sang trước khi xóa.":(n?`Còn ${n} món, sẽ chuyển sang nhóm ${esc(t)}. `:"")+"Bấm thùng rác lần nữa để xóa.";
-    return `<div class="grow"><div style="flex:1;min-width:0"><b>${esc(c)}</b> <span class="mu">· ${n} món</span>${msg?`<br><small style="color:#dc2626">${msg}</small>`:""}</div><button class="gi" aria-label="Lên" ${i?"":"disabled"} onclick="moveCat(${i},-1)"><span class="ic">${upI}</span></button><button class="gi" aria-label="Xuống" ${i<C.length-1?"":"disabled"} onclick="moveCat(${i},1)"><span class="ic">${dnI}</span></button><button class="gi" aria-label="Sửa tên" onclick="editCat(${i})"><span class="ic">${pnI}</span></button><button class="gi d" aria-label="Xóa nhóm" onclick="delCat(${i})"><span class="ic">${trashI}</span></button></div>`};
+    return `<div class="grow"><div style="flex:1;min-width:0"><b>${esc(c)}</b> <span class="mu">· ${n} món</span>${msg?`<br><small style="color:#dc2626">${msg}</small>`:""}</div><button class="${noK({cat:c})?"":"p"}" style="font-size:12px;padding:5px 10px;white-space:nowrap" title="Bật: món nhóm này được báo xuống bếp. Tắt: không cần báo bếp (ví dụ Buffet)" onclick="togNk(${i})">Báo bếp: ${noK({cat:c})?"Tắt":"Bật"}</button><button class="gi" aria-label="Lên" ${i?"":"disabled"} onclick="moveCat(${i},-1)"><span class="ic">${upI}</span></button><button class="gi" aria-label="Xuống" ${i<C.length-1?"":"disabled"} onclick="moveCat(${i},1)"><span class="ic">${dnI}</span></button><button class="gi" aria-label="Sửa tên" onclick="editCat(${i})"><span class="ic">${pnI}</span></button><button class="gi d" aria-label="Xóa nhóm" onclick="delCat(${i})"><span class="ic">${trashI}</span></button></div>`};
   return `<div class="r2" style="flex-wrap:nowrap;margin-bottom:14px"><input id="g_n" placeholder="Tên nhóm mới, ví dụ: Món nướng" style="flex:1;min-width:0" oninput="$('#g_b').disabled=!this.value.trim();gErr=''" onkeydown="if(event.key==='Enter')addCat()"><button id="g_b" class="p" style="display:flex;align-items:center;gap:6px" disabled onclick="addCat()"><span class="ic">${plusI}</span>Thêm</button></div>${gErr?`<p style="color:#dc2626;margin:-6px 0 10px">${esc(gErr)}</p>`:""}
   <div class="card" style="padding:0;overflow:hidden">${C.map(row).join("")||`<p class="mu" style="padding:16px;margin:0">Chưa có nhóm nào.</p>`}</div>`;
 }
+function togNk(i){const c=catList()[i];noK({cat:c});const k=S.nk.indexOf(c);k>=0?S.nk.splice(k,1):S.nk.push(c);lg("Thực đơn","Nhóm "+c+": "+(k>=0?"bật":"tắt")+" báo bếp");save();view()}
 function addCat(){const v=$("#g_n").value.trim();if(!v)return;if(catList().some(c=>c.toLowerCase()===v.toLowerCase())){gErr="Nhóm này đã có.";view();return}S.cats.push(v);lg("Thực đơn","Thêm nhóm "+v);save();view();$("#g_n").focus()}
 function moveCat(i,d){const C=catList(),j=i+d;if(j<0||j>=C.length)return;[C[i],C[j]]=[C[j],C[i]];save();view()}
 function editCat(i){gEd=catList()[i];gDel=null;gErr="";view();$("#g_e").select()}
@@ -1443,6 +1446,7 @@ function renCat(i){
   const C=catList(),old=C[i],v=($("#g_e")||{value:""}).value.trim();if(!v)return;
   if(v===old){gEd=null;view();return}
   if(C.some((c,k)=>k!==i&&c.toLowerCase()===v.toLowerCase())){gErr="Nhóm này đã có.";view();return}
+  noK({cat:old});if(S.nk){const k=S.nk.indexOf(old);if(k>=0)S.nk[k]=v}
   C[i]=v;S.menu.forEach(m=>{if(m.cat===old)m.cat=v});if(S.store.leCats)S.store.leCats=S.store.leCats.map(c=>c===old?v:c);if(mfc===old)mfc=v;
   gEd=null;gErr="";lg("Thực đơn","Đổi nhóm "+old+" thành "+v);save();view()}
 function delCat(i){
