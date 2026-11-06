@@ -377,7 +377,7 @@ let S=load();if(!S.ing){S.ing=[];S.imp=[];S.kk=[];S.iid=1}
 let PG=(location.hash||"#ban").slice(1);
 function nav(k){if(k===PG&&!pend)return false;leave();PG=k;try{history.replaceState(null,"","#"+k)}catch(e){}if(pend){cur=pend;pend=null}view();return false}
 let cur=null,cat="Tất cả",rst=false,qrMode=false,edI=null,sv=null,cx=false,pend=null;
-const BANKS=[["970436","Vietcombank"],["970415","VietinBank"],["970418","BIDV"],["970405","Agribank"],["970407","Techcombank"],["970422","MB Bank"],["970416","ACB"],["970432","VPBank"],["546034","Cake by VPBank"],["970423","TPBank"],["970403","Sacombank"],["970441","VIB"],["970443","SHB"],["970437","HDBank"],["970448","OCB"],["970426","MSB"],["970440","SeABank"],["970431","Eximbank"],["970449","LPBank"]];
+const BANKS=[["970436","Vietcombank"],["970415","VietinBank"],["970418","BIDV"],["970405","Agribank"],["970407","Techcombank"],["970422","MB Bank"],["970416","ACB"],["970432","VPBank"],["546034","Cake"],["970423","TPBank"],["970403","Sacombank"],["970441","VIB"],["970443","SHB"],["970437","HDBank"],["970448","OCB"],["970426","MSB"],["970440","SeABank"],["970431","Eximbank"],["970449","LPBank"]];
 const bank=()=>S.bank||(S.bank={bin:"",acc:"",name:""});
 const tlv=(id,v)=>id+String(v.length).padStart(2,"0")+v;
 function crc16(s){let c=0xFFFF;for(let i=0;i<s.length;i++){c^=s.charCodeAt(i)<<8;for(let j=0;j<8;j++)c=c&0x8000?((c<<1)^0x1021)&0xFFFF:(c<<1)&0xFFFF}return c.toString(16).toUpperCase().padStart(4,"0")}
