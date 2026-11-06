@@ -851,7 +851,7 @@ let ad=dk(Date.now()),pfr=ad.slice(0,8)+"01",pto=ad;
 const hrs=a=>((a.out||Date.now())-a.in)/36e5,hm=h=>Math.floor(h)+"g "+String(Math.round(h%1*60)).padStart(2,"0")+"p";
 let AF={from:ymd(Date.now()),to:ymd(Date.now())};
 const attLH=()=>{const sw=AF.from&&AF.to&&AF.from>AF.to;return sw?[AF.to,AF.from]:[AF.from,AF.to]};
-const attIn=a=>{if(!(canPay()||a.sid===S.me))return false;const st0=S.staff.find(s=>s.id===a.sid);if(st0&&st0.role==="Chủ quán")return false;const[lo,hi]=attLH(),d=dk(a.in);return !(lo&&d<lo)&&!(hi&&d>hi)};
+const attIn=a=>{if(attDupX(a))return false;if(!(canPay()||a.sid===S.me))return false;const st0=S.staff.find(s=>s.id===a.sid);if(st0&&st0.role==="Chủ quán")return false;const[lo,hi]=attLH(),d=dk(a.in);return !(lo&&d<lo)&&!(hi&&d>hi)};
 const attRows=()=>S.att.filter(attIn).slice().reverse().slice(0,300);
 const attSum=()=>{const r=S.att.filter(attIn),[lo,hi]=attLH(),t=lo&&hi?(lo===hi?dmy(lo):dmy(lo)+" – "+dmy(hi)):lo?"Từ "+dmy(lo):hi?"Đến "+dmy(hi):"Tất cả các ngày";return t+": "+new Set(r.map(a=>a.sid)).size+" nhân viên · "+r.length+" ca"};
 const attTb=()=>attRows().map(a=>`<tr><td>${new Date(a.in).toLocaleDateString("vi-VN")}</td><td>${esc(a.name)}</td><td>${esc((S.staff.find(s=>s.id===a.sid)||{}).role||"")}</td><td>${tm(a.in)}${hnI(a)}${a.adj?`<br><small class="mu">Chủ quán chỉnh (gốc ${tm(a.adj.in0)})</small>`:""}${isOwner()?`<br><button type="button" onclick="attEd('${a.sk||a.sid+"_"+a.in}')" style="margin-top:4px;padding:2px 10px;font-size:12px">✎ Sửa giờ</button>`:""}</td><td>${a.out?tm(a.out):"—"}${a.adj&&a.adj.out0&&a.adj.out0!==a.out?`<br><small class="mu">gốc ${tm(a.adj.out0)}</small>`:""}</td><td>${a.out?((a.out-a.in)/36e5).toFixed(1)+" giờ":"Đang làm"}${regS(a)>a.in?`<br><small class="mu">Tính lương từ ${dueT(regS(a))}</small>`:""}${hnD(a)}</td><td>${a.cash1==null?"":`<span class="pill ${a.cash1===a.exp?"pg":""}">${a.cash1===a.exp?"Khớp":"Không khớp"}</span>`}</td><td class="mu">${esc(nt(a))}${(a.ev||[]).map(d=>`<img src="${d}" style="height:40px;border-radius:6px;margin:4px 4px 0 0;cursor:zoom-in;display:block" onclick="this.style.height=this.style.height==='40px'?'240px':'40px'">`).join("")}</td></tr>`).join("")||`<tr><td colspan="8" class="mu">Chưa có dữ liệu.</td></tr>`;
@@ -885,9 +885,11 @@ function setPax(v){const o=ordN(cur);if(!o)return;if(String(v).trim()===""){o.pa
 function togLe(c){const l=leCats();S.store.leCats=l.includes(c)?l.filter(x=>x!==c):[...l,c];save();view()}
 const PAYC=()=>{const c=S.store.pay||{};return{std:0,otx:c.otx!=null&&c.otx!==""?Math.max(0,+c.otx||0):1,rnd:+c.rnd||0}};
 /* Chỉ tính công trong ca đã đăng ký: tuần đã chốt có lịch mà bản ghi không thuộc ca nào thì không tính; bản ghi trùng (chấm công lặp cùng ca) chỉ tính một lần */
+/* bản ghi chấm công trùng hệt nhau (cùng người, cùng giờ vào, cùng giờ ra) chỉ hiện và tính một lần */
+const attDupX=x=>{const i=S.att.indexOf(x),m=t=>Math.floor((t||0)/6e4);return i>0&&S.att.some((y,j)=>j<i&&y.sid===x.sid&&m(y.in)===m(x.in)&&m(y.out)===m(x.out)&&!!y.out===!!x.out)};
 const attGov=x=>{const d=new Date(x.in);d.setDate(d.getDate()-((d.getDay()+6)%7));const wk=ovKey(d.getTime()),r=(S.sch||{})[wk];if(!r||!schLocked(wk))return false;return Object.values(r.as||{}).some(m=>Object.values(m).some(a=>(Array.isArray(a)?a:[a]).some(z=>z&&z.h>0)))||Object.values(r.reg||{}).some(m=>Object.values(m).some(z=>z&&z.h>0))};
 const attDup=(x,o)=>{if(!o)return false;const ix=S.att.indexOf(x),now=Date.now();return S.att.some((y,iy)=>{if(y===x||y.sid!==x.sid)return false;const yo=shOf(y);if(!yo||yo.st!==o.st)return false;if(!(y.in<x.in||(y.in===x.in&&iy<ix)))return false;return (y.out||now)>x.in})};
-function attPay(x,w){w=wOv(x,w);const c=PAYC();const o0=shOf(x);if(attDup(x,o0)||(!o0&&attGov(x)))return{h:0,reg:0,ot:0,pay:0};const ss=regS(x),pi=ss>x.in?ss:x.in;let h=Math.max(0,((x.out||Date.now())-pi)/36e5);if(c.rnd>0){const m=c.rnd/60;h=Math.round(h/m)*m}const sd=regH(x),reg=sd>0?Math.min(h,sd):h,ot=h-reg;return{h,reg,ot,pay:Math.round(w*(reg+ot*c.otx)*hx(x.in))}}
+function attPay(x,w){w=wOv(x,w);const c=PAYC();const o0=shOf(x);if(attDupX(x)||attDup(x,o0)||(!o0&&attGov(x)))return{h:0,reg:0,ot:0,pay:0};const ss=regS(x),pi=ss>x.in?ss:x.in;let h=Math.max(0,((x.out||Date.now())-pi)/36e5);if(c.rnd>0){const m=c.rnd/60;h=Math.round(h/m)*m}const sd=regH(x),reg=sd>0?Math.min(h,sd):h,ot=h-reg;return{h,reg,ot,pay:Math.round(w*(reg+ot*c.otx)*hx(x.in))}}
 let pmv="h";
 const pD=k=>new Date(+k.slice(0,4),+k.slice(5,7)-1,+k.slice(8,10));
 const pRl=()=>pD(pfr).toLocaleDateString("vi-VN")+" – "+pD(pto).toLocaleDateString("vi-VN");
@@ -917,14 +919,14 @@ function todayRows(){const now=Date.now(),k=ovKey(now),gr=GR();
       else if(now<c.st){const d=Math.ceil((c.st-now)/6e4);it.push({rg,up:true,t:"⏳ Sắp tới ca"+(d<=60?" · còn "+dm(d):" · "+tm(c.st))})}
       else if(now<c.en){const lt=Math.floor((now-c.st)/6e4);it.push(lt>gr?{rg,bad:true,t:"🔴 Chưa vào ca · trễ "+dm(lt)}:{rg,up:true,t:"⏳ Đến giờ vào ca"})}
       else it.push({rg,bad:true,t:"🔴 Vắng ca (không chấm công)"})});
-    S.att.filter(x=>x.sid===s.id&&!used.has(x)&&(ovKey(x.in)===k||!x.out)&&!shOf(x)).forEach(x=>it.push({rg:"Ngoài lịch",t:(x.out?"⚪ Đã ra ca · ":"🟢 Đang làm · vào ")+tm(x.in)+(x.out?"–"+tm(x.out):"")}));
+    S.att.filter(x=>x.sid===s.id&&!used.has(x)&&(ovKey(x.in)===k||!x.out)&&!shOf(x)&&!attDupX(x)).forEach(x=>it.push({rg:"Ngoài lịch",t:(x.out?"⚪ Đã ra ca · ":"🟢 Đang làm · vào ")+tm(x.in)+(x.out?"–"+tm(x.out):"")}));
     return{s,it}}).filter(r=>r.it.length)}
 function vToday(){const R=todayRows(),on=S.staff.filter(s=>s.on&&nvOk(s)).length,me=(S.staff.find(s=>s.id===S.me)||S.staff[0]||{}).id;
   return `<h3>Ca hôm nay · ${on} đang làm</h3>`+(R.length?`<div class="grid" style="grid-template-columns:repeat(auto-fill,minmax(220px,1fr))">${R.map(r=>{const bad=r.it.some(i=>i.bad);return `<div class="card" style="${bad?"border-color:var(--bad);background:color-mix(in srgb,var(--bad) 8%,var(--card))":""}"><b>${esc(r.s.name)}${r.s.id===me?" <small>(bạn)</small>":""}</b><br><small>${esc(r.s.role)}</small>${r.it.map(i=>`<div style="margin-top:8px"><small class="mu">${i.rg}</small><div style="font-weight:600;${i.bad?"color:var(--bad)":i.up?"color:var(--pr)":""}">${i.t}</div></div>`).join("")}</div>`}).join("")}</div>`:`<div class="card mu">Hôm nay chưa có ai có ca. (Ca chỉ hiện khi lịch tuần đã được chốt.)</div>`)}
 function repData(){const a=pD(pfr).getTime(),ee=pD(pto),b=new Date(ee.getFullYear(),ee.getMonth(),ee.getDate()+1).getTime(),now=Date.now(),rows=[],sum=[];
   const dstr=ts=>ovKey(ts).split("-").reverse().join("/");
   S.staff.filter(nvOk).forEach(s=>{const T={s,n:0,sch:0,late:0,lm:0,abs:0,off:0,eo:0,pre:0,post:0,raw:0,h:0,ot:0};sum.push(T);
-    S.att.filter(x=>x.sid===s.id&&x.in>=a&&x.in<b).forEach(x=>{const m=mOf(x),o=m.o;T.n++;T.raw+=m.raw;T.h+=m.h;T.ot+=m.ot;
+    S.att.filter(x=>x.sid===s.id&&x.in>=a&&x.in<b).forEach(x=>{if(attDupX(x))return;const m=mOf(x),o=m.o;T.n++;T.raw+=m.raw;T.h+=m.h;T.ot+=m.ot;
       let st="Ngoài lịch";if(o){T.sch++;st=x.out?(m.late?"Đi trễ":"Đúng giờ"):(m.late?"Đang làm (trễ)":"Đang làm")}else T.off++;
       if(m.late){T.late++;T.lm+=m.late}T.eo+=m.eo;T.pre+=m.pre;T.post+=m.post;
       rows.push({t:x.in,n:s.name,r:[dstr(x.in),s.name,s.role,o?(o.st?tm(o.st)+"–"+tm(o.st+o.h*36e5):o.h+" giờ"):"Không có ca xếp",tm(x.in),x.out?tm(x.out):"Đang làm",st,m.late,m.eo,m.pre,m.post,m.pre+m.post,r2(m.raw),r2(m.h),r2(m.ot)]})});
