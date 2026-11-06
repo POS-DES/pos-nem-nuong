@@ -680,7 +680,7 @@ function ofil(k,v){OF[k]=v;const r=olist();$("#osub").textContent=r.sub;$("#ol")
 function openO(no){if(PG==="ban"){cur=no;view()}else{pend=no;nav("ban")}}
 /* ===== Chấm công ===== */
 const canPay=()=>isOwner()||can("staffMgr");
-const vis=s=>isOwner()||s.role!=="Chủ quán",ownN=()=>S.staff.filter(s=>s.role==="Chủ quán").map(s=>s.name);
+const vis=s=>isOwner()||s.role!=="Chủ quán",nvOk=s=>s.role!=="Chủ quán",ownN=()=>S.staff.filter(s=>s.role==="Chủ quán").map(s=>s.name);
 let rkP="m",rkM="q";
 function rkSet(k,v){if(k==="p")rkP=v;else rkM=v;view()}
 function vRank(){
@@ -689,7 +689,7 @@ function vRank(){
   leQ=s=>s.items.filter(i=>le.includes((menuOf(i.id)||{}).cat)).reduce((u,i)=>u+i.q,0),M={};
   S.sales.filter(s=>!s.cancel&&s.type==="ship"&&s.ts>=a).forEach(s=>{const k=s.staff||"—",o=M[k]||(M[k]={n:k,q:0,o:0,v:0});o.q+=leQ(s);o.o++;o.v+=s.total||0});
   if(!M[me])M[me]={n:me,q:0,o:0,v:0};
-  const val=r=>rkM==="v"?r.v:r.q,R=Object.values(M).filter(r=>isOwner()||!ownN().includes(r.n)).sort((x,y)=>val(y)-val(x)||y.o-x.o),mx=Math.max(1,...R.map(val));
+  const val=r=>rkM==="v"?r.v:r.q,R=Object.values(M).filter(r=>!ownN().includes(r.n)).sort((x,y)=>val(y)-val(x)||y.o-x.o),mx=Math.max(1,...R.map(val));
   const row=(r,i)=>{const mine=r.n===me,v=val(r),st=rkM==="v"?`<b>${fmt(r.v)}</b> · ${r.o} đơn`:`<b>${r.q} suất</b> · ${r.o} đơn`+((all||mine)?` · +${fmt(r.q*com)}`:"");
     let hint="";if(mine&&i>0){const up=R[i-1],d=val(up)-v+1;hint=`Thêm ${rkM==="v"?fmt(d):d+" suất"} là vượt ${esc(up.n)}`}
     return `<div style="padding:10px 12px;border-radius:10px;${mine?"background:var(--hov)":""}"><div style="display:flex;align-items:center;gap:10px"><span style="width:22px;text-align:center">${i===0&&v>0?"🏆":i+1}</span><span style="flex:1;min-width:0"><b>${esc(r.n)}</b>${mine?` <span class="pill pb" style="padding:0 8px">Bạn</span>`:""}</span><span class="mu" style="white-space:nowrap">${st}</span></div><div style="height:6px;border-radius:99px;background:var(--bd);margin:6px 0 0 32px"><i style="display:block;height:100%;width:${Math.round(v/mx*100)}%;border-radius:99px;background:var(--pr)"></i></div>${hint?`<small class="mu" style="display:block;margin:4px 0 0 32px">${hint}</small>`:""}</div>`};
@@ -848,7 +848,7 @@ let ad=dk(Date.now()),pfr=ad.slice(0,8)+"01",pto=ad;
 const hrs=a=>((a.out||Date.now())-a.in)/36e5,hm=h=>Math.floor(h)+"g "+String(Math.round(h%1*60)).padStart(2,"0")+"p";
 let AF={from:ymd(Date.now()),to:ymd(Date.now())};
 const attLH=()=>{const sw=AF.from&&AF.to&&AF.from>AF.to;return sw?[AF.to,AF.from]:[AF.from,AF.to]};
-const attIn=a=>{if(!(canPay()||a.sid===S.me))return false;const[lo,hi]=attLH(),d=dk(a.in);return !(lo&&d<lo)&&!(hi&&d>hi)};
+const attIn=a=>{if(!(canPay()||a.sid===S.me))return false;const st0=S.staff.find(s=>s.id===a.sid);if(st0&&st0.role==="Chủ quán")return false;const[lo,hi]=attLH(),d=dk(a.in);return !(lo&&d<lo)&&!(hi&&d>hi)};
 const attRows=()=>S.att.filter(attIn).slice().reverse().slice(0,300);
 const attSum=()=>{const r=S.att.filter(attIn),[lo,hi]=attLH(),t=lo&&hi?(lo===hi?dmy(lo):dmy(lo)+" – "+dmy(hi)):lo?"Từ "+dmy(lo):hi?"Đến "+dmy(hi):"Tất cả các ngày";return t+": "+new Set(r.map(a=>a.sid)).size+" nhân viên · "+r.length+" ca"};
 const attTb=()=>attRows().map(a=>`<tr><td>${new Date(a.in).toLocaleDateString("vi-VN")}</td><td>${esc(a.name)}</td><td>${esc((S.staff.find(s=>s.id===a.sid)||{}).role||"")}</td><td>${tm(a.in)}${hnI(a)}</td><td>${a.out?tm(a.out):"—"}</td><td>${a.out?((a.out-a.in)/36e5).toFixed(1)+" giờ":"Đang làm"}${regS(a)>a.in?`<br><small class="mu">Tính lương từ ${dueT(regS(a))}</small>`:""}${hnD(a)}</td><td>${a.cash1==null?"":`<span class="pill ${a.cash1===a.exp?"pg":""}">${a.cash1===a.exp?"Khớp":"Không khớp"}</span>`}</td><td class="mu">${esc(nt(a))}${(a.ev||[]).map(d=>`<img src="${d}" style="height:40px;border-radius:6px;margin:4px 4px 0 0;cursor:zoom-in;display:block" onclick="this.style.height=this.style.height==='40px'?'240px':'40px'">`).join("")}</td></tr>`).join("")||`<tr><td colspan="8" class="mu">Chưa có dữ liệu.</td></tr>`;
@@ -887,7 +887,7 @@ function mOf(x){const o=shOf(x),en=x.out||Date.now(),r=attPay(x,0),m={o,late:0,e
 const hnI=a=>{const m=mOf(a);return m.late?`<br><small style="color:var(--bad);font-weight:600">Trễ ${dm(m.late)}</small>`:""};
 const hnD=a=>{const m=mOf(a);return(m.post?`<br><small class="mu">Làm thêm sau ca ${dm(m.post)}</small>`:"")+(m.eo?`<br><small style="color:var(--bad)">Về sớm ${dm(m.eo)}</small>`:"")};
 function todayRows(){const now=Date.now(),k=ovKey(now),gr=GR();
-  return S.staff.filter(vis).map(s=>{const sh=dayShifts(s.id,k),used=new Set(),it=[];
+  return S.staff.filter(nvOk).map(s=>{const sh=dayShifts(s.id,k),used=new Set(),it=[];
     sh.forEach(c=>{const x=shAtt(s.id,c,k),rg=c.st?tm(c.st)+"–"+tm(c.en):c.h+" giờ";if(x)used.add(x);
       if(x){const lt=c.st?Math.round((x.in-c.st)/6e4):0,bad=lt>gr;it.push({rg,bad,t:(x.out?"⚪ Đã ra ca · "+tm(x.in)+"–"+tm(x.out):"🟢 Đang làm · vào "+tm(x.in))+(bad?" · trễ "+dm(lt):"")})}
       else if(!c.st)it.push({rg,t:"⚪ Chưa vào ca"});
@@ -896,11 +896,11 @@ function todayRows(){const now=Date.now(),k=ovKey(now),gr=GR();
       else it.push({rg,bad:true,t:"🔴 Vắng ca (không chấm công)"})});
     S.att.filter(x=>x.sid===s.id&&!used.has(x)&&(ovKey(x.in)===k||!x.out)).forEach(x=>it.push({rg:"Ngoài lịch",t:(x.out?"⚪ Đã ra ca · ":"🟢 Đang làm · vào ")+tm(x.in)+(x.out?"–"+tm(x.out):"")}));
     return{s,it}}).filter(r=>r.it.length)}
-function vToday(){const R=todayRows(),on=S.staff.filter(s=>s.on&&vis(s)).length,me=(S.staff.find(s=>s.id===S.me)||S.staff[0]||{}).id;
+function vToday(){const R=todayRows(),on=S.staff.filter(s=>s.on&&nvOk(s)).length,me=(S.staff.find(s=>s.id===S.me)||S.staff[0]||{}).id;
   return `<h3>Ca hôm nay · ${on} đang làm</h3>`+(R.length?`<div class="grid" style="grid-template-columns:repeat(auto-fill,minmax(220px,1fr))">${R.map(r=>{const bad=r.it.some(i=>i.bad);return `<div class="card" style="${bad?"border-color:var(--bad);background:color-mix(in srgb,var(--bad) 8%,var(--card))":""}"><b>${esc(r.s.name)}${r.s.id===me?" <small>(bạn)</small>":""}</b><br><small>${esc(r.s.role)}</small>${r.it.map(i=>`<div style="margin-top:8px"><small class="mu">${i.rg}</small><div style="font-weight:600;${i.bad?"color:var(--bad)":i.up?"color:var(--pr)":""}">${i.t}</div></div>`).join("")}</div>`}).join("")}</div>`:`<div class="card mu">Hôm nay chưa có ai có ca. (Ca chỉ hiện khi lịch tuần đã được chốt.)</div>`)}
 function repData(){const a=pD(pfr).getTime(),ee=pD(pto),b=new Date(ee.getFullYear(),ee.getMonth(),ee.getDate()+1).getTime(),now=Date.now(),rows=[],sum=[];
   const dstr=ts=>ovKey(ts).split("-").reverse().join("/");
-  S.staff.filter(vis).forEach(s=>{const T={s,n:0,sch:0,late:0,lm:0,abs:0,off:0,eo:0,pre:0,post:0,raw:0,h:0,ot:0};sum.push(T);
+  S.staff.filter(nvOk).forEach(s=>{const T={s,n:0,sch:0,late:0,lm:0,abs:0,off:0,eo:0,pre:0,post:0,raw:0,h:0,ot:0};sum.push(T);
     S.att.filter(x=>x.sid===s.id&&x.in>=a&&x.in<b).forEach(x=>{const m=mOf(x),o=m.o;T.n++;T.raw+=m.raw;T.h+=m.h;T.ot+=m.ot;
       let st="Ngoài lịch";if(o){T.sch++;st=x.out?(m.late?"Đi trễ":"Đúng giờ"):(m.late?"Đang làm (trễ)":"Đang làm")}else T.off++;
       if(m.late){T.late++;T.lm+=m.late}T.eo+=m.eo;T.pre+=m.pre;T.post+=m.post;
