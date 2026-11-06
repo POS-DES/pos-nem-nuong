@@ -769,7 +769,9 @@ function schAvIn(){const m=schm;m.any=false;m.off=false;m.a=pTime($("#av_a").val
 function schDel(){const r=schRec(),m=schm;if(r.reg[m.sid])delete r.reg[m.sid][m.k];if(canAs()&&r.as&&r.as[m.sid])delete r.as[m.sid][m.k];lg("Lịch ca","Xóa "+m.k.split("-").reverse().join("/"));schm=null;save();view()}
 function schShifts(r,sid,k){const a=((r.as||{})[sid]||{})[k];if(a)return(Array.isArray(a)?a:[a]).filter(x=>x&&x.h>0);const e=((r.reg||{})[sid]||{})[k];return e&&e.h>0?[{h:e.h,s:e.s||""}]:[]}
 function schAsOf(r,sid,k){return schShifts(r,sid,k)[0]||null}
-function shOf(x){const d=new Date(x.in);d.setDate(d.getDate()-((d.getDay()+6)%7));const wk=ovKey(d.getTime()),r=(S.sch||{})[wk];if(!r||!schLocked(wk))return null;const L=schShifts(r,x.sid,ovKey(x.in));if(!L.length)return null;const en=x.out||Date.now();let b=null,bst=0,bo=-1,bd=1e18;
+/* Gộp các ca nối liền nhau (ca trước kết thúc đúng giờ ca sau bắt đầu) thành một khối: chấm công một lần cho cả chuỗi ca */
+function schMerge(L){const w=L.filter(c=>c.s).map(c=>({h:+c.h,s:c.s,a:toMin(c.s)})).sort((x,y)=>x.a-y.a),o=L.filter(c=>!c.s),R=[];w.forEach(c=>{const p=R[R.length-1];if(p&&c.a<=p.a+Math.round(p.h*60)+1){const e=Math.max(p.a+Math.round(p.h*60),c.a+Math.round(c.h*60));p.h=(e-p.a)/60}else R.push({...c})});return[...R.map(c=>({h:c.h,s:c.s})),...o]}
+function shOf(x){const d=new Date(x.in);d.setDate(d.getDate()-((d.getDay()+6)%7));const wk=ovKey(d.getTime()),r=(S.sch||{})[wk];if(!r||!schLocked(wk))return null;const L=schMerge(schShifts(r,x.sid,ovKey(x.in)));if(!L.length)return null;const en=x.out||Date.now();let b=null,bst=0,bo=-1,bd=1e18;
   L.forEach(c=>{let st=0,ov=0,ds=0;if(c.s){const q=c.s.split(":").map(Number),t=new Date(x.in);t.setHours(q[0],q[1]||0,0,0);st=t.getTime();ov=Math.max(0,Math.min(en,st+c.h*36e5)-Math.max(x.in,st));ds=Math.abs(st-x.in)}if(ov>bo||(ov===bo&&ds<bd)){b=c;bst=st;bo=ov;bd=ds}});return{h:+b.h,st:bst}}
 function regS(x){const o=shOf(x);return o?o.st:0}
 function regH(x){const o=shOf(x);return o?o.h:0}
@@ -897,7 +899,7 @@ const dm=m=>m>=60?Math.floor(m/60)+"g "+String(m%60).padStart(2,"0")+"p":m+" ph�
 const r2=n=>Math.round(n*100)/100;
 const stT=(k,s)=>{const q=k.split("-"),t=s.split(":").map(Number);return new Date(+q[0],+q[1]-1,+q[2],t[0],t[1]||0,0,0).getTime()};
 function dayShifts(sid,k){const d=pD(k);d.setDate(d.getDate()-((d.getDay()+6)%7));const wk=ovKey(d.getTime()),r=(S.sch||{})[wk];if(!r||!schLocked(wk))return[];
-  return schShifts(r,sid,k).map(c=>{const st=c.s?stT(k,c.s):0;return{h:+c.h,s:c.s||"",st,en:st?st+c.h*36e5:0}})}
+  return schMerge(schShifts(r,sid,k)).map(c=>{const st=c.s?stT(k,c.s):0;return{h:+c.h,s:c.s||"",st,en:st?st+c.h*36e5:0}})}
 function shAtt(sid,c,k){const L=S.att.filter(x=>x.sid===sid&&ovKey(x.in)===k);if(!L.length)return null;if(!c.st)return L[0];let b=null,bd=1e18;L.forEach(x=>{const o=shOf(x),d=Math.abs(x.in-c.st);if(o&&o.st===c.st&&d<bd){b=x;bd=d}});return b}
 function mOf(x){const o=shOf(x),en=x.out||Date.now(),r=attPay(x,0),m={o,late:0,eo:0,pre:0,post:0,ot:r.ot,h:r.h,raw:(en-x.in)/36e5};
   if(o&&o.st){const e=o.st+o.h*36e5,L=Math.round((x.in-o.st)/6e4);m.late=L>GR()?L:0;m.pre=Math.max(0,Math.round((o.st-x.in)/6e4));if(x.out){m.post=Math.max(0,Math.round((x.out-e)/6e4));m.eo=Math.max(0,Math.round((e-x.out)/6e4))}}
