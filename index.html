@@ -1926,7 +1926,32 @@ view();
 syBoot();
 /* Tự nhận dạng thiết bị: phone / tablet / desktop, cập nhật khi xoay màn hình hoặc đổi kích thước cửa sổ */
 function devFit(){const d=document.documentElement,w=innerWidth,ua=navigator.userAgent||'',tp=navigator.maxTouchPoints>1,touch=matchMedia('(pointer:coarse)').matches||tp,tab=/iPad|Tablet|PlayBook|Silk/i.test(ua)||(/Android/i.test(ua)&&!/Mobile/i.test(ua))||(navigator.platform==='MacIntel'&&tp);const k=w<700?'phone':(tab||(touch&&w<1400)||w<900)?'tablet':'desktop';d.dataset.dev=k;d.dataset.ori=w>innerHeight?'land':'port';d.classList.toggle('touch',touch)}
-devFit();addEventListener('resize',devFit);addEventListener('orientationchange',()=>setTimeout(devFit,250));
+devFit();addEventListener('resize',devFit);
+/* Tự căn chỉnh giao diện theo màn hình đang dùng: chạy lại khi mở phần mềm, xoay màn hình, đổi cỡ cửa sổ, đổi cỡ chữ và mỗi lần danh sách thay đổi */
+function fitRows(){
+  document.querySelectorAll(".orow").forEach(r=>{
+    r.classList.remove("stk");r.style.gridTemplateColumns="";
+    r.querySelectorAll(":scope>.lead,:scope>.fm,:scope>.t1,:scope>.tl").forEach(c=>c.classList.remove("lead","fm","t1","tl"));
+    const K=[...r.children];if(K.length<3||!r.clientWidth)return;
+    const m=K.find(c=>parseFloat(getComputedStyle(c).flexGrow)>0);if(!m)return;
+    const tight=m.getBoundingClientRect().width<150||r.scrollWidth>r.clientWidth+1;if(!tight)return;
+    const mi=K.indexOf(m),lead=K.slice(0,mi),tail=K.slice(mi+1);if(!tail.length)return;
+    lead.forEach(c=>c.classList.add("lead"));m.classList.add("fm");
+    tail[0].classList.add("t1");tail[tail.length-1].classList.add("tl");
+    r.style.gridTemplateColumns=(lead.length?"auto ":"")+"minmax(0,1fr)"+" auto".repeat(Math.max(0,tail.length-1));
+    r.classList.add("stk");
+    if(!lead.length){m.style.gridColumn="1/-1"}
+  })
+}
+function fitAll(){try{devFit();fitRows()}catch(e){}}
+let _ft=0;const fitSoon=()=>{cancelAnimationFrame(_ft);_ft=requestAnimationFrame(fitAll)};
+{const v=window.view;window.view=function(){const r=v.apply(this,arguments);fitAll();return r}}
+addEventListener("resize",fitSoon);addEventListener("orientationchange",()=>setTimeout(fitSoon,250));
+try{new MutationObserver(fitSoon).observe(document.getElementById("app"),{childList:true,subtree:true})}catch(e){}
+try{if(document.fonts&&document.fonts.ready)document.fonts.ready.then(fitSoon)}catch(e){}
+try{new ResizeObserver(fitSoon).observe(document.getElementById("app"))}catch(e){}
+fitSoon();
+addEventListener('orientationchange',()=>setTimeout(devFit,250));
 </script>
 <style>
 /* Tối ưu máy tính + điện thoại */
@@ -1940,6 +1965,15 @@ aside{height:calc(100dvh - env(safe-area-inset-top,0px))}
 @media(min-width:701px){.grid{grid-template-columns:repeat(auto-fill,minmax(160px,1fr))}}
 @media(min-width:1500px){main{max-width:1400px;margin:0 auto}}
 @media(max-width:700px){main :not(.scroll):not(.sc)>table{display:block;max-width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch}}
+/* Tự căn chỉnh theo thiết bị: hàng nào chật (phần chữ chính bị bóp hẹp) tự chuyển sang 2 dòng, không phụ thuộc loại máy */
+.orow.stk{display:grid;row-gap:6px;column-gap:10px;align-items:center}
+.orow.stk>.lead{grid-column:1;grid-row:1/span 2;min-width:0;align-self:center}
+.orow.stk>.lead[style*="width"]{width:auto!important;min-width:34px}
+.orow.stk>.fm{grid-column:2/-1;grid-row:1;min-width:0}
+.orow.stk>.t1{justify-self:start}
+.orow.stk>.tl{justify-self:end;text-align:right;min-width:0!important}
+.orow.stk small,.orow.stk .oi small{white-space:normal!important;overflow:visible!important;text-overflow:clip!important;line-height:1.35}
+.orow.stk .ot{min-width:0!important}
 /* Riêng cho máy tính bảng */
 [data-dev=tablet] main{padding:18px 20px}
 [data-dev=tablet] .grid{grid-template-columns:repeat(auto-fill,minmax(170px,1fr))}
