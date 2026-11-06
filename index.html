@@ -673,7 +673,7 @@ function fmk(el,e,max,fn){
 }
 const DS={of:{g:k=>OF[k],s:(k,v)=>ofil(k,v)},at:{g:k=>AF[k],s:(k,v)=>afil(k,v)}};
 function dtf(k){return dtg("of",k)}
-function dtg(sc,k){const v=DS[sc].g(k);return `<span class="dt2"><input class="dtx" inputmode="numeric" autocomplete="off" placeholder="dd/mm/yyyy" value="${dmy(v)}" onfocus="setTimeout(()=>this.select())" oninput="dsel('${sc}','${k}',this,event)" onblur="dblur('${sc}','${k}',this)"><label class="cal"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4.5" width="18" height="16" rx="3"/><path d="M8 2.5v4M16 2.5v4M3 10h18"/></svg><input type="date" value="${v}" onclick="try{this.showPicker()}catch(e){}" onchange="dpick('${sc}','${k}',this)"></label></span>`}
+function dtg(sc,k){return dtn(DS[sc].g(k),"dpick('"+sc+"','"+k+"',this)","","","Ngày",1)}
 function dsel(sc,k,el,e){
   fmk(el,e,8,dfmt8);
   const dg=el.value.replace(/\D/g,"");el.classList.remove("bad");
@@ -685,19 +685,53 @@ function dsel(sc,k,el,e){
   if(c)c.value=iso;
   DS[sc].s(k,iso);
 }
-function dtn(v,onch,max,id,al){return `<span class="dt2"><input class="dtx" inputmode="numeric" autocomplete="off" placeholder="dd/mm/yyyy" aria-label="${al||"Ngày"}" value="${dmy(v)}" onfocus="setTimeout(()=>this.select())" oninput="dtnIn(this,event)" onblur="dtnBl(this)"><label class="cal"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4.5" width="18" height="16" rx="3"/><path d="M8 2.5v4M16 2.5v4M3 10h18"/></svg><input type="date" ${id?`id="${id}"`:""} value="${v||""}" ${max?`max="${max}"`:""} onclick="try{this.showPicker()}catch(e){}" onchange="${onch}"></label></span>`}
-function dtnIn(el,e){
-  fmk(el,e,8,dfmt8);el.classList.remove("bad");
-  const dg=el.value.replace(/\D/g,"");if(dg.length<8)return;
-  const d=+dg.slice(0,2),m=+dg.slice(2,4),y=+dg.slice(4),t=new Date(y,m-1,d),c=el.closest(".dt2").querySelector("input[type=date]");
+const DTP=["dd","mm","yyyy"];
+function dtn(v,onch,max,id,al,ne){return `<span class="dt2"><input class="dtx" ${ne?'data-ne="1"':""} autocomplete="off" inputmode="numeric" aria-label="${al||"Ngày"}" value="${dmy(v)||"dd/mm/yyyy"}" onkeydown="dtkd(this,event)" onmousedown="this._m=1" onmouseup="dtmu(this)" onfocus="dtfo(this)" onblur="dtbl(this)" onpaste="dtps(this,event)"><label class="cal"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4.5" width="18" height="16" rx="3"/><path d="M8 2.5v4M16 2.5v4M3 10h18"/></svg><input type="date" ${id?`id="${id}"`:""} value="${v||""}" ${max?`max="${max}"`:""} onclick="try{this.showPicker()}catch(e){}" onchange="${onch}"></label></span>`}
+function dtParts(el){const p=el.value.split("/");return[p[0]||"dd",p[1]||"mm",p[2]||"yyyy"]}
+function dtRng(p,i){let a=0;for(let j=0;j<i;j++)a+=p[j].length+1;return[a,a+p[i].length]}
+function dtSeg(el,i){const p=dtParts(el);el._s=i;el._b="";const r=dtRng(p,i);try{el.setSelectionRange(r[0],r[1])}catch(x){}}
+function dtSet(el,p,i){el.value=p.join("/");const r=dtRng(p,i);try{el.setSelectionRange(r[0],r[1])}catch(x){}}
+function dtkd(el,e){
+  if(e.ctrlKey||e.metaKey||e.altKey)return;
+  const k=e.key,p=dtParts(el),i=el._s||0;
+  if(/^\d$/.test(k)){
+    e.preventDefault();
+    let b=(el._b||"")+k;
+    if(b.length>(i===2?4:2)||(i===0&&+b>31)||(i===1&&+b>12))b=k;
+    el._b=b;p[i]=i===2?b:b.padStart(2,"0");dtSet(el,p,i);return;
+  }
+  if(k==="Tab"){
+    if(!e.shiftKey&&i<2){e.preventDefault();dtSeg(el,i+1)}
+    else if(e.shiftKey&&i>0){e.preventDefault();dtSeg(el,i-1)}
+    return;
+  }
+  if(k==="ArrowRight"){e.preventDefault();dtSeg(el,Math.min(2,i+1));return}
+  if(k==="ArrowLeft"){e.preventDefault();dtSeg(el,Math.max(0,i-1));return}
+  if(k==="Backspace"||k==="Delete"){e.preventDefault();p[i]=DTP[i];el._b="";dtSet(el,p,i);return}
+  if(k==="Enter"){e.preventDefault();dtCommit(el);return}
+  if(k==="/"||k==="."||k==="-"||k===" "){e.preventDefault();dtSeg(el,Math.min(2,i+1));return}
+  if(k.length===1)e.preventDefault();
+}
+function dtfo(el){if(!el._m)setTimeout(()=>dtSeg(el,0),0)}
+function dtmu(el){setTimeout(()=>{el._m=0;const p=dtParts(el),x=el.selectionStart,l0=p[0].length,l1=p[1].length;dtSeg(el,x<=l0?0:x<=l0+1+l1?1:2)},0)}
+function dtps(el,e){e.preventDefault();const t=(e.clipboardData.getData("text")||"").replace(/\D/g,"");if(t.length>=8){el.value=t.slice(0,2)+"/"+t.slice(2,4)+"/"+t.slice(4,8);dtCommit(el)}}
+function dtCommit(el){
+  const c=el.closest(".dt2").querySelector("input[type=date]"),p=dtParts(el);
+  if(p.every((x,i)=>x===DTP[i])){
+    if(el.dataset.ne&&c.value){c.value="";c.dispatchEvent(new Event("change"))}else el.value=dmy(c.value)||"dd/mm/yyyy";
+    return;
+  }
+  if(!p.every(x=>/^\d+$/.test(x))||!(p[2].length===4||p[2].length<=2)){el.classList.add("bad");return}
+  const d=+p[0],m=+p[1],y=p[2].length<=2?2000+ +p[2]:+p[2],t=new Date(y,m-1,d);
   if(y<1900||t.getFullYear()!==y||t.getMonth()!==m-1||t.getDate()!==d){el.classList.add("bad");return}
   const iso=y+"-"+String(m).padStart(2,"0")+"-"+String(d).padStart(2,"0");
   if(c.max&&iso>c.max){el.classList.add("bad");return}
-  c.value=iso;c.dispatchEvent(new Event("change"));
+  el.classList.remove("bad");el.value=dmy(iso);
+  if(iso!==c.value){c.value=iso;c.dispatchEvent(new Event("change"))}
 }
-function dtnBl(el){const c=el.closest(".dt2").querySelector("input[type=date]");el.value=dmy(c.value);el.classList.remove("bad")}
+function dtbl(el){el._m=0;dtCommit(el);if(el.classList.contains("bad")){const c=el.closest(".dt2").querySelector("input[type=date]");el.value=dmy(c.value)||"dd/mm/yyyy";el.classList.remove("bad")}}
 function dblur(sc,k,el){el.value=dmy(DS[sc].g(k));el.classList.remove("bad")}
-function dpick(sc,k,el){const b=el.closest(".dt2").querySelector(".dtx");b.value=dmy(el.value);b.classList.remove("bad");DS[sc].s(k,el.value)}
+function dpick(sc,k,el){const b=el.closest(".dt2").querySelector(".dtx");b.value=dmy(el.value)||"dd/mm/yyyy";b.classList.remove("bad");DS[sc].s(k,el.value)}
 function drange(t){const n=new Date(),e=ymd(n);let s=e;if(t==="7"){const d=new Date();d.setDate(d.getDate()-6);s=ymd(d)}if(t==="m")s=ymd(new Date(n.getFullYear(),n.getMonth(),1));let e2=e;if(t==="y"){const d=new Date();d.setDate(d.getDate()-1);s=e2=ymd(d)}OF.from=s;OF.to=e2;view()}
 function ofil(k,v){OF[k]=v;const r=olist();$("#osub").textContent=r.sub;$("#ol").innerHTML=r.html}
 function openO(no){if(PG==="ban"){cur=no;view()}else{pend=no;nav("ban")}}
