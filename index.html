@@ -494,6 +494,7 @@ function dnMigrate(){const M=new Map();
   Object.keys(D).forEach(k=>{if(!D[k].some(e=>e.L.some(o=>!o.dn)))return;D[k].sort((x,y)=>x.t-y.t||x.no-y.no).forEach((e,i)=>e.L.forEach(o=>{o.dn=i+1}))});
   save()}
 function view(){
+  ingSort();
   if(S.orders.some(o=>!o.dn)||S.sales.some(z=>!z.dn))dnMigrate();
   if(needLogin()){if(!sessOk()){loginShow();return}S.me=SESS;const lo=$("#lgin");if(lo)lo.remove()}else{const lo=$("#lgin");if(lo)lo.remove()}
   const h=PG;let k=NAV.some(n=>n[0]===h)?h:"ban";if(!navOk(k)){const f=NAV.find(n=>navOk(n[0]));if(f)k=f[0]}
@@ -952,6 +953,30 @@ function clock(){
 /* ===== Kho ===== */
 
 const dk=t=>{const d=new Date(t);return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")};
+/* Thứ tự nguyên liệu do người dùng kéo thả: lưu ở trường o của từng nguyên liệu (đồng bộ giữa các máy), mọi danh sách đều theo thứ tự này */
+const ingSort=()=>{S.ing.sort((a,b)=>(a.o==null?1e9:a.o)-(b.o==null?1e9:b.o)||a.id-b.id)};
+function ingDrag(ev,id){
+  ev.preventDefault();ev.stopPropagation();
+  const h=ev.currentTarget,row=h.closest("tr"),body=row.parentElement;
+  let sc=body;while(sc&&sc!==document.body){const o=getComputedStyle(sc).overflowY;if((o==="auto"||o==="scroll")&&sc.scrollHeight>sc.clientHeight)break;sc=sc.parentElement}
+  if(!sc||sc===document.body)sc=document.scrollingElement;
+  row.style.background="var(--hov)";row.style.opacity=".85";row.style.boxShadow="0 4px 14px rgba(0,0,0,.25)";
+  try{h.setPointerCapture(ev.pointerId)}catch(e){}
+  const mv=e=>{
+    const y=e.clientY,r0=sc.getBoundingClientRect?sc.getBoundingClientRect():{top:0,bottom:innerHeight};
+    const top=Math.max(0,r0.top),bot=Math.min(innerHeight,r0.bottom);
+    if(y<top+50)sc.scrollTop-=14;else if(y>bot-50)sc.scrollTop+=14;
+    const rows=[...body.querySelectorAll("tr[data-id]")].filter(r=>r!==row);
+    let ref=null;for(const r of rows){const b=r.getBoundingClientRect();if(y<b.top+b.height/2){ref=r;break}}
+    const cur=row.nextElementSibling;
+    if(ref!==cur&&!(ref===null&&cur===null)){const first=[...body.querySelectorAll("tr[data-id]")].map(r=>r.getBoundingClientRect().top);body.insertBefore(row,ref)}
+  };
+  const up=()=>{
+    h.removeEventListener("pointermove",mv);h.removeEventListener("pointerup",up);h.removeEventListener("pointercancel",up);
+    const ids=[...body.querySelectorAll("tr[data-id]")].map(r=>+r.dataset.id);
+    ids.forEach((x,i)=>{const g=ing(x);if(g&&g.o!==i)g.o=i});
+    save();view()};
+  h.addEventListener("pointermove",mv);h.addEventListener("pointerup",up);h.addEventListener("pointercancel",up)}
 /* Có đơn vị đóng gói riêng (kể cả quy đổi 1 túi = 1 kg) thì hiện quy đổi */
 const pk=i=>i.f>1||!!(i.pu&&String(i.pu).trim().toLowerCase()!==String(i.u||"").trim().toLowerCase());
 const nf=n=>(+(+n).toFixed(2)).toLocaleString("vi-VN"),DAY=864e5;
@@ -1257,7 +1282,7 @@ function vStock(){
   if(kp==="add"||kp==="edit")pn=ingModal(e);
   if(kp==="nhap")pn=impModal();
   if(imE)pn+=impEditModal();
-  if(kt==="ton")body=`<div class="card"><div class="bar" style="margin:0 0 8px"><b>Nguyên liệu</b>${kIn?`<button style="margin-left:auto" onclick="kp='add';ke=null;view();$('#in_n').focus()">+ Thêm</button>`:""}</div><div class="scroll"><table><tr><th>Nguyên liệu</th><th>Quy cách</th>${kCo?`<th style="text-align:right">Giá nhập</th>`:""}<th style="text-align:right">Còn</th></tr>${S.ing.map(i=>`<tr${kIn?` data-ed style="cursor:pointer" onclick="ke=${i.id};kp='edit';view();$('#in_n').focus()"`:""}><td><b>${esc(i.name)}</b>${lowI(i)?' <span class="pill">Sắp hết</span>':""}<br><small class="mu">${esc(i.note||"")}</small></td><td>${pk(i)?nf(i.f)+" "+esc(i.u)+"/"+esc(i.pu):esc(i.u)}</td>${kCo?`<td style="text-align:right">${fmt(i.price)}/${esc(i.pu||i.u)}</td>`:""}<td style="text-align:right" class="${lowI(i)?"low":""}"><b>${nf(i.qty)} ${esc(i.u)}</b>${pk(i)?`<br><small>${nf(i.qty/i.f)} ${esc(i.pu)}</small>`:""}${kCo?lotLine(i):""}</td></tr>`).join("")||`<tr><td colspan="5" class="mu">Chưa có nguyên liệu.${kIn?" Bấm Thêm để tạo.":""}</td></tr>`}</table></div></div>`;
+  if(kt==="ton")body=`<div class="card"><div class="bar" style="margin:0 0 8px"><b>Nguyên liệu</b>${kIn?`<button style="margin-left:auto" onclick="kp='add';ke=null;view();$('#in_n').focus()">+ Thêm</button>`:""}</div><div class="scroll"><table><tr>${kIn?"<th></th>":""}<th>Nguyên liệu</th><th>Quy cách</th>${kCo?`<th style="text-align:right">Giá nhập</th>`:""}<th style="text-align:right">Còn</th></tr>${S.ing.map(i=>`<tr data-id="${i.id}"${kIn?` data-ed style="cursor:pointer" onclick="ke=${i.id};kp='edit';view();$('#in_n').focus()"`:""}>${kIn?`<td style="width:26px;padding-right:0;color:var(--mu);cursor:grab;touch-action:none;user-select:none;font-size:18px;letter-spacing:-3px" title="Kéo để đổi thứ tự" onpointerdown="ingDrag(event,${i.id})" onclick="event.stopPropagation()">⋮⋮</td>`:""}<td><b>${esc(i.name)}</b>${lowI(i)?' <span class="pill">Sắp hết</span>':""}<br><small class="mu">${esc(i.note||"")}</small></td><td>${pk(i)?nf(i.f)+" "+esc(i.u)+"/"+esc(i.pu):esc(i.u)}</td>${kCo?`<td style="text-align:right">${fmt(i.price)}/${esc(i.pu||i.u)}</td>`:""}<td style="text-align:right" class="${lowI(i)?"low":""}"><b>${nf(i.qty)} ${esc(i.u)}</b>${pk(i)?`<br><small>${nf(i.qty/i.f)} ${esc(i.pu)}</small>`:""}${kCo?lotLine(i):""}</td></tr>`).join("")||`<tr><td colspan="5" class="mu">Chưa có nguyên liệu.${kIn?" Bấm Thêm để tạo.":""}</td></tr>`}</table></div></div>`;
   else if(kt==="nhap"){const[a,b]=rg(kr),G={};S.imp.filter(x=>x.ts>=a&&x.ts<b).slice().reverse().forEach(x=>(G[dk(x.ts)]=G[dk(x.ts)]||[]).push(x));
     body=chips+(Object.keys(G).map(d=>{const g=G[d],ce=can("stockEdit");return `<div class="card" style="padding:0;overflow:hidden;margin-bottom:12px"><div class="row" style="padding:12px 16px;margin:0;border-radius:0;border-bottom:0;background:var(--hov)"><b style="flex:1">${new Date(d+"T00:00").toLocaleDateString("vi-VN",{weekday:"short",day:"2-digit",month:"2-digit"})} <span class="mu" style="font-weight:400">· ${g.length} dòng</span></b><b>${fmt(g.reduce((t,x)=>t+x.cost,0))}</b></div><div class="impr imph"><div>Nguyên liệu</div><div>Số lượng nhập</div><div>Đơn giá</div><div>Thành tiền</div><span></span></div>${g.map(x=>{const i=ing(x.iid)||{u:"",name:"?"};return `<div class="impr"><div class="in"><b>${esc(i.name)}</b><small class="mu">${tm(x.ts)} · ${esc(x.by)}${x.edit?" · đã sửa":""}</small></div><div class="iq">${nf(x.q)} <span>${esc(i.u)}</span>${pk(i)?`<br><small class="mu" style="font-weight:400">${nf(x.q/i.f)} ${esc(i.pu||"")}</small>`:""}</div><div class="ig">${x.q?(i.f>1?fmt(x.cost/x.q*i.f)+"/"+esc(i.pu||i.u):fmt(x.cost/x.q)+"/"+esc(i.u)):""}</div><div class="it">${fmt(x.cost)}</div>${ce?`<button class="gi" aria-label="Sửa phiếu nhập" title="Sửa phiếu nhập" onclick="editImp(${x.id})"><span class="ic">${pnI}</span></button>`:"<span></span>"}</div>`}).join("")}</div>`}).join("")||`<p class="mu">Chưa có phiếu nhập trong khoảng này.</p>`)}
   else if(kt==="bc"){const[a,b]=rg(kr),ss=S.sales.filter(s=>!s.cancel&&s.ts>=a&&s.ts<b),fl=(i,x,y)=>[S.imp.filter(z=>z.iid===i.id&&z.ts>=x&&z.ts<y).reduce((t,z)=>t+z.q,0),S.kk.filter(z=>z.iid===i.id&&z.ts>=x&&z.ts<y).reduce((t,z)=>t+z.d,0),S.kk.some(z=>z.iid===i.id&&z.ts>=x&&z.ts<y)];
