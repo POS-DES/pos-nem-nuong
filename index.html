@@ -609,7 +609,7 @@ function pay(m){
 
 /* ===== Bếp ===== */
 function vKitchen(){
-  const a=S.kitchen.filter(t=>t.st!=="done"),d=S.kitchen.filter(t=>t.st==="done").slice(-6).reverse();
+  const td=dk(Date.now()),a=S.kitchen.filter(t=>t.st!=="done"&&dk(t.ts)===td),d=S.kitchen.filter(t=>t.st==="done"&&dk(t.dts||t.ts)===td).slice(-6).reverse();
   const c=t=>`<div class="card"><div class="top"><b>${esc(t.where)}</b>${t.st==="done"?`<small>${t.dts?"Xong sau "+ago2(t.ts,t.dts):"Đã xong"}</small>`:`<b class="kt" data-ts="${t.ts}" style="font-variant-numeric:tabular-nums;color:var(--pr)">${fmtc(t.ts)}</b>`}</div><small class="tw" style="display:block;margin:2px 0 6px">Báo lúc ${tm(t.ts)}</small>${t.items.map(i=>`<div class="row"><span>${esc(i.name)}</span><b>× ${i.q}</b></div>`).join("")}
   ${t.st==="done"?`<small>Đã xong</small>`:`<button class="${t.st==="new"?"p":"g"}" style="margin-top:8px;width:100%" onclick="kst(${t.id})">${t.st==="new"?"Bắt đầu làm":"Hoàn thành"}</button>`}</div>`;
   return `<h2 style="margin-top:0">Bếp</h2><div class="grid" style="grid-template-columns:repeat(auto-fill,minmax(220px,1fr))">${a.map(c).join("")||`<span class="mu">Không có phiếu nào đang chờ.</span>`}</div>
