@@ -1179,7 +1179,7 @@ function nCalc(id,s){
   }else if(s==="g"){man=1;t.value=q>0&&g.value!==""?Math.round(q*g.value):""}
   else if(t.value!==""){man=1;if(q>0)g.value=r2(+t.value/q)}
   else{man=0;g.value=""}
-  kvn[id]=[$("#ns"+id).value,g.value,t.value,man];
+  kvn[id]=[$("#ns"+id).value,g.value,t.value,man];impTot();
   $("#im_ok").disabled=!S.ing.some(x=>+$("#ns"+x.id).value>0)||imNeed()
 }
 function impSave(){if(!can("stockIn"))return;const now=new Date(),ts=dk(now)===kd?now.getTime():new Date(kd+"T12:00").getTime(),fg=imFg===true;if(imNeed())return;let n=0;S.ing.forEach(i=>{const q=+$("#ns"+i.id).value;if(!(q>0))return;const c=Math.round(+$("#nt"+i.id).value||q*(+$("#ng"+i.id).value||0)),u=q*i.f,k=fg?kkDay(i):null;if(k){S.imp.push({id:++S.iid,ts:k.ts-1-n++,by:meName(),iid:i.id,q:u,cost:c,kk:k.ts});k.a+=u;k.d+=u}else{S.imp.push({id:++S.iid,ts:ts+n++,by:meName(),iid:i.id,q:u,cost:c});i.qty+=u}if(c>0)i.price=c/q});kp=null;kvn={};imFg=null;save();view()}
@@ -1187,8 +1187,11 @@ function impModal(){
   const cl="kp=null;kvn={};imFg=null;view()",inp=(p,id,ph,v,fn,sx)=>`<div class="ib"><input id="${p}${id}" ${p==="ns"?'type="number" min="0"':'data-m type="text" inputmode="decimal"'} placeholder="${ph}" value="${v}" oninput="nCalc(${id},'${fn}')"><span class="su">${sx}</span></div>`;
   return `<div class="mo" onclick="if(event.target===this){${cl}}"><div class="md" style="max-width:780px"><div class="mh"><b>Nhập hàng</b><button class="mx" onclick="${cl}">×</button></div><div class="mb">${dtBar()}${srch()}
   <div class="card scroll" style="padding:0"><table><tr><th>Nguyên liệu</th><th style="text-align:right">Số lượng</th><th style="text-align:right">Đơn giá</th><th style="text-align:right">Thành tiền</th></tr>${S.ing.map(i=>{const v=kvn[i.id]||["","",""];return `<tr class="ir" data-n="${esc(i.name.toLowerCase())}"><td>${esc(i.name)}${i.f>1?`<br><small class="mu">1 ${esc(i.pu)} = ${nf(i.f)} ${esc(i.u)}</small>`:""}</td><td>${inp("ns",i.id,"SL",v[0],"s",esc(i.pu||i.u))}</td><td>${inp("ng",i.id,"Giá",v[1],"g","đ")}</td><td>${inp("nt",i.id,"Tiền",v[2],"t","đ")}</td></tr>`}).join("")||`<tr><td colspan="4" class="mu">Chưa có nguyên liệu. Hãy thêm nguyên liệu trước.</td></tr>`}</table></div></div>
-  <div class="mfoot"><button onclick="${cl}">Hủy</button><button id="im_ok" class="p" onclick="impSave()" ${S.ing.some(i=>+(kvn[i.id]||[])[0]>0)&&!imNeed()?"":"disabled"}>Lưu</button></div></div></div>`}
+  <div class="mfoot"><div style="margin-right:auto;display:flex;flex-direction:column;line-height:1.3"><small class="mu">Tổng tiền nhập</small><b id="im_tot" style="font-size:18px">${impTotT()}</b></div><button onclick="${cl}">Hủy</button><button id="im_ok" class="p" onclick="impSave()" ${S.ing.some(i=>+(kvn[i.id]||[])[0]>0)&&!imNeed()?"":"disabled"}>Lưu</button></div></div></div>`}
 let imFg=null;
+/* Tổng tiền phiếu nhập, cập nhật mỗi lần nhập số lượng / giá / tiền */
+const impTotT=()=>{let s=0,n=0;S.ing.forEach(i=>{const v=kvn[i.id];if(!v)return;const q=+v[0];if(!(q>0))return;s+=Math.round(+v[2]||q*(+v[1]||0));n++});return n?fmt(s)+" · "+n+" mặt hàng":"0đ"};
+function impTot(){const e=$("#im_tot");if(e)e.textContent=impTotT()}
 const imNeed=()=>false;
 function imOkU(){const b=$("#im_ok");if(b)b.disabled=!S.ing.some(x=>$("#ns"+x.id)&&+$("#ns"+x.id).value>0)||imNeed()}
 function kkHint(id){const i=ing(id),el=$("#kh"+id);if(!i||!el)return;const v=kvk[id];if(v===""||v==null){el.textContent="";return}const x=exOn(i,kCut(i).e),b=+v;el.textContent=x>0&&b>x+1e-9?"⚠ Đếm dư "+nf(b-x)+" "+i.u+" so với sổ: kiểm tra lại số đếm, hoặc có hàng chưa nhập vào phần mềm":""}
