@@ -380,15 +380,15 @@ function seed(){
     staff:[{id:1,name:"Chủ quán",role:"Chủ quán",on:false},{id:2,name:"Thu ngân 1",role:"Thu ngân",on:false}],
     ing:[],imp:[],kk:[],iid:1,att:[],orders:[],sales:[],kitchen:[],nid:100,ono:20,kid:0};
 }
-const CHK="posquanan2_chain";
-let CH=(()=>{try{return JSON.parse(localStorage.getItem(CHK))}catch(e){}})()||{cur:"main",list:[{id:"main",key:"posquanan2"}]};
+const CHK="postest_chain";
+let CH=(()=>{try{return JSON.parse(localStorage.getItem(CHK))}catch(e){}})()||{cur:"main",list:[{id:"main",key:"postest"}]};
 let SK=(CH.list.find(x=>x.id===CH.cur)||CH.list[0]).key;
 function load(){try{const r=localStorage.getItem(SK);if(r)return JSON.parse(r)}catch(e){}return seed()}
 function save(){try{localStorage.setItem(SK,JSON.stringify(S))}catch(e){}}
 let S=load();if(!S.ing){S.ing=[];S.imp=[];S.kk=[];S.iid=1}
 let PG=(location.hash||"#ban").slice(1);
 function nav(k){if(k===PG&&!pend)return false;leave();PG=k;try{history.replaceState(null,"","#"+k)}catch(e){}if(pend){cur=pend;pend=null}view();return false}
-let cur=null,cat="Tất cả",rst=false,qrMode=false,edI=null,sv=null,cx=false,pend=null;
+let cur=null,cat="Tất cả",rst=false,qrMode=false,edI=null,sv=null,cx=false,pend=null,qrOkNo=0,qrGot=0,qrBusy=false,qrOpen=0,qrWrong=0;
 const BANKS=[["970436","Vietcombank"],["970415","VietinBank"],["970418","BIDV"],["970405","Agribank"],["970407","Techcombank"],["970422","MB Bank"],["970416","ACB"],["970432","VPBank"],["546034","Cake"],["970423","TPBank"],["970403","Sacombank"],["970441","VIB"],["970443","SHB"],["970437","HDBank"],["970448","OCB"],["970426","MSB"],["970440","SeABank"],["970431","Eximbank"],["970449","LPBank"]];
 const bank=()=>S.bank||(S.bank={bin:"",acc:"",name:""});
 const tlv=(id,v)=>id+String(v.length).padStart(2,"0")+v;
@@ -444,7 +444,7 @@ menu:'<path d="M5 3v7a2 2 0 0 0 2 2 2 2 0 0 0 2-2V3M7 3v18M17 21V3c-2 1-4 4-4 8 
 sodo:'<path d="M5 11V8a3 3 0 0 1 3-3h8a3 3 0 0 1 3 3v3"/><path d="M3 13a2 2 0 0 1 4 0v2h10v-2a2 2 0 0 1 4 0v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2Z"/><path d="M6 19v2M18 19v2"/>',
 nhanvien:'<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.9M16 3.1a4 4 0 0 1 0 7.8"/>',
 caidat:'<path d="M4 6h10M18 6h2M4 12h4M12 12h8M4 18h12"/><circle cx="16" cy="6" r="2"/><circle cx="10" cy="12" r="2"/><circle cx="18" cy="18" r="2"/>'};
-let SESS=(()=>{try{return+localStorage.getItem("posquanan2_sess")||0}catch(e){return 0}})(),lgErr="",lgPhone="",lgFail=0,lgUntil=0;
+let SESS=(()=>{try{return+localStorage.getItem("postest_sess")||0}catch(e){return 0}})(),lgErr="",lgPhone="",lgFail=0,lgUntil=0;
 const phoneKey=p=>{let d=String(p||"").replace(/\D/g,"");if(d.startsWith("84"))d="0"+d.slice(2);return d};
 const needLogin=()=>S.staff.some(s=>s.role==="Chủ quán"&&s.phone&&s.pw);
 const sessOk=()=>{const s=S.staff.find(x=>x.id===SESS);return!!(s&&s.phone&&s.pw)};
@@ -466,8 +466,8 @@ async function doLogin(){lgPhone=$("#lg_p").value;const ph=phoneKey(lgPhone),pw=
   if(Date.now()<lgUntil){lgErr="Nhập sai nhiều lần. Thử lại sau "+Math.ceil((lgUntil-Date.now())/1000)+" giây.";return loginShow(true)}
   const s=S.staff.find(x=>x.phone&&x.pw&&ph&&phoneKey(x.phone)===ph),ok=!!(s&&pw&&await pwOk(s,pw));
   if(!ok){lgFail++;if(lgFail>=5){lgFail=0;lgUntil=Date.now()+6e4}lgErr="Số điện thoại hoặc mật khẩu không đúng.";return loginShow(true)}
-  lgFail=0;lgErr="";lgPhone="";rcNew=null;SESS=s.id;S.me=s.id;try{localStorage.setItem("posquanan2_sess",s.id)}catch(e){}lg("Đăng nhập",s.name);view()}
-function logout(){if(!needLogin()){const o=S.staff.find(s=>s.role==="Chủ quán");if(isOwner()&&o){nav("nhanvien");nvT("ds");editStaff(o.id)}return}lg("Đăng xuất",meName());SESS=0;pwShow={};try{localStorage.removeItem("posquanan2_sess")}catch(e){}leave();view()}
+  lgFail=0;lgErr="";lgPhone="";rcNew=null;SESS=s.id;S.me=s.id;try{localStorage.setItem("postest_sess",s.id)}catch(e){}lg("Đăng nhập",s.name);view()}
+function logout(){if(!needLogin()){const o=S.staff.find(s=>s.role==="Chủ quán");if(isOwner()&&o){nav("nhanvien");nvT("ds");editStaff(o.id)}return}lg("Đăng xuất",meName());SESS=0;pwShow={};try{localStorage.removeItem("postest_sess")}catch(e){}leave();view()}
 function loginBn(){return needLogin()||!isOwner()?"":`<div class="card" style="margin-bottom:14px;display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap"><span><b>Chưa bật đăng nhập.</b> Đặt số điện thoại và mật khẩu cho Chủ quán trong mục Nhân viên để nhân viên phải đăng nhập mới vào được.</span><button class="p" onclick="nav('nhanvien')">Đặt ngay</button></div>`}
 async function saveStaff(){
   const er=t=>{const x=$("#st_e");if(x)x.textContent=t};
@@ -484,7 +484,7 @@ async function saveStaff(){
   if(stm.id){cur.name=n;cur.phone=ph;cur.wage=w;if(cur.role!=="Chủ quán")cur.role=r;if(hs){cur.pw=hs;pvSet(cur.id,pw)}lg("Nhân viên","Sửa "+n)}
   else{S.staff.push({id:++S.nid,name:n,role:r,phone:ph,wage:w,on:false,pw:hs});pvSet(S.nid,pw);lg("Nhân viên","Thêm "+n)}
   if(hs)lg("Tài khoản",(stm.id?"Đặt lại":"Đặt")+" mật khẩu đăng nhập cho "+n);
-  if(!was&&needLogin()&&isOwner()){SESS=S.me;try{localStorage.setItem("posquanan2_sess",S.me)}catch(e){}}
+  if(!was&&needLogin()&&isOwner()){SESS=S.me;try{localStorage.setItem("postest_sess",S.me)}catch(e){}}
   stm=null;sdl=false;save();view()}
 /* Ngày nào còn đơn chưa có số theo ngày (đơn cũ, hoặc dữ liệu vừa đồng bộ từ bản cũ) thì đánh lại số từ 1 cho cả ngày đó, xếp theo giờ mở đơn */
 function dnMigrate(){const M=new Map();
@@ -530,8 +530,9 @@ function openT(id){const o=ordT(id);if(o){if(o.paid){openSale(o.no,1);return}cur
 function newShip(){newOrder(null)}
 function vQR(o){
   const b=bank(),amt=stot(o),ok=b.bin&&b.acc,bn=(BANKS.find(x=>x[0]===b.bin)||[0,""])[1];
+  if(qrOkNo===o.no)return vQRok(o,amt);
   return `<div class="bar"><button onclick="qrMode=false;view()">← Quay lại</button><b>Chuyển khoản · ${o.tid!=null?esc(tbl(o.tid).name):"#"+o.no}</b></div>
-  <div class="card qr" style="max-width:360px;text-align:center;margin:0 auto">${ok?`<img alt="Mã QR chuyển khoản" src="${qrUrl(vietqr(amt,"DON "+o.no))}"><div class="tot" style="justify-content:center">${fmt(amt)}</div><p class="mu">${esc(bn)} · ${esc(b.acc)}<br>${esc(b.name)}<br>Nội dung: DON ${o.no}</p><button class="g" style="width:100%" onclick="pay('Chuyển khoản')">Đã nhận tiền</button>`:`<p>Chưa cài đặt ngân hàng nhận tiền.</p><a href="#caidat" onclick="return nav('caidat')">Đến Cài đặt</a>`}</div>`;
+  <div class="card qr" style="max-width:360px;text-align:center;margin:0 auto">${ok?`<img alt="Mã QR chuyển khoản" src="${qrUrl(vietqr(amt,"DON "+o.no))}"><div class="tot" style="justify-content:center">${fmt(amt)}</div><p class="mu">${esc(bn)} · ${esc(b.acc)}<br>${esc(b.name)}<br>Nội dung: DON ${o.no}</p><p class="mu" style="margin:12px 0">${qrWrong>0?`<b style="color:#ef4444">Đã nhận ${fmt(qrWrong)} nhưng khác số cần thu ${fmt(amt)}. Không tự xác nhận, hãy báo quản lý.</b>`:"Đang chờ khách chuyển khoản…"}</p>${mgrOk()?`<button class="g" style="width:100%" onclick="payManual()">Xác nhận thủ công (quản lý)</button>`:""}`:`<p>Chưa cài đặt ngân hàng nhận tiền.</p><a href="#caidat" onclick="return nav('caidat')">Đến Cài đặt</a>`}</div>`;
 }
 function vOrder(o){if(qrMode)return vQR(o);if(ck)return vCheckout(o);
   const cats=["Tất cả",...catList()],list=sortM(S.menu.filter(m=>(cat==="Tất cả"||m.cat===cat)&&(!mq.trim()||m.name.toLowerCase().includes(mq.trim().toLowerCase())))),u=unsent(o),t=o.tid!=null?tbl(o.tid):null;
@@ -565,7 +566,7 @@ function vCheckout(o){const t=o.tid!=null?tbl(o.tid):null,u=unsent(o),ok=o.items
   <div class="ckc"><div class="cch">Ưu đãi</div>${vch||`<small class="mu">Đơn này chưa có ưu đãi nào được áp dụng.</small>`}</div>
   <div class="ckc"><div class="cch">Chi tiết thanh toán</div>${sum}${sav>0.5?`<div class="cksv2"><span class="ic">${ico(tag)}</span>Bạn đã tiết kiệm <b>${fmt(sav)}</b> cho đơn này</div>`:""}</div>
   <div class="ckc"><div class="cch">Phương thức thanh toán</div>${rd("Tiền mặt","Tiền mặt","Thu trực tiếp tại quầy","M2 6h20v12H2zM12 9.5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5ZM6 12h.01M18 12h.01","var(--ok)")}${rd("Chuyển khoản","Chuyển khoản","Quét mã QR theo số tiền của đơn","M3 3h7v7H3zM14 3h7v7h-7zM3 14h7v7H3zM14 14h3v3h-3zM20 14v.01M14 20h3M20 17v4","var(--pr)")}</div>
-  <div class="ckbar"><div class="ckbt"><small class="mu">Tổng thanh toán</small><b>${fmt(stot(o))}</b>${sav>0.5?`<small class="sv">Tiết kiệm ${fmt(sav)}</small>`:""}</div><button class="p" onclick="${cash?"pay('Tiền mặt')":"qrMode=true;view()"}" ${ok?"":"disabled"}>${cash?"Xác nhận đã thu tiền":"Hiện mã QR"}</button></div></div>`}
+  <div class="ckbar"><div class="ckbt"><small class="mu">Tổng thanh toán</small><b>${fmt(stot(o))}</b>${sav>0.5?`<small class="sv">Tiết kiệm ${fmt(sav)}</small>`:""}</div><button class="p" onclick="${cash?"pay('Tiền mặt')":"qrMode=true;qrGot=0;qrOkNo=0;qrOpen=0;qrWrong=0;view()"}" ${ok?"":"disabled"}>${cash?"Xác nhận đã thu tiền":"Hiện mã QR"}</button></div></div>`}
 function pbest(id,pr){let b=0,bn="";actP().forEach(p=>{const L=p.items||[];if(p.t==="fix"?!L.includes(id):(L.length&&!L.includes(id)))return;const d=pdisc(p,pr);if(d>b){b=d;bn=p.name}});return{d:b,n:bn}}
 function promoStrip(){const P=actP();if(!P.length)return"";const ic=ico('<path d="M20.6 13.4 13.4 20.6a2 2 0 0 1-2.8 0L3 13V3h10l7.6 7.6a2 2 0 0 1 0 2.8Z"/><circle cx="7.5" cy="7.5" r="1.5"/>');return `<div class="pbn">${P.map(p=>{const td=new Date(p.to).toDateString()===new Date().toDateString(),v=p.t==="pct"?"Giảm "+p.v+"%":p.t==="fix"?"Đồng giá "+fmt(p.v):"Bớt "+fmt(p.v)+"/suất";return `<div class="pcd"><span class="ic pic">${ic}</span><div class="ptx"><b>${esc(p.name)}</b><small>${v}${td?" · đến "+tm(p.to):""}</small></div></div>`}).join("")}</div>`}
 const qn=(o,id)=>o.items.filter(i=>i.id===id).reduce((a,i)=>a+i.q,0);
@@ -606,6 +607,28 @@ function pay(m){
   const F=fees(o);S.sales.push({ts:now,opened:o.ts,no:o.no,dn:o.dn,code,type:o.tid!=null?"ban":"ship",table:o.tid!=null?tbl(o.tid).name:"Mang về",cust:o.cust,pax:paxOf(o),staff:o.staff,payBy:meName(),sub:F.sub,pd:F.pd,pn:F.pn,disc:o.disc,md:F.md,sv:F.sv,vat:F.vat,ship:F.ship,km:o.km||0,total:F.total,method:m,ref:(m==="Tiền mặt"?"TM":"QP")+String(Math.random()*1e6|0).padStart(6,"0"),items});
   o.paid={method:m,ts:Date.now()};qrMode=false;ck=false;edI=null;save();cur=null;view();
 }
+
+/* ===== Tự nhận biết khách đã chuyển khoản (SePay -> Supabase) ===== */
+function vQRok(o,amt){return `<div class="bar"><b>Chuyển khoản · ${o.tid!=null?esc(tbl(o.tid).name):"#"+o.no}</b></div><div class="card" style="max-width:360px;text-align:center;margin:0 auto;padding:32px 20px"><svg width="72" height="72" viewBox="0 0 24 24" fill="none" stroke="var(--ok)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M8 12.5l3 3 5-6"/></svg><div class="tot" style="justify-content:center;margin-top:12px">Thanh toán thành công</div><p class="mu">${fmt(amt)}</p></div>`}
+async function qrCheck(){
+  if(qrBusy||!qrMode||cur==null)return;
+  const no=cur,o=ordN(no),b=bank();
+  if(!o||o.paid||qrOkNo===no||!b.acc)return;
+  qrBusy=true;
+  try{
+    const amt=Math.round(stot(o)),a={p_account:b.acc,p_order:o.no,p_opened:+o.ts||0};
+    if(qrOpen!==no){await syRpc("pos_pay_open",{...a,p_amount:amt});if(!qrMode||cur!==no)return;qrOpen=no}
+    const r=await syRpc("pos_pay_status",a);
+    if(!qrMode||cur!==no)return;
+    if(r&&r.status==="paid"&&+r.amount===amt&&amt>0){
+      qrOkNo=no;view();
+      setTimeout(()=>{const x=ordN(no);if(qrOkNo===no&&x&&!x.paid){cur=no;pay("Chuyển khoản");qrOkNo=0;qrGot=0;if(PG!=="ban")nav("ban")}},2000);
+    }else{const w=+(r&&r.wrong)||0;if(w!==qrWrong){qrWrong=w;view()}}
+  }catch(e){}finally{qrBusy=false}
+}
+const mgrOk=()=>{const m=S.staff.find(s=>s.id===S.me);return !m||m.role==="Chủ quán"||m.role==="Quản lý"};
+function payManual(){if(!mgrOk())return;const o=ordN(cur);if(o)lg("Thanh toán","Xác nhận tay chuyển khoản · đơn #"+o.no+" · "+fmt(stot(o)));pay("Chuyển khoản")}
+setInterval(qrCheck,3000);
 
 /* ===== Bếp ===== */
 function vKitchen(){
@@ -1768,23 +1791,23 @@ function delStore(id){if(CH.list.length<2)return;if(!sdel){sdel=true;view();retu
 function addStore(){const n=$("#sn_n").value.trim();if(!n){$("#sn_n").focus();return}
   const d=seed();d.store.name=n;d.store.addr=$("#sn_a").value.trim();
   if($("#sn_c").checked){d.menu=JSON.parse(JSON.stringify(S.menu));d.tables=JSON.parse(JSON.stringify(S.tables));d.areas=JSON.parse(JSON.stringify(S.areas||[]));d.nid=Math.max(d.nid,S.nid)}
-  const id="s"+Date.now().toString(36),key="posquanan2_"+id;
+  const id="s"+Date.now().toString(36),key="postest_"+id;
   try{localStorage.setItem(key,JSON.stringify(d))}catch(e){}
   lg("Chuỗi quán","Thêm quán "+n);CH.list.push({id,key});smod=false;switchStore(id)}
 const stName=x=>x.id===CH.cur?S.store.name:(((ldk(x.key)||{}).store||{}).name||"Quán");
 function stSw(){return `<span class="chev ic">${ico('<path d="m7 15 5 5 5-5M7 9l5-5 5 5"/>')}</span><select title="Đổi cơ sở" onchange="stPick(this.value)">${CH.list.map(x=>`<option value="${esc(String(x.id))}" ${x.id===CH.cur?"selected":""}>${esc(stName(x))}</option>`).join("")}</select>`}
 function stPick(v){if(v==="__mg"){sTab="chuoi";PG==="caidat"?view():nav("caidat");return}const x=CH.list.find(z=>String(z.id)===String(v));if(x)swStore(x.id)}
 function swStore(id){const m=S.staff.find(s=>s.id===S.me)||{},ph=m.phone,pw=m.pw;switchStore(id);
-  if(needLogin()&&!sessOk()&&ph&&pw){const o=S.staff.find(s=>s.role==="Chủ quán"&&s.phone===ph&&s.pw===pw);if(o){SESS=o.id;S.me=o.id;try{localStorage.setItem("posquanan2_sess",o.id)}catch(e){}view()}}}
+  if(needLogin()&&!sessOk()&&ph&&pw){const o=S.staff.find(s=>s.role==="Chủ quán"&&s.phone===ph&&s.pw===pw);if(o){SESS=o.id;S.me=o.id;try{localStorage.setItem("postest_sess",o.id)}catch(e){}view()}}}
 function switchStore(id){const x=CH.list.find(z=>z.id===id);if(!x||id===CH.cur){view();return}save();CH.cur=id;SK=x.key;try{localStorage.setItem(CHK,JSON.stringify(CH))}catch(e){}S=load();cur=null;sv=null;chk()}
-let DV=(()=>{try{return JSON.parse(localStorage.getItem("posquanan2_dev"))}catch(e){}})()||{theme:"auto",fs:100};
+let DV=(()=>{try{return JSON.parse(localStorage.getItem("postest_dev"))}catch(e){}})()||{theme:"auto",fs:100};
 function dvApply(){const r=document.documentElement;DV.theme==="auto"?r.removeAttribute("data-theme"):r.setAttribute("data-theme",DV.theme);r.style.zoom=DV.fs/100}
-function dvSet(k,v){DV[k]=v;try{localStorage.setItem("posquanan2_dev",JSON.stringify(DV))}catch(e){}dvApply();view()}
+function dvSet(k,v){DV[k]=v;try{localStorage.setItem("postest_dev",JSON.stringify(DV))}catch(e){}dvApply();view()}
 const seg=(k,o)=>`<div class="seg">${o.map(x=>`<button class="${DV[k]==x[0]?"on":""}" onclick="dvSet('${k}',${typeof x[0]==="number"?x[0]:`'${x[0]}'`})">${x[1]}</button>`).join("")}</div>`;
-function sDev(){return `<div class="card" style="max-width:560px"><div class="row"><span>Cài lên màn hình chính</span><button id="ipb" class="p" onclick="pwaInstall()" ${IP?"":"hidden"}>Cài đặt</button>${IP||matchMedia("(display-mode:standalone)").matches?"":`<small class="mu" style="max-width:300px;text-align:right">Mở bằng Chrome rồi bấm ⋮ → Cài đặt ứng dụng (hoặc Thêm vào màn hình chính). Trên iPhone dùng Safari → Chia sẻ → Thêm vào MH chính.</small>`}${matchMedia("(display-mode:standalone)").matches?`<small class="mu">Đã cài</small>`:""}</div><div class="row"><span>Giao diện</span>${seg("theme",[["auto","Theo máy"],["light","Sáng"],["dark","Tối"]])}</div><div class="row"><span>Cỡ hiển thị</span>${seg("fs",[[90,"90%"],[100,"100%"],[112,"112%"],[125,"125%"]])}</div><div class="row"><span>Dữ liệu quán này trên máy</span><span class="mu">${(JSON.stringify(S).length/1024).toFixed(0)} KB</span></div><p><b>Sao lưu / khôi phục</b></p><textarea id="bk" rows="4" style="width:100%" placeholder="Bấm Tạo bản sao lưu rồi sao chép nội dung, hoặc dán bản sao lưu vào đây để khôi phục"></textarea><div class="bar"><button onclick="$('#bk').value=JSON.stringify(S)">Tạo bản sao lưu</button><button class="p" onclick="restore()">Khôi phục</button><span id="bm" class="mu"></span></div></div>`}
+function sDev(){return `<div class="card" style="max-width:560px"><div class="row"><span>Cài lên màn hình chính</span><button id="ipb" class="p" onclick="pwaInstall()" ${IP?"":"hidden"}>Cài đặt</button>${IP||matchMedia("(display-mode:standalone)").matches?"":`<small class="mu" style="max-width:300px;text-align:right">Mở bằng Chrome rồi bấm ⋮ → Cài đặt ứng dụng (hoặc Thêm vào màn hình chính). Trên iPhone dùng Safari → Chia sẻ → Thêm vào MH chính.</small>`}${matchMedia("(display-mode:standalone)").matches?`<small class="mu">Đã cài</small>`:""}</div><div class="row"><span>Thông báo ca làm</span>${ntRow()}</div><div class="row"><span>Giao diện</span>${seg("theme",[["auto","Theo máy"],["light","Sáng"],["dark","Tối"]])}</div><div class="row"><span>Cỡ hiển thị</span>${seg("fs",[[90,"90%"],[100,"100%"],[112,"112%"],[125,"125%"]])}</div><div class="row"><span>Dữ liệu quán này trên máy</span><span class="mu">${(JSON.stringify(S).length/1024).toFixed(0)} KB</span></div><p><b>Sao lưu / khôi phục</b></p><textarea id="bk" rows="4" style="width:100%" placeholder="Bấm Tạo bản sao lưu rồi sao chép nội dung, hoặc dán bản sao lưu vào đây để khôi phục"></textarea><div class="bar"><button onclick="$('#bk').value=JSON.stringify(S)">Tạo bản sao lưu</button><button class="p" onclick="restore()">Khôi phục</button><span id="bm" class="mu"></span></div></div>`}
 function restore(){try{const d=JSON.parse($("#bk").value);if(!d||!d.store||!d.menu||!d.tables)throw 0;S=d;save();lg("Cài đặt","Khôi phục dữ liệu từ bản sao lưu");view()}catch(e){$("#bm").textContent="Bản sao lưu không hợp lệ."}}
-let PV=(()=>{try{return JSON.parse(localStorage.getItem("posquanan2_pwv"))||{}}catch(e){return{}}})(),pwShow={};
-const pvSave=()=>{try{localStorage.setItem("posquanan2_pwv",JSON.stringify(PV))}catch(e){}};
+let PV=(()=>{try{return JSON.parse(localStorage.getItem("postest_pwv"))||{}}catch(e){return{}}})(),pwShow={};
+const pvSave=()=>{try{localStorage.setItem("postest_pwv",JSON.stringify(PV))}catch(e){}};
 const pvSet=(id,v)=>{PV[id]=v;pvSave()},pvDel=id=>{delete PV[id];pvSave()};
 function pwTg(id){pwShow[id]=!pwShow[id];view()}
 function pwCell(s){if(!s.pw)return `<small class="mu">Chưa đặt</small>`;if(!isOwner())return `<b style="letter-spacing:2px">••••••••</b><br><small class="mu">Đã đặt</small>`;const v=PV[s.id];if(!v)return `<small class="mu">Chưa xem được. Bấm Đặt lại mật khẩu để xem.</small>`;const on=pwShow[s.id];return `<b style="font-family:ui-monospace,Menlo,monospace;letter-spacing:${on?0:2}px">${on?esc(v):"••••••••"}</b> <button onclick="pwTg(${s.id})" style="padding:2px 10px;margin-left:6px">${on?"Ẩn":"Hiện"}</button>`}
@@ -1820,7 +1843,7 @@ async function doForgot(){
   let nc=null;if(s.role==="Chủ quán"){nc=rcGen(16);s.rc=await rcHash(s.id,nc)}
   lg("Tài khoản",s.name+" đặt lại mật khẩu bằng mã");save();fpErr="";fpOk={id:s.id,code:nc};loginShow(true)}
 function fpEnter(){const s=S.staff.find(x=>x.id===(fpOk&&fpOk.id));fpOn=false;fpOk=null;fpPhone="";lgPhone="";if(!s){loginShow(true);return}
-  SESS=s.id;S.me=s.id;try{localStorage.setItem("posquanan2_sess",s.id)}catch(e){}lg("Đăng nhập",s.name);view()}
+  SESS=s.id;S.me=s.id;try{localStorage.setItem("postest_sess",s.id)}catch(e){}lg("Đăng nhập",s.name);view()}
 let accMsg=null;
 const pwOk=async(s,pw)=>{const c=[...new Set([pw,pw.trim(),pw.normalize("NFC"),pw.normalize("NFC").trim()])].filter(Boolean);for(const t of c){if(await pwHash(s.id,t,s.pw[0]==="d")===s.pw)return true}return false};
 const pwHash=async(id,t,fb)=>{const q="pos:"+id+":"+t;try{if(!fb&&window.crypto&&crypto.subtle){const b=await crypto.subtle.digest("SHA-256",new TextEncoder().encode(q));return"s"+[...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,"0")).join("")}}catch(e){}let h=5381;for(let i=0;i<q.length;i++)h=(h*33^q.charCodeAt(i))>>>0;return"d"+h.toString(16)};
@@ -1879,7 +1902,7 @@ Object.keys(LW).forEach(k=>{const f=window[k];if(typeof f!=="function")return;wi
 {const f=window.clock;if(typeof f==="function")window.clock=function(){const s=S.staff.find(x=>x.id===S.me)||S.staff[0],b=s&&S.att.some(x=>x.sid===s.id&&!x.out),r=f.apply(this,arguments),a=s&&S.att.some(x=>x.sid===s.id&&!x.out);if(s&&a!==b)lg("Chấm công",s.name+(a?" vào ca":" ra ca"));return r}}
 /* ===== Đồng bộ Supabase: dữ liệu quán nằm trên máy chủ, tách khỏi phần mềm ===== */
 const SB={url:"https://awwoydshcmokpnwdname.supabase.co",key:"sb_publishable_4NouKJv-cF-x7FveLAy8eA_pT9Z8lSs",code:"quan-5a07987807e819107327f807bdb1ed31"};
-const SYK="posquanan2_sync",_save=save;
+const SYK="postest_sync",_save=save;
 let SY=(()=>{try{return JSON.parse(localStorage.getItem(SYK))}catch(e){}})()||{};
 SY.on=!!SY.on;SY.code=SY.code||"";SY.gone=SY.gone||[];if(!SY.dev)SY.dev=Math.random().toString(36).slice(2,10);
 const sySave=()=>{try{localStorage.setItem(SYK,JSON.stringify(SY))}catch(e){}};
@@ -1891,7 +1914,7 @@ const SYA={menu:{k:r=>r.id,del:1},tables:{k:r=>r.id,del:1},staff:{k:r=>r.id,del:
 const SYN=["ono","nid","iid","kid"];
 let SYL={},SYC={s:null,init:false},SYS={st:SY.on?"sync":"off",msg:"",t:0},SYUI={},SYB=false,SYD=false,SYV=false,syKT=0,syN=0;
 const syKey=()=>SY.code+"."+CH.cur;
-const sylKey=()=>"posquanan2_syl_"+SK+"_"+hsh(SY.code||"");
+const sylKey=()=>"postest_syl_"+SK+"_"+hsh(SY.code||"");
 function syLoad(){try{const o=JSON.parse(localStorage.getItem(sylKey()))||{};SYL=o.m||{};SYC={s:o.s||null,init:!!o.init}}catch(e){SYL={};SYC={s:null,init:false}}}
 function sySaveL(){try{localStorage.setItem(sylKey(),JSON.stringify({m:SYL,s:SYC.s,init:SYC.init}))}catch(e){}}
 const syMeta=()=>{const m={};Object.keys(S).forEach(k=>{if(!SYA[k]&&k!=="me")m[k]=S[k]});return m};
@@ -2108,6 +2131,46 @@ dvApply();chk();
 addEventListener("hashchange",()=>{const k=(location.hash||"#ban").slice(1);if(k!==PG)nav(k)});
 view();
 syBoot();
+/* ===== Thông báo ca làm: sắp tới ca, trễ ca, chưa chấm ra ca ===== */
+const NTK="postest_ntf";let NTD=(()=>{try{return JSON.parse(localStorage.getItem(NTK))||{}}catch(e){return{}}})(),NTX={},NTH="";
+const ntLead=()=>{const v=(S.store.pay||{}).nlead;return v!=null&&v!==""?Math.max(1,+v||15):15};
+const ntSup=()=>"Notification"in window;
+(()=>{const s=document.createElement("style");s.textContent="#ntf{position:fixed;top:calc(env(safe-area-inset-top,0px) + 8px);left:8px;right:8px;z-index:998;display:flex;flex-direction:column;gap:8px;align-items:center;pointer-events:none}#ntf .nti{pointer-events:auto;width:100%;max-width:520px;background:var(--card);color:var(--tx);border:1px solid var(--bd);border-left:6px solid var(--pr);border-radius:14px;padding:12px 14px;box-shadow:0 8px 28px rgba(0,0,0,.25);display:flex;flex-direction:column;gap:6px}#ntf .nti.l1{border-left-color:#d97706}#ntf .nti.l2{border-left-color:#dc2626;background:color-mix(in srgb,#dc2626 7%,var(--card))}#ntf .nti b{font-size:15px}#ntf .nti small{color:var(--mu);font-size:13px;line-height:1.4}#ntf .nta{display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap}#ntf .nta button{min-height:36px;padding:6px 14px}";document.head.appendChild(s);const d=document.createElement("div");d.id="ntf";document.body.appendChild(d)})();
+function ntBeep(){try{const C=window.AudioContext||window.webkitAudioContext,c=new C(),t=c.currentTime;[0,.25].forEach(o=>{const g=c.createGain(),z=c.createOscillator();z.frequency.value=880;z.connect(g);g.connect(c.destination);g.gain.setValueAtTime(.18,t+o);g.gain.exponentialRampToValueAtTime(.001,t+o+.18);z.start(t+o);z.stop(t+o+.2)});setTimeout(()=>c.close(),900)}catch(e){}try{navigator.vibrate&&navigator.vibrate([200,100,200,100,200])}catch(e){}}
+async function ntNative(t,b,tag){try{if(!ntSup()||Notification.permission!=="granted")return;const o={body:b,tag,icon:"icon-192.png",badge:"icon-192.png",vibrate:[200,100,200,100,200],requireInteraction:true,renotify:true};let r=null;try{r=navigator.serviceWorker&&await Promise.race([navigator.serviceWorker.ready,new Promise(z=>setTimeout(z,800))])}catch(e){}if(r&&r.showNotification)await r.showNotification(t,o);else{const n=new Notification(t,o);n.onclick=()=>{try{window.focus()}catch(e){}n.close()}}}catch(e){}}
+function ntScan(){
+  let A=[];
+  try{
+    if(needLogin()&&!sessOk())throw 0;
+    const me=S.staff.find(x=>x.id===S.me);if(!me)throw 0;
+    attHeal();
+    const now=Date.now(),gr=GR()*6e4,lead=ntLead()*6e4,mgr=can("staffMgr"),cs=CH.cur,ks=[ovKey(now-864e5),ovKey(now)];
+    S.staff.filter(s=>s.role!=="Chủ quán"&&(s.id===me.id||mgr)).forEach(s=>{
+      const mine=s.id===me.id,seen=new Set();
+      ks.forEach(k=>dayShifts(s.id,k).forEach(c=>{
+        if(!c.st)return;const x=shAtt(s.id,c,k),rg=tm(c.st)+"–"+tm(c.en),base=cs+"_"+s.id+"_"+c.st;if(x)seen.add(x);
+        if(!x){
+          if(mine&&now>=c.st-lead&&now<c.st)A.push({id:"up_"+base,lv:0,every:1e13,t:"Sắp tới ca làm",b:"Ca "+rg+" bắt đầu lúc "+tm(c.st)+" (còn "+dm(Math.ceil((c.st-now)/6e4))+"). Nhớ bấm Vào ca.",go:"Vào ca"});
+          else if(now>c.st+gr&&now<c.en)A.push({id:"late_"+base,lv:2,every:6e5,t:mine?"Bạn đang trễ ca":s.name+" đang trễ ca",b:"Ca "+rg+", đã trễ "+dm(Math.floor((now-c.st)/6e4))+". "+(mine?"Hãy bấm Vào ca ngay.":"Chưa chấm công vào ca."),go:mine?"Vào ca":""});
+        }else if(!x.out&&now>c.en+gr)A.push({id:"out_"+base,lv:1,every:6e5,t:mine?"Bạn chưa chấm ra ca":s.name+" chưa chấm ra ca",b:"Ca "+rg+" đã kết thúc "+dm(Math.floor((now-c.en)/6e4))+" trước mà vẫn đang mở ca.",go:mine?"Ra ca":""});
+      }));
+      S.att.filter(x=>x.sid===s.id&&!x.out&&!x.gh&&!seen.has(x)&&now-x.in>12*36e5).forEach(x=>A.push({id:"outx_"+cs+"_"+s.id+"_"+x.in,lv:1,every:36e5,t:mine?"Bạn chưa chấm ra ca":s.name+" chưa chấm ra ca",b:"Đã vào ca lúc "+tm(x.in)+" "+new Date(x.in).toLocaleDateString("vi-VN")+" và vẫn chưa ra ca.",go:mine?"Ra ca":""}));
+    });
+    if(S.att.length&&mgr===false&&0)A=[];
+  }catch(e){A=[]}
+  const n=Date.now();let fired=false;
+  A.forEach(a=>{if(NTD[a.id]&&n-NTD[a.id]<a.every)return;NTD[a.id]=n;fired=true;ntNative(a.t,a.b,a.id)});
+  Object.keys(NTD).forEach(k=>{if(n-NTD[k]>3*864e5)delete NTD[k]});if(fired){try{localStorage.setItem(NTK,JSON.stringify(NTD))}catch(e){}ntBeep()}
+  ntRender(A)}
+function ntRender(A){
+  const n=Date.now(),L=A.filter(a=>!(NTX[a.id]>n));let h=L.map(a=>`<div class="nti l${a.lv}"><b>${a.lv===2?"🔴":a.lv===1?"🟠":"⏰"} ${esc(a.t)}</b><small>${esc(a.b)}</small><div class="nta"><button onclick="ntLater('${a.id}')">Để sau</button>${a.go?`<button class="p" onclick="ntGo('${a.id}')">${a.go}</button>`:""}</div></div>`).join("");
+  if(ntSup()&&Notification.permission==="default"&&(!needLogin()||sessOk())&&S.staff.length&&!NTX.ask)h+=`<div class="nti"><b>🔔 Bật thông báo ca làm</b><small>Cho phép thông báo để điện thoại nhắc khi sắp tới ca, trễ ca hoặc quên chấm ra ca.</small><div class="nta"><button onclick="NTX.ask=1;ntRender([]);ntScan()">Để sau</button><button class="p" onclick="ntAsk()">Bật thông báo</button></div></div>`;
+  if(h!==NTH){NTH=h;const e=document.getElementById("ntf");if(e)e.innerHTML=h}}
+function ntLater(id){NTX[id]=Date.now()+6e5;ntScan()}
+function ntGo(id){NTX[id]=Date.now()+6e5;atab="cc";if(PG==="chamcong")view();else nav("chamcong");ntScan()}
+function ntAsk(){try{Notification.requestPermission().then(()=>{NTH="";ntScan();if(PG==="caidat")view()})}catch(e){}}
+function ntRow(){if(!ntSup())return `<small class="mu" style="max-width:300px;text-align:right">Trình duyệt này không hỗ trợ thông báo. Trên iPhone hãy thêm ứng dụng vào màn hình chính trước.</small>`;const p=Notification.permission;return p==="granted"?`<span style="display:flex;gap:8px;align-items:center"><span class="pill pg">Đã bật</span><button onclick="ntNative('Thông báo thử','Thông báo ca làm đang hoạt động.','test');ntBeep()">Thử</button></span>`:p==="denied"?`<small class="mu" style="max-width:300px;text-align:right">Đã bị chặn. Hãy mở cài đặt trình duyệt của trang này và cho phép thông báo.</small>`:`<button class="p" onclick="ntAsk()">Bật thông báo</button>`}
+setInterval(ntScan,20000);setTimeout(ntScan,1500);document.addEventListener("visibilitychange",()=>{if(!document.hidden)ntScan()});
 /* Tự nhận dạng thiết bị: phone / tablet / desktop, cập nhật khi xoay màn hình hoặc đổi kích thước cửa sổ */
 function devFit(){const d=document.documentElement,w=innerWidth,ua=navigator.userAgent||'',tp=navigator.maxTouchPoints>1,touch=matchMedia('(pointer:coarse)').matches||tp,tab=/iPad|Tablet|PlayBook|Silk/i.test(ua)||(/Android/i.test(ua)&&!/Mobile/i.test(ua))||(navigator.platform==='MacIntel'&&tp);const k=w<700?'phone':(tab||(touch&&w<1400)||w<900)?'tablet':'desktop';d.dataset.dev=k;d.dataset.ori=w>innerHeight?'land':'port';d.classList.toggle('touch',touch)}
 devFit();addEventListener('resize',devFit);
