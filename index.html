@@ -532,7 +532,7 @@ function vQR(o){
   const b=bank(),amt=stot(o),ok=b.bin&&b.acc,bn=(BANKS.find(x=>x[0]===b.bin)||[0,""])[1];
   if(qrOkNo===o.no)return vQRok(o,amt);
   return `<div class="bar"><button onclick="qrMode=false;view()">← Quay lại</button><b>Chuyển khoản · ${o.tid!=null?esc(tbl(o.tid).name):"#"+o.no}</b></div>
-  <div class="card qr" style="max-width:360px;text-align:center;margin:0 auto">${ok?`<img alt="Mã QR chuyển khoản" src="${qrUrl(vietqr(amt,"DON "+o.no))}"><div class="tot" style="justify-content:center">${fmt(amt)}</div><p class="mu">${esc(bn)} · ${esc(b.acc)}<br>${esc(b.name)}<br>Nội dung: DON ${o.no}</p><p class="mu" style="margin:12px 0">${qrWrong>0?`<b style="color:#ef4444">Đã nhận ${fmt(qrWrong)} nhưng khác số cần thu ${fmt(amt)}. Không tự xác nhận, hãy báo quản lý.</b>`:"Đang chờ khách chuyển khoản…"}</p>${mgrOk()?`<button class="g" style="width:100%" onclick="payManual()">Xác nhận thủ công (quản lý)</button>`:""}`:`<p>Chưa cài đặt ngân hàng nhận tiền.</p><a href="#caidat" onclick="return nav('caidat')">Đến Cài đặt</a>`}</div>`;
+  <div class="card qr" style="max-width:360px;text-align:center;margin:0 auto">${ok?`<img alt="Mã QR chuyển khoản" src="${qrUrl(vietqr(amt,"DON "+o.no))}"><div class="tot" style="justify-content:center">${fmt(amt)}</div><p class="mu">${esc(bn)} · ${esc(b.acc)}<br>${esc(b.name)}<br>Nội dung: DON ${o.no}</p><p class="mu" style="margin:12px 0">${qrWrong>0?`<b style="color:#ef4444">Đã nhận ${fmt(qrWrong)} nhưng khác số cần thu ${fmt(amt)}. Không tự xác nhận, hãy báo quản lý.</b>`:"Đang chờ khách chuyển khoản…"}</p>${can("pay")?`<button class="g" style="width:100%" onclick="payManual()">Xác nhận đã nhận tiền</button>`:""}`:`<p>Chưa cài đặt ngân hàng nhận tiền.</p><a href="#caidat" onclick="return nav('caidat')">Đến Cài đặt</a>`}</div>`;
 }
 function vOrder(o){if(qrMode)return vQR(o);if(ck)return vCheckout(o);
   const cats=["Tất cả",...catList()],list=sortM(S.menu.filter(m=>(cat==="Tất cả"||m.cat===cat)&&(!mq.trim()||m.name.toLowerCase().includes(mq.trim().toLowerCase())))),u=unsent(o),t=o.tid!=null?tbl(o.tid):null;
@@ -627,7 +627,7 @@ async function qrCheck(){
   }catch(e){}finally{qrBusy=false}
 }
 const mgrOk=()=>{const m=S.staff.find(s=>s.id===S.me);return !m||m.role==="Chủ quán"||m.role==="Quản lý"};
-function payManual(){if(!mgrOk())return;const o=ordN(cur);if(o)lg("Thanh toán","Xác nhận tay chuyển khoản · đơn #"+o.no+" · "+fmt(stot(o)));pay("Chuyển khoản")}
+function payManual(){if(!can("pay"))return;const o=ordN(cur);if(o)lg("Thanh toán","Xác nhận tay chuyển khoản · đơn #"+o.no+" · "+fmt(stot(o)));pay("Chuyển khoản")}
 setInterval(qrCheck,3000);
 
 /* ===== Bếp ===== */
