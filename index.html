@@ -1676,7 +1676,7 @@ function nvPerm(){
   <div class="bar" style="margin:16px 0 0"><button id="rp_s" class="p" ${ed&&rpDirty()?"":"disabled"} onclick="rpSave()">Lưu bảng quyền</button><button ${ed?"":"disabled"} onclick="rpDef()">Về mặc định</button></div></div>`;
 }
 function rpSet(r,k,v){if(!isOwner())return;rpD[r][k]=v;$("#rp_s").disabled=!rpDirty()}
-function rpSave(){if(!isOwner()||!rpD)return;S.store.rp=JSON.parse(JSON.stringify(rpD));lg("Phân quyền","Lưu bảng quyền theo vai trò");save();rpD=null;view()}
+function rpSave(){if(!isOwner()||!rpD)return;S.store.rp=JSON.parse(JSON.stringify(rpD));lg("Phân quyền","Lưu bảng quyền theo vai trò");save();rpD=null;view();okToast("Đã lưu bảng quyền")}function okToast(t){const o=document.getElementById("okt");if(o)o.remove();const e=document.createElement("div");e.id="okt";e.setAttribute("role","status");e.textContent="✓ "+t;e.style.cssText="position:fixed;left:50%;bottom:28px;transform:translateX(-50%) translateY(12px);background:#16a34a;color:#fff;padding:12px 22px;border-radius:12px;font-weight:600;font-size:15px;box-shadow:0 8px 24px rgba(0,0,0,.4);z-index:99999;opacity:0;transition:opacity .25s,transform .25s;pointer-events:none";document.body.appendChild(e);requestAnimationFrame(()=>{e.style.opacity="1";e.style.transform="translateX(-50%) translateY(0)"});setTimeout(()=>{e.style.opacity="0";e.style.transform="translateX(-50%) translateY(12px)";setTimeout(()=>e.remove(),300)},2200)}
 function rpDef(){if(!isOwner())return;rpD=JSON.parse(JSON.stringify(PD));view()}
 let sTab="quan",smod=false,sdel=false,lq="";
 const ST=[["quan","Quán"],["tt","Thanh toán"],["chuoi","Chuỗi quán"],["dongbo","Đồng bộ"],["may","Máy này"],["tk","Tài khoản"],["nk","Nhật ký"]];
