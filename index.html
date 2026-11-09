@@ -426,17 +426,17 @@ const who=o=>`<small class="tw">${esc(o.staff||"—")} · ${ago(o.ts)}</small>`;
 const bdg=o=>unsent(o)?`<span class="pill">${unsent(o)} chưa báo bếp</span>`:"";
 const meName=()=>(S.staff.find(s=>s.id===S.me)||S.staff[0]||{name:"—"}).name;
 const today=ts=>new Date(ts).toDateString()===new Date().toDateString();
-const PERMS=[["order","Mở đơn, gọi món, báo bếp"],["move","Chuyển bàn, gộp bàn"],["discount","Giảm giá đơn"],["cancelItem","Hủy món đã báo bếp"],["pay","Thu tiền, in hóa đơn"],["kitchen","Màn hình bếp"],["shift","Mở ca, đóng ca"],["menuEdit","Sửa thực đơn"],["mapEdit","Sửa sơ đồ bàn"],["report","Xem báo cáo, lịch sử đơn"],["sum","Xem Tổng hợp (gồm các cơ sở khác)"],["staffMgr","Quản lý nhân viên, phân quyền"],["settings","Cài đặt quán, thanh toán, in"],["stockCheck","Kho: kiểm kho"],["stockIn","Kho: nhập hàng, nguyên liệu"],["stockEdit","Kho: sửa, xóa phiếu nhập"],["cost","Xem giá nhập, giá vốn, lãi gộp"],["stockPast","Kho: sửa ngày đã qua"],["schDl","Lịch ca: chỉnh hạn đăng ký"]];
+const PERMS=[["order","Mở đơn, gọi món, báo bếp"],["move","Chuyển bàn, gộp bàn"],["discount","Giảm giá đơn"],["cancelItem","Hủy món đã báo bếp"],["pay","Thu tiền, in hóa đơn"],["kitchen","Màn hình bếp"],["shift","Mở ca, đóng ca"],["menuEdit","Sửa thực đơn"],["mapEdit","Sửa sơ đồ bàn"],["report","Xem báo cáo, lịch sử đơn"],["sum","Xem Tổng hợp (gồm các cơ sở khác)"],["staffMgr","Quản lý nhân viên, phân quyền"],["settings","Cài đặt quán, thanh toán, in"],["stockCheck","Kho: kiểm kho"],["stockView","Kho: xem tồn kho, phiếu nhập (không xem giá)"],["stockIn","Kho: nhập hàng, nguyên liệu"],["stockEdit","Kho: sửa, xóa phiếu nhập"],["cost","Xem giá nhập, giá vốn, lãi gộp"],["stockPast","Kho: sửa ngày đã qua"],["schDl","Lịch ca: chỉnh hạn đăng ký"]];
 const RL=["Quản lý","Thu ngân","Phục vụ","Bếp"];
 const mkP=l=>{const o={};PERMS.forEach(p=>o[p[0]]=l.includes(p[0]));return o};
-const PD={"Quản lý":mkP(["order","move","discount","cancelItem","pay","kitchen","shift","menuEdit","mapEdit","report","sum","staffMgr","settings","stockCheck","stockIn","stockEdit","cost","stockPast","schDl"]),"Thu ngân":mkP(["order","move","discount","pay","kitchen","shift","stockCheck"]),"Phục vụ":mkP(["order","move","stockCheck"]),"Bếp":mkP(["kitchen","stockCheck"])};
-const normP=m=>{const o={};RL.forEach(r=>{o[r]={};PERMS.forEach(p=>o[r][p[0]]=(p[0]==="schDl"||p[0]==="stockEdit"||p[0]==="sum")&&!(m&&m[r]&&p[0] in m[r])?!!(PD[r]&&PD[r][p[0]]):!!(m&&m[r]&&m[r][p[0]]))});return o};
+const PD={"Quản lý":mkP(["order","move","discount","cancelItem","pay","kitchen","shift","menuEdit","mapEdit","report","sum","staffMgr","settings","stockCheck","stockView","stockIn","stockEdit","cost","stockPast","schDl"]),"Thu ngân":mkP(["order","move","discount","pay","kitchen","shift","stockCheck"]),"Phục vụ":mkP(["order","move","stockCheck"]),"Bếp":mkP(["kitchen","stockCheck","stockView"])};
+const normP=m=>{const o={};RL.forEach(r=>{o[r]={};PERMS.forEach(p=>o[r][p[0]]=(p[0]==="schDl"||p[0]==="stockEdit"||p[0]==="sum"||p[0]==="stockView")&&!(m&&m[r]&&p[0] in m[r])?!!(PD[r]&&PD[r][p[0]]):!!(m&&m[r]&&m[r][p[0]]))});return o};
 const rpm=()=>S.store.rp?normP(S.store.rp):PD;
 const PM={view:"report",reprint:"pay",cancel:"cancelItem"};
 const pv=(m,k)=>m.role==="Chủ quán"||!!((rpm()[m.role]||{})[PM[k]||k]);
 const isOwner=()=>{const m=S.staff.find(s=>s.id===S.me);return !m||m.role==="Chủ quán"};
 const can=k=>{const m=S.staff.find(s=>s.id===S.me);return !m||pv(m,k)};
-const navOk=k=>({ban:can("order"),bep:can("kitchen"),donhang:can("report"),chamcong:true,kho:can("stockCheck")||can("stockIn"),baocao:can("report"),tonghop:can("sum"),menu:can("menuEdit"),sodo:can("mapEdit"),nhanvien:can("staffMgr"),caidat:true})[k];
+const navOk=k=>({ban:can("order"),bep:can("kitchen"),donhang:can("report"),chamcong:true,kho:can("stockCheck")||can("stockView")||can("stockIn"),baocao:can("report"),tonghop:can("sum"),menu:can("menuEdit"),sodo:can("mapEdit"),nhanvien:can("staffMgr"),caidat:true})[k];
 
 const ico=p=>`<svg viewBox="0 0 24 24">${p}</svg>`;
 const SV=(p,s)=>`<svg viewBox="0 0 24 24" width="${s||15}" height="${s||15}" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${p}</svg>`,USERS='<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>',BIKE='<circle cx="18.5" cy="17.5" r="3.5"/><circle cx="5.5" cy="17.5" r="3.5"/><circle cx="15" cy="5" r="1"/><path d="M12 17.5V14l-3-3 4-3 2 3h2"/>';
@@ -1403,7 +1403,7 @@ function saveIng(){if(!isOwner())return;const g=k=>$("#"+k).value.trim(),n=g("in
   if(ke)Object.assign(ing(ke),o);else S.ing.push({id:++S.iid,qty:0,...o});kp=ke=null;save();view()}
 function vStock(){
   if(kp==="kiem")return vKiem();
-  const kIn=can("stockIn"),kCo=can("cost"),kAd=isOwner(),kBc=kCo||can("report"),kPh=kCo||kIn;
+  const kIn=can("stockIn"),kCo=can("cost"),kAd=isOwner(),kBc=kCo||can("report"),kPh=kCo||kIn||can("stockView");
   if(!kPh&&kt==="nhap")kt="ton";if(!kBc&&kt==="bc")kt="ton";
   if(!kIn&&kp==="nhap")kp=null;if(!kAd&&(kp==="add"||kp==="edit")){kp=null;ke=null}
   const e=(ke&&ing(ke))||{},I=(id,ph,v,w,t)=>`<input id="${id}" ${t?'type="number" min="0" ':""}placeholder="${ph}" value="${v==null?"":esc(v)}" style="${w}">`,ok=`<div class="bar" style="margin:12px 0 0">`,
@@ -1747,7 +1747,7 @@ function delStaff(id){
   S.staff=S.staff.filter(x=>x.id!==id);pvDel(id);if(S.me===id)S.me=S.staff[0].id;
   lg("Nhân viên","Xóa "+s.name);stm=null;sdl=false;save();view()}
 const rpDirty=()=>JSON.stringify(rpD)!==JSON.stringify(rpm());
-const PERMG=[["Bán hàng",["order","move","discount","cancelItem","pay","kitchen","shift"]],["Kho",["stockCheck","stockIn","stockEdit","stockPast"]],["Báo cáo & số liệu",["report","sum","cost"]],["Quản lý quán",["menuEdit","mapEdit","staffMgr","settings","schDl"]]];
+const PERMG=[["Bán hàng",["order","move","discount","cancelItem","pay","kitchen","shift"]],["Kho",["stockCheck","stockView","stockIn","stockEdit","stockPast"]],["Báo cáo & số liệu",["report","sum","cost"]],["Quản lý quán",["menuEdit","mapEdit","staffMgr","settings","schDl"]]];
 function rpCnt(){RL.forEach(r=>{const e=document.getElementById("rpc_"+r);if(e)e.textContent=PERMS.filter(p=>rpD[r][p[0]]).length+"/"+PERMS.length});const d=document.getElementById("rp_d");if(d)d.hidden=!rpDirty()}
 function nvPerm(){
   if(!rpD)rpD=JSON.parse(JSON.stringify(rpm()));
