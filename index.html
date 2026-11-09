@@ -884,8 +884,8 @@ function regH(x){const o=shOf(x);return o?o.h:0}
 function schCell(r,sid,k,ed){const e=((r.reg||{})[sid]||{})[k],L=schShifts(r,sid,k);let t=L.map(a=>`<div style="display:inline-block;background:var(--busy);border-radius:8px;padding:4px 10px;white-space:nowrap;line-height:1.35;margin-bottom:4px"><b>${a.s?fm12(a.s)+"–"+endT(a.s,a.h).replace(" (hôm sau)",""):a.h+" giờ"}</b>${a.s?`<br><small style="color:inherit;opacity:.8">${a.h} giờ</small>`:""}</div>`).join("<br>");
   if(e&&(e.any||e.off||e.a))t+=`<div style="white-space:nowrap;margin-top:${L.length?2:0}px"><small class="mu"${e.off?' style="color:#dc2626"':""}>${e.any?"Freetime":e.off?"Bận":"Rảnh "+fm12(e.a)+"–"+fm12(e.b)}</small></div>`;
   return t||`<span class="mu">${ed?"+":"—"}</span>`}
-function schEdit(sid,k){const w=(S.sch||{})[wkv]||{},e=((w.reg||{})[sid]||{})[k]||{},L0=schShifts(w,sid,k),L=L0.map(c=>({h:c.h,s:c.s||""}));if(!L.length)L.push({h:"",s:e.a||""});schm={sid,k,any:!!e.any,off:!!e.off,a:e.a||"",b:e.b||"",sh:L,has:!!(e.any||e.off||e.a||L0.length)};view();schPv()}
-function syncSh(){schm.sh=schm.sh.map((c,i)=>({h:$("#sh_h"+i)?+$("#sh_h"+i).value||"":c.h,s:$("#sh_s"+i)?pTime($("#sh_s"+i).value)||"":c.s}))}
+function schEdit(sid,k){const w=(S.sch||{})[wkv]||{},e=((w.reg||{})[sid]||{})[k]||{},L0=schShifts(w,sid,k),L=L0.map(c=>({h:c.h,s:c.s||"",ov:c.ov}));if(!L.length)L.push({h:"",s:e.a||""});schm={sid,k,any:!!e.any,off:!!e.off,a:e.a||"",b:e.b||"",sh:L,has:!!(e.any||e.off||e.a||L0.length)};view();schPv()}
+function syncSh(){schm.sh=schm.sh.map((c,i)=>({h:$("#sh_h"+i)?+$("#sh_h"+i).value||"":c.h,s:$("#sh_s"+i)?pTime($("#sh_s"+i).value)||"":c.s,ov:c.ov}))}
 function schAddSh(){syncSh();schm.sh.push({h:"",s:""});view();schPv()}
 function schRmSh(i){syncSh();schm.sh.splice(i,1);if(!schm.sh.length)schm.sh.push({h:"",s:""});view();schPv()}
 function schPv(){const m=schm;if(!m||!$("#sc_p"))return;const on=(id,v)=>{const b=$("#"+id);if(b)b.classList.toggle("p",!!v)};on("av_all",m.any);on("av_off",m.off);["s","c","t"].forEach(x=>on("av_"+x,!m.any&&!m.off&&m.a===AVP[x][0]&&m.b===AVP[x][1]));
@@ -897,7 +897,7 @@ function schPv(){const m=schm;if(!m||!$("#sc_p"))return;const on=(id,v)=>{const 
 function schSave(){const m=schm,e=t=>{$("#sc_e").textContent=t};let reg=null;const L=[];
   if(m.any)reg={any:true};else if(m.off)reg={off:true};else if(m.a&&m.b)reg={a:m.a,b:m.b};else if(m.a||m.b)return e("Nhập đủ giờ rảnh từ và đến.");
   if(reg&&reg.a&&toMin(reg.b)<=toMin(reg.a))return e("Giờ rảnh kết thúc phải sau giờ bắt đầu.");
-  if(canAs()){for(let i=0;i<m.sh.length;i++){const h=+$("#sh_h"+i).value,s=pTime($("#sh_s"+i).value),en=$("#sh_e"+i).value.trim(),sv=$("#sh_s"+i).value.trim();if(!(h>0)&&(sv||en))return e("Ca "+(i+1)+": nhập đủ giờ bắt đầu và giờ kết thúc, ví dụ 8h và 12h.");if(h<0||h>24)return e("Ca "+(i+1)+": số giờ từ 0,5 đến 24.");if(h>0){if(s===null||(!s&&m.sh.length>1))return e("Ca "+(i+1)+": nhập giờ bắt đầu, ví dụ 9h, 13h, 20h30.");L.push({h,s})}}
+  if(canAs()){for(let i=0;i<m.sh.length;i++){const h=+$("#sh_h"+i).value,s=pTime($("#sh_s"+i).value),en=$("#sh_e"+i).value.trim(),sv=$("#sh_s"+i).value.trim();if(!(h>0)&&(sv||en))return e("Ca "+(i+1)+": nhập đủ giờ bắt đầu và giờ kết thúc, ví dụ 8h và 12h.");if(h<0||h>24)return e("Ca "+(i+1)+": số giờ từ 0,5 đến 24.");if(h>0){if(s===null||(!s&&m.sh.length>1))return e("Ca "+(i+1)+": nhập giờ bắt đầu, ví dụ 9h, 13h, 20h30.");L.push(m.sh[i].ov?{h,s,ov:m.sh[i].ov}:{h,s})}}
     const sl=L.filter(c=>c.s).sort((a,b)=>toMin(a.s)-toMin(b.s));for(let i=1;i<sl.length;i++)if(toMin(sl[i].s)<toMin(sl[i-1].s)+sl[i-1].h*60)return e("Hai ca bị trùng giờ, vui lòng kiểm tra lại.")}
   if(!reg&&!L.length)return e(canAs()?"Chọn giờ rảnh hoặc xếp ca.":"Chọn giờ rảnh.");
   const r=schRec(),nm=(S.staff.find(x=>x.id===m.sid)||{}).name||"";
@@ -1182,17 +1182,81 @@ function holSave(){const e=s=>{$("#hl_e").textContent=s},m=hlm,n=$("#hl_n").valu
 function holDel(id){const P=S.store.pay||{},r=(P.hol||[]).find(x=>x.id===id);P.hol=(P.hol||[]).filter(x=>x.id!==id);if(r)lg("Lương","Xóa ngày hệ số "+r.name);hlm=null;save();view()}
 let ovm=null;
 const ovKey=ts=>{const d=new Date(ts);return d.getFullYear()+"-"+hz(d.getMonth()+1)+"-"+hz(d.getDate())};
-function wOv(x,w){const L=(S.store.pay||{}).ov||[],k=ovKey(x.in);for(let i=L.length-1;i>=0;i--){const e=L[i];if(e.d===k&&e.ids.includes(x.sid))return e.m==="grp"?e.v/e.ids.length:e.v}return w}
-function ovDesc(e){const nm=e.ids.map(i=>(S.staff.find(s=>s.id===i)||{name:"?"}).name).join(", "),n=e.ids.length;return nm+" · "+(e.m==="grp"?fmt(e.v)+"/giờ cả nhóm → "+fmt(Math.round(e.v/n))+"/người":fmt(e.v)+"/giờ mỗi người")}
-function ovCard(){const L=(S.store.pay||{}).ov||[];return `<div class="card" style="margin-top:12px"><div class="bar" style="margin:0"><b style="font-size:16px">Lương giờ riêng theo ngày</b><button class="r" onclick="ovNew()">+ Thêm</button></div><p class="mu" style="margin:6px 0 10px">Dùng khi nhân viên làm chung hoặc thỏa thuận mức giờ khác trong một ngày. Ngày đó mức này thay cho lương giờ thường của những người được chọn, các ngày khác vẫn tính như cũ.</p>${L.length?`<div class="card" style="padding:0;overflow:hidden">${L.slice().sort((a,b)=>b.d.localeCompare(a.d)).map(e=>`<div class="orow" onclick="ovEdit(${e.id})"><div style="flex:1;min-width:0"><b>${e.d.split("-").reverse().join("/")}${e.note?" · "+esc(e.note):""}</b><br><small class="mu">${esc(ovDesc(e))}</small></div><span>✎</span></div>`).join("")}</div>`:`<small class="mu">Chưa có ngày nào.</small>`}${ovm?ovModal():""}</div>`}
-function ovModal(){const m=ovm,cl="ovm=null;view()";return `<div class="mo" onclick="if(event.target===this){${cl}}"><div class="md" style="max-width:480px"><div class="mh"><b>${m.id?"Sửa":"Thêm"} lương giờ theo ngày</b><button class="mx" onclick="${cl}">×</button></div><div class="mb"><label class="mf"><span>Ngày</span><input id="ov_d" value="${esc(m.d)}" placeholder="dd/mm/yyyy" inputmode="numeric" autocomplete="off" onfocus="setTimeout(()=>this.select())" oninput="fdy(this,event)"></label><div class="mf"><span>Nhân viên làm chung</span><div class="card" style="max-height:150px;overflow:auto">${S.staff.map(s=>`<label style="display:flex;gap:8px;padding:3px 0"><input type="checkbox" class="ov_i" value="${s.id}" ${m.ids.includes(s.id)?"checked":""}> ${esc(s.name)}</label>`).join("")}</div></div><div class="r2"><label class="mf" style="flex:1;min-width:190px"><span>Cách tính</span><select id="ov_m"><option value="grp" ${m.m==="grp"?"selected":""}>Tổng cả nhóm, chia đều</option><option value="each" ${m.m==="each"?"selected":""}>Mỗi người một mức</option></select></label><label class="mf" style="width:160px"><span>Mức (đ/giờ)</span><input id="ov_v" data-m type="text" inputmode="decimal" value="${m.v||""}"></label></div><small class="mu">Ví dụ: tổng cả nhóm 30.000đ/giờ cho 2 người thì mỗi người 15.000đ/giờ.</small><label class="mf"><span>Ghi chú</span><input id="ov_n" value="${esc(m.note||"")}" placeholder="VD: A và B làm chung"></label><small id="ov_e" style="color:#dc2626"></small></div><div class="mfoot">${m.id?`<button style="margin-right:auto;color:#dc2626" onclick="ovDel(${m.id})">Xóa</button>`:""}<button onclick="${cl}">Hủy</button><button class="p" onclick="ovSave()">Lưu</button></div></div></div>`}
-function ovNew(){const t=new Date();ovm={id:0,d:hz(t.getDate())+"/"+hz(t.getMonth()+1)+"/"+t.getFullYear(),ids:[],m:"grp",v:"",note:""};view()}
-function ovEdit(id){const e=((S.store.pay||{}).ov||[]).find(x=>x.id===id);if(e){ovm={id:e.id,d:e.d.split("-").reverse().join("/"),ids:e.ids.slice(),m:e.m,v:e.v,note:e.note||""};view()}}
-function ovSave(){const e=s=>{$("#ov_e").textContent=s},q=$("#ov_d").value.trim().split("/"),d=new Date(+q[2],+q[1]-1,+q[0]),ids=[...document.querySelectorAll(".ov_i:checked")].map(x=>+x.value),v=+$("#ov_v").value;
-  if(q.length!==3||d.getDate()!==+q[0]||d.getMonth()!==+q[1]-1)return e("Ngày phải theo dạng dd/mm/yyyy.");if(!ids.length)return e("Chọn ít nhất một nhân viên.");if(!(v>0))return e("Nhập mức đ/giờ.");
-  const r={id:ovm.id||Date.now(),d:ovKey(d.getTime()),ids,m:$("#ov_m").value,v,note:$("#ov_n").value.trim()},P=S.store.pay||(S.store.pay={}),L=P.ov||(P.ov=[]),i=L.findIndex(y=>y.id===r.id);
-  i<0?L.push(r):L[i]=r;lg("Lương","Lương giờ riêng "+q.join("/")+" · "+ovDesc(r));ovm=null;save();view()}
-function ovDel(id){const P=S.store.pay||{};P.ov=(P.ov||[]).filter(x=>x.id!==id);lg("Lương","Xóa lương giờ riêng theo ngày");ovm=null;save();view()}
+const ovN=e=>e.g?e:{id:e.id,from:e.d,to:e.d,ids:e.ids||[],g:[{ids:e.ids||[],s:"",h:0,m:e.m,v:e.v,note:e.note||""}]};
+/* Lương giờ riêng: khoảng ngày + nhân viên áp dụng + nhiều ca (mỗi ca có nhóm người, giờ, mức lương). Chấm công thuộc ca nào (theo giờ trùng nhiều nhất) thì dùng mức của ca đó. */
+function wOv(x,w){const L=(S.store.pay||{}).ov||[],k=ovKey(x.in),en=x.out||Date.now();let b=null,bo=0;
+  for(let i=L.length-1;i>=0;i--){const e=ovN(L[i]);if(k<e.from||k>e.to||!e.ids.includes(x.sid))continue;
+    e.g.forEach(g=>{if(!g.ids.includes(x.sid))return;let ov=1;if(g.s&&g.h>0){const st=stT(k,g.s);ov=Math.max(0,Math.min(en,st+g.h*36e5)-Math.max(x.in,st))}if(ov>bo){bo=ov;b=g}})}
+  return b?(b.m==="grp"&&b.ids.length>1?b.v/b.ids.length:b.v):w}
+const ovNm=id=>(S.staff.find(s=>s.id===id)||{name:"?"}).name;
+const ovRg=e=>e.from===e.to?dmy(e.from):dmy(e.from)+" – "+dmy(e.to);
+const ovDays=m=>!m.from||!m.to||m.to<m.from?0:Math.round((pD(m.to)-pD(m.from))/DAY)+1;
+function ovHrs(a,b){if(!a||!b)return 0;let d=toMin(b)-toMin(a);if(d===0)return 0;if(d<0)d+=1440;return Math.round(d/60*100)/100}
+function ovGd(g){const n=g.ids.length,grp=g.m==="grp"&&n>1;return g.ids.map(ovNm).join(", ")+" · "+(g.s?fm12(g.s)+"–"+endT(g.s,g.h).replace(" (hôm sau)","")+" ("+g.h+" giờ)":"không xếp giờ")+" · "+(grp?fmt(g.v)+"/giờ cả nhóm → "+fmt(Math.round(g.v/n))+"/người":fmt(g.v)+"/giờ"+(n>1?" mỗi người":""))+(g.note?" · "+g.note:"")}
+function ovCard(){const L=((S.store.pay||{}).ov||[]).map(ovN).sort((a,b)=>b.from.localeCompare(a.from));
+  return `<div class="card" style="margin-top:12px"><div class="bar" style="margin:0"><b style="font-size:16px">Ca làm và lương giờ riêng theo ngày</b><button class="r" onclick="ovNew()">+ Thêm</button></div><p class="mu" style="margin:6px 0 10px">Dùng khi nhân viên làm chung hoặc thỏa thuận mức giờ khác trong một hoặc nhiều ngày. Chọn khoảng ngày và nhân viên, rồi xếp ca và lương cho từng nhóm. Ca xếp xong tự hiện trên lịch làm của nhân viên và được tính lương theo mức đã đặt. Ngoài các ngày này vẫn tính lương giờ thường.</p>${L.length?`<div class="card" style="padding:0;overflow:hidden">${L.map(e=>`<div class="orow" onclick="ovEdit(${e.id})"><div style="flex:1;min-width:0"><b>${ovRg(e)}</b> <small class="mu">· ${e.ids.length} nhân viên</small>${e.g.map(g=>`<br><small class="mu">${esc(ovGd(g))}</small>`).join("")}</div><span>✎</span></div>`).join("")}</div>`:`<small class="mu">Chưa có ngày nào.</small>`}${ovm?ovModal():""}</div>`}
+function ovModal(){const m=ovm,cl="ovm=null;view()";
+  const grp=(g,i)=>{const n=g.ids.length,gh=ovHrs(pTime(g.s),pTime(g.e));
+    return `<div class="sm-shift"><div class="bar" style="margin:0 0 8px"><b>Ca ${i+1}</b>${m.g.length>1?`<button type="button" class="gi d r" aria-label="Xóa ca ${i+1}" onclick="ovRmG(${i})"><span class="ic">${trashI}</span></button>`:""}</div>
+    <div class="mf" style="margin-bottom:8px"><span>Ai làm ca này</span>${m.ids.length?`<div style="display:flex;flex-wrap:wrap;gap:6px">${m.ids.map(id=>`<button type="button" class="${g.ids.includes(id)?"p":""}" onclick="ovGTog(${i},${id})">${esc(ovNm(id))}</button>`).join("")}</div>`:`<small class="mu">Chọn nhân viên áp dụng ở bước 2 trước.</small>`}</div>
+    <div class="r2" style="flex-wrap:nowrap;gap:8px"><label class="mf" style="flex:1;min-width:0"><span>Bắt đầu</span><input id="ov_s${i}" value="${esc(g.s)}" placeholder="18h" oninput="ovPv()"></label><label class="mf" style="flex:1;min-width:0"><span>Kết thúc</span><input id="ov_e${i}" value="${esc(g.e)}" placeholder="22h" oninput="ovPv()"></label><label class="mf" style="flex:1;min-width:0"><span>Số giờ</span><input id="ov_h${i}" readonly tabindex="-1" value="${gh||""}" placeholder="tự tính" style="background:transparent;border-style:dashed"></label></div>
+    <div class="r2" style="flex-wrap:nowrap;gap:8px;margin-top:8px">${n>1?`<label class="mf" style="flex:1;min-width:0"><span>Cách tính</span><select id="ov_m${i}" onchange="ovPv()"><option value="grp" ${g.m!=="each"?"selected":""}>Tổng cả nhóm, chia đều</option><option value="each" ${g.m==="each"?"selected":""}>Mỗi người một mức</option></select></label>`:""}<label class="mf" style="flex:1;min-width:0"><span>Mức lương (đ/giờ)</span><div class="ib"><input id="ov_v${i}" data-m type="text" inputmode="decimal" value="${g.v||""}" oninput="ovPv()"><span class="su">đ</span></div></label></div>
+    <small id="ov_x${i}" class="mu" style="display:block;margin-top:6px"></small>
+    <label class="mf" style="margin-top:8px"><span>Ghi chú</span><input id="ov_n${i}" value="${esc(g.note||"")}" placeholder="VD: A và B làm chung" oninput="ovPv()"></label></div>`};
+  return `<div class="mo" onclick="if(event.target===this){${cl}}"><div class="md" style="max-width:600px"><div class="mh"><b>${m.id?"Sửa":"Thêm"} ca làm và lương theo ngày</b><button class="mx" onclick="${cl}">×</button></div><div class="mb" style="gap:12px">
+  <div class="sm-card"><div class="sm-h">1. Ngày áp dụng</div><div class="r2" style="align-items:center;flex-wrap:nowrap"><span class="mu">Từ</span>${dtn(m.from,"ovPv()","","ov_f","Từ ngày")}<span class="mu">đến</span>${dtn(m.to,"ovPv()","","ov_t","Đến ngày")}</div><small class="mu" style="display:block;margin-top:6px">Một ngày thì chọn từ và đến cùng ngày.</small></div>
+  <div class="sm-card"><div class="sm-h">2. Nhân viên được áp dụng</div><div style="display:flex;flex-wrap:wrap;gap:8px">${S.staff.map(s=>`<label style="display:inline-flex;gap:6px;align-items:center;padding:6px 10px;border:1px solid var(--bd);border-radius:10px;background:var(--card);cursor:pointer"><input type="checkbox" class="ck" ${m.ids.includes(s.id)?"checked":""} onchange="ovTog(${s.id},this.checked)">${esc(s.name)}</label>`).join("")}</div></div>
+  <div class="sm-card"><div class="sm-h">3. Xếp ca và lương</div><small class="mu" style="display:block;margin:-4px 0 10px">Người làm chung cùng giờ và cùng mức lương thì để chung một ca. Người làm giờ khác hoặc lương khác thì thêm ca riêng.</small>${m.g.map(grp).join("")}<button type="button" onclick="ovAddG()" style="width:100%;border-style:dashed;margin-top:10px">+ Thêm ca nữa</button></div>
+  <small id="ov_p" class="mu" style="display:block"></small><small id="ov_e" style="color:#dc2626;display:block"></small></div>
+  <div class="mfoot">${m.id?`<button id="ov_d" style="margin-right:auto;color:#dc2626" onclick="ovDel(${m.id})">Xóa</button>`:""}<button onclick="${cl}">Hủy</button><button class="p" onclick="ovSave()">Lưu</button></div></div></div>`}
+function ovSy(){const m=ovm;if(!m)return;const f=$("#ov_f"),t=$("#ov_t");if(f&&f.value)m.from=f.value;if(t&&t.value)m.to=t.value;
+  m.g.forEach((g,i)=>{const s=$("#ov_s"+i);if(!s)return;g.s=s.value;g.e=$("#ov_e"+i).value;const mm=$("#ov_m"+i);if(mm)g.m=mm.value;g.v=$("#ov_v"+i).value;g.note=$("#ov_n"+i).value})}
+function ovPv(){const m=ovm;if(!m)return;ovSy();
+  m.g.forEach((g,i)=>{const h=$("#ov_h"+i);if(!h)return;const hh=ovHrs(pTime(g.s),pTime(g.e)),v=+g.v,n=g.ids.length;h.value=hh>0?hh:"";const x=$("#ov_x"+i);
+    if(x)x.textContent=v>0&&n?"Mỗi người nhận "+fmt(Math.round(g.m==="grp"&&n>1?v/n:v))+"/giờ"+(hh>0?" · "+hh+" giờ = "+fmt(Math.round((g.m==="grp"&&n>1?v/n:v)*hh))+"/người/ngày":""):""});
+  const nd=ovDays(m),p=$("#ov_p"),cnt=m.g.reduce((t,g)=>t+g.ids.length,0)*nd;
+  if(p)p.textContent=nd?"Lưu xong: "+nd+" ngày, "+cnt+" ca sẽ hiện trên lịch làm của nhân viên."+(nd>62?" (Tối đa 62 ngày mỗi lần.)":""):""}
+function ovTog(id,on){ovSy();const m=ovm;
+  if(on){if(!m.ids.includes(id)){m.ids=S.staff.map(s=>s.id).filter(x=>x===id||m.ids.includes(x));if(m.g.length===1&&!m.g[0].ids.includes(id))m.g[0].ids.push(id)}}
+  else{m.ids=m.ids.filter(x=>x!==id);m.g.forEach(g=>{g.ids=g.ids.filter(x=>x!==id)})}
+  view();ovPv()}
+function ovGTog(i,id){ovSy();const m=ovm,g=m.g[i];g.ids=g.ids.includes(id)?g.ids.filter(x=>x!==id):m.ids.filter(x=>x===id||g.ids.includes(x));view();ovPv()}
+function ovAddG(){ovSy();ovm.g.push({ids:[],s:"",e:"",m:"grp",v:"",note:""});view();ovPv()}
+function ovRmG(i){ovSy();ovm.g.splice(i,1);if(!ovm.g.length)ovm.g.push({ids:[],s:"",e:"",m:"grp",v:"",note:""});view();ovPv()}
+let ovDq=0;
+function ovNew(){const t=ovKey(Date.now());ovDq=0;ovm={id:0,from:t,to:t,ids:[],g:[{ids:[],s:"",e:"",m:"grp",v:"",note:""}]};view();ovPv()}
+function ovEdit(id){const e=((S.store.pay||{}).ov||[]).map(ovN).find(x=>x.id===id);if(!e)return;ovDq=0;
+  ovm={id:e.id,from:e.from,to:e.to,ids:e.ids.slice(),g:e.g.map(g=>({ids:g.ids.slice(),s:g.s?fm12(g.s):"",e:g.s&&g.h>0?endT(g.s,g.h).replace(" (hôm sau)",""):"",m:g.m||"grp",v:g.v,note:g.note||""}))};view();ovPv()}
+/* Xóa các ca do mục này đã đẩy lên lịch làm */
+function ovClear(id){Object.values(S.sch||{}).forEach(r=>{const A=r.as;if(!A)return;Object.keys(A).forEach(sid=>{const D=A[sid];Object.keys(D).forEach(k=>{const L=(Array.isArray(D[k])?D[k]:[D[k]]).filter(x=>x&&x.ov!==id);if(L.length)D[k]=L;else delete D[k]});if(!Object.keys(D).length)delete A[sid]})})}
+/* Đẩy ca lên lịch làm của từng nhân viên cho từng ngày; ca tự xếp tay trùng giờ trong ngày đó sẽ được thay bằng ca này */
+function ovPush(e){const A=S.sch||(S.sch={});
+  for(const t=pD(e.from),z=pD(e.to);t<=z;t.setDate(t.getDate()+1)){
+    const k=ovKey(t.getTime()),wk=ovKey(new Date(t.getFullYear(),t.getMonth(),t.getDate()-((t.getDay()+6)%7)).getTime()),r=A[wk]||(A[wk]={reg:{}}),as=r.as||(r.as={});
+    e.g.forEach(g=>{const a0=toMin(g.s),a1=a0+Math.round(g.h*60);
+      g.ids.forEach(sid=>{const D=as[sid]||(as[sid]={}),cur=(D[k]?(Array.isArray(D[k])?D[k]:[D[k]]):[]).filter(x=>x&&x.h>0),
+        keep=cur.filter(c=>{if(c.ov===e.id)return false;if(!c.s)return true;const b0=toMin(c.s),b1=b0+Math.round(c.h*60);return !(a0<b1&&b0<a1)});
+        keep.push({h:g.h,s:g.s,ov:e.id});D[k]=keep})})}}
+function ovSave(){const er=s=>{$("#ov_e").textContent=s};ovSy();const m=ovm;
+  if(!m.from||!m.to)return er("Chọn ngày áp dụng từ và đến.");
+  if(m.to<m.from)return er("Ngày kết thúc phải sau hoặc bằng ngày bắt đầu.");
+  if(ovDays(m)>62)return er("Tối đa 62 ngày mỗi lần thêm. Hãy chia thành nhiều lần.");
+  if(!m.ids.length)return er("Chọn ít nhất một nhân viên áp dụng.");
+  const G=[];
+  for(let i=0;i<m.g.length;i++){const g=m.g[i],a=pTime(g.s),b=pTime(g.e),h=ovHrs(a,b),v=+g.v,n="Ca "+(i+1)+": ",ids=g.ids.filter(x=>m.ids.includes(x));
+    if(!ids.length)return er(n+"chọn nhân viên làm ca này.");
+    if(!a||!b||!(h>0))return er(n+"nhập giờ bắt đầu và kết thúc, ví dụ 18h và 22h.");
+    if(!(v>0))return er(n+"nhập mức lương đ/giờ.");
+    G.push({ids,s:a,h,m:ids.length>1?(g.m==="each"?"each":"grp"):"each",v,note:(g.note||"").trim()})}
+  for(let i=0;i<G.length;i++)for(let j=i+1;j<G.length;j++){
+    if(!G[i].ids.some(x=>G[j].ids.includes(x)))continue;
+    const a0=toMin(G[i].s),a1=a0+Math.round(G[i].h*60),b0=toMin(G[j].s),b1=b0+Math.round(G[j].h*60);
+    if(a0<b1&&b0<a1)return er("Ca "+(i+1)+" và ca "+(j+1)+" có người làm trùng giờ, vui lòng kiểm tra lại.")}
+  const e={id:m.id||Date.now(),from:m.from,to:m.to,ids:m.ids.slice(),g:G},P=S.store.pay||(S.store.pay={}),L=P.ov||(P.ov=[]),i=L.findIndex(y=>y.id===e.id);
+  ovClear(e.id);ovPush(e);i<0?L.push(e):L[i]=e;
+  lg("Lương","Ca và lương giờ riêng "+ovRg(e)+" · "+G.map(ovGd).join(" | "));ovm=null;save();view()}
+function ovDel(id){if(ovDq!==id){ovDq=id;const b=$("#ov_d");if(b){b.textContent="Bấm lần nữa để xóa";b.style.borderColor="#dc2626"}return}
+  ovDq=0;const P=S.store.pay||{};ovClear(id);P.ov=(P.ov||[]).filter(x=>x.id!==id);lg("Lương","Xóa ca và lương giờ riêng theo ngày");ovm=null;save();view()}
 const WD=["CN","T2","T3","T4","T5","T6","T7"],h1=h=>nf(Math.round(h*10)/10);
 function vPay(){
   const y=+pfr.slice(0,4),o=+pfr.slice(5,7)-1,d0=+pfr.slice(8,10),a=new Date(y,o,d0).getTime(),ee=pD(pto),b=new Date(ee.getFullYear(),ee.getMonth(),ee.getDate()+1).getTime(),nd=Math.round((b-a)/DAY),idx=t=>Math.min(nd-1,Math.max(0,Math.round((new Date(t).setHours(0,0,0,0)-a)/DAY))),le=leCats(),com=S.store.com!=null?S.store.com:2000,cats=catList(),C=PAYC(),tk=dk(Date.now()),X=schOn();
