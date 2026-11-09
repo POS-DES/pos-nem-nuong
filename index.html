@@ -808,13 +808,13 @@ function vWeek(){
   const f=d=>p2(d.getDate())+"/"+p2(d.getMonth()+1),
   day=dt=>{const a=dt.getTime(),b=new Date(dt.getFullYear(),dt.getMonth(),dt.getDate()+1).getTime(),
     mo=new Date(dt.getFullYear(),dt.getMonth(),dt.getDate()-((dt.getDay()+6)%7)),r=(S.sch||{})[ovKey(mo.getTime())]||{},k=ovKey(a),
-    o={dt,h:0,pay:0,su:0,sh:schShifts(r,me.id,k),av:((r.reg||{})[me.id]||{})[k]||null};
+    lk=schLocked(ovKey(mo.getTime())),o={dt,lk,h:0,pay:0,su:0,sh:schShifts(r,me.id,k),av:lk?null:((r.reg||{})[me.id]||{})[k]||null};
     S.att.filter(x=>x.sid===me.id&&x.in>=a&&x.in<b).forEach(x=>{const q=attPay(x,w);o.h+=q.reg;o.pay+=q.pay});
     S.sales.filter(s=>!s.cancel&&s.type==="ship"&&s.staff===me.name&&s.ts>=a&&s.ts<b).forEach(s=>{o.su+=leQ(s)});
     o.hh=o.su*com;o.t=o.pay+o.hh;return o},
   shT=c=>c.s?fm12(c.s)+"–"+endT(c.s,c.h).replace(" (hôm sau)",""):c.h+" giờ",
   pill=(c,big)=>`<span style="display:inline-block;background:var(--card);border:1px solid var(--bd);border-radius:8px;padding:${big?"6px 12px":"3px 9px"};font-weight:700;font-size:${big?"18px":"13px"};white-space:nowrap">${shT(c)}${c.s?` <small style="font-weight:400">· ${c.h} giờ</small>`:""}</span>`,
-  shLine=(o,big)=>o.sh.length?o.sh.map(c=>pill(c,big)).join(""):o.av&&(o.av.any||o.av.off||o.av.a)?`<small>${o.av.any?"Bạn đăng ký: Freetime":o.av.off?"Bạn báo bận":"Bạn rảnh "+fm12(o.av.a)+"–"+fm12(o.av.b)}</small>`:`<small class="mu">Chưa có ca</small>`,
+  shLine=(o,big)=>o.sh.length?o.sh.map(c=>pill(c,big)).join(""):o.av&&(o.av.any||o.av.off||o.av.a)?`<small>${o.av.any?"Bạn đăng ký: Freetime":o.av.off?"Bạn báo bận":"Bạn rảnh "+fm12(o.av.a)+"–"+fm12(o.av.b)}</small>`:o.lk?`<small class="mu">Không có ca</small>`:`<small class="mu">Chưa có ca</small>`,
   td=day(at),tm1=day(new Date(at.getFullYear(),at.getMonth(),at.getDate()+1)),
   m0=new Date(at.getFullYear(),at.getMonth(),at.getDate()-((at.getDay()+6)%7)+7*wko),
   D=[...Array(7)].map((_,i)=>day(new Date(m0.getFullYear(),m0.getMonth(),m0.getDate()+i))),
@@ -1323,25 +1323,25 @@ const KR=[["today","Hôm nay"],["yday","Hôm qua"],["7","7 ngày"],["30","30 ng�
 function kiem(i,v){if(v!==i.qty){S.kk.push({ts:Date.now(),by:meName(),iid:i.id,a:i.qty,b:v,d:i.qty-v});i.qty=v;return true}return false}
 let ingDel=null;
 function delIng(){
-  if(!can("stockEdit")||!ke)return;const i=ing(ke);if(!i){kp=ke=ingDel=null;view();return}
+  if(!isOwner()||!ke)return;const i=ing(ke);if(!i){kp=ke=ingDel=null;view();return}
   if(ingDel!==ke){ingDel=ke;const b=$("#in_del");if(b){b.textContent="Bấm lần nữa để xóa";b.style.borderColor="#dc2626"}return}
   S.ing=S.ing.filter(x=>x.id!==i.id);delete kvn[i.id];delete kvk[i.id];
   lg("Xóa nguyên liệu",i.name+" · còn "+nf(i.qty)+" "+i.u);
   kp=ke=ingDel=null;save();view()}
-function saveIng(){if(!can("stockIn"))return;const g=k=>$("#"+k).value.trim(),n=g("in_n");if(!n)return;const pu=g("in_pu"),o={name:n,note:g("in_note"),u:g("in_u")||"cái",pu,f:pu?Math.max(1,+g("in_f")||1):1,price:+g("in_p")||0,min:+g("in_m")||0};
+function saveIng(){if(!isOwner())return;const g=k=>$("#"+k).value.trim(),n=g("in_n");if(!n)return;const pu=g("in_pu"),o={name:n,note:g("in_note"),u:g("in_u")||"cái",pu,f:pu?Math.max(1,+g("in_f")||1):1,price:+g("in_p")||0,min:+g("in_m")||0};
   if(ke)Object.assign(ing(ke),o);else S.ing.push({id:++S.iid,qty:0,...o});kp=ke=null;save();view()}
 function vStock(){
   if(kp==="kiem")return vKiem();
-  const kIn=can("stockIn"),kCo=can("cost");
+  const kIn=can("stockIn"),kCo=can("cost"),kAd=isOwner();
   if(!kCo&&kt!=="ton")kt="ton";
-  if(!kIn&&(kp==="add"||kp==="edit"||kp==="nhap"))kp=null;
+  if(!kIn&&kp==="nhap")kp=null;if(!kAd&&(kp==="add"||kp==="edit")){kp=null;ke=null}
   const e=(ke&&ing(ke))||{},I=(id,ph,v,w,t)=>`<input id="${id}" ${t?'type="number" min="0" ':""}placeholder="${ph}" value="${v==null?"":esc(v)}" style="${w}">`,ok=`<div class="bar" style="margin:12px 0 0">`,
   chips=`<div class="chips">${KR.map(k=>`<button class="${k[0]===kr?"on":""}" onclick="kr='${k[0]}';view()">${k[1]}</button>`).join("")}</div>`;
   let pn="",body="";
   if(kp==="add"||kp==="edit")pn=ingModal(e);
   if(kp==="nhap")pn=impModal();
   if(imE)pn+=impEditModal();
-  if(kt==="ton")body=`<div class="card"><div class="bar" style="margin:0 0 8px"><b>Nguyên liệu</b>${kIn?`<button style="margin-left:auto" onclick="kp='add';ke=null;view();$('#in_n').focus()">+ Thêm</button>`:""}</div><div class="scroll"><table><tr><th>Nguyên liệu</th><th>Quy cách</th>${kCo?`<th style="text-align:right">Giá nhập</th>`:""}<th style="text-align:right">Còn</th></tr>${S.ing.map(i=>`<tr data-id="${i.id}"${kIn?` data-ed style="cursor:pointer;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none" onpointerdown="rowDrag(event)" onclick="if(Date.now()-DG<400)return;ke=${i.id};ingDel=null;kp='edit';view();$('#in_n').focus()"`:""}><td><b>${esc(i.name)}</b>${lowI(i)?' <span class="pill">Sắp hết</span>':""}<br><small class="mu">${esc(i.note||"")}</small></td><td>${pk(i)?nf(i.f)+" "+esc(i.u)+"/"+esc(i.pu):esc(i.u)}</td>${kCo?`<td style="text-align:right">${fmt(i.price)}/${esc(i.pu||i.u)}</td>`:""}<td style="text-align:right" class="${lowI(i)?"low":""}"><b>${nf(i.qty)} ${esc(i.u)}</b>${pk(i)?`<br><small>${nf(i.qty/i.f)} ${esc(i.pu)}</small>`:""}${kCo?lotLine(i):""}</td></tr>`).join("")||`<tr><td colspan="5" class="mu">Chưa có nguyên liệu.${kIn?" Bấm Thêm để tạo.":""}</td></tr>`}</table></div></div>`;
+  if(kt==="ton")body=`<div class="card"><div class="bar" style="margin:0 0 8px"><b>Nguyên liệu</b>${kAd?`<button style="margin-left:auto" onclick="kp='add';ke=null;view();$('#in_n').focus()">+ Thêm</button>`:""}</div><div class="scroll"><table><tr><th>Nguyên liệu</th><th>Quy cách</th>${kCo?`<th style="text-align:right">Giá nhập</th>`:""}<th style="text-align:right">Còn</th></tr>${S.ing.map(i=>`<tr data-id="${i.id}"${kAd?` data-ed style="cursor:pointer;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none" onpointerdown="rowDrag(event)" onclick="if(Date.now()-DG<400)return;ke=${i.id};ingDel=null;kp='edit';view();$('#in_n').focus()"`:""}><td><b>${esc(i.name)}</b>${lowI(i)?' <span class="pill">Sắp hết</span>':""}<br><small class="mu">${esc(i.note||"")}</small></td><td>${pk(i)?nf(i.f)+" "+esc(i.u)+"/"+esc(i.pu):esc(i.u)}</td>${kCo?`<td style="text-align:right">${fmt(i.price)}/${esc(i.pu||i.u)}</td>`:""}<td style="text-align:right" class="${lowI(i)?"low":""}"><b>${nf(i.qty)} ${esc(i.u)}</b>${pk(i)?`<br><small>${nf(i.qty/i.f)} ${esc(i.pu)}</small>`:""}${kCo?lotLine(i):""}</td></tr>`).join("")||`<tr><td colspan="5" class="mu">Chưa có nguyên liệu.${kAd?" Bấm Thêm để tạo.":""}</td></tr>`}</table></div></div>`;
   else if(kt==="nhap"){const[a,b]=rg(kr),G={};S.imp.filter(x=>x.ts>=a&&x.ts<b).slice().reverse().forEach(x=>(G[dk(x.ts)]=G[dk(x.ts)]||[]).push(x));
     body=chips+(Object.keys(G).map(d=>{const g=G[d],ce=can("stockEdit");return `<div class="card" style="padding:0;overflow:hidden;margin-bottom:12px"><div class="row" style="padding:12px 16px;margin:0;border-radius:0;border-bottom:0;background:var(--hov)"><b style="flex:1">${new Date(d+"T00:00").toLocaleDateString("vi-VN",{weekday:"short",day:"2-digit",month:"2-digit"})} <span class="mu" style="font-weight:400">· ${g.length} dòng</span></b><b>${fmt(g.reduce((t,x)=>t+x.cost,0))}</b></div><div class="impr imph"><div>Nguyên liệu</div><div>Số lượng nhập</div><div>Đơn giá</div><div>Thành tiền</div><span></span></div>${g.map(x=>{const i=ing(x.iid)||{u:"",name:"?"};return `<div class="impr"><div class="in"><b>${esc(i.name)}</b><small class="mu">${tm(x.ts)} · ${esc(x.by)}${x.edit?" · đã sửa":""}</small></div><div class="iq">${nf(x.q)} <span>${esc(i.u)}</span>${pk(i)?`<br><small class="mu" style="font-weight:400">${nf(x.q/i.f)} ${esc(i.pu||"")}</small>`:""}</div><div class="ig">${x.q?(i.f>1?fmt(x.cost/x.q*i.f)+"/"+esc(i.pu||i.u):fmt(x.cost/x.q)+"/"+esc(i.u)):""}</div><div class="it">${fmt(x.cost)}</div>${ce?`<button class="gi" aria-label="Sửa phiếu nhập" title="Sửa phiếu nhập" onclick="editImp(${x.id})"><span class="ic">${pnI}</span></button>`:"<span></span>"}</div>`}).join("")}</div>`}).join("")||`<p class="mu">Chưa có phiếu nhập trong khoảng này.</p>`)}
   else if(kt==="bc"){const[a,b]=rg(kr),ss=S.sales.filter(s=>!s.cancel&&s.ts>=a&&s.ts<b),fl=(i,x,y)=>[S.imp.filter(z=>z.iid===i.id&&z.ts>=x&&z.ts<y).reduce((t,z)=>t+z.q,0),S.kk.filter(z=>z.iid===i.id&&z.ts>=x&&z.ts<y).reduce((t,z)=>t+z.d,0),S.kk.some(z=>z.iid===i.id&&z.ts>=x&&z.ts<y)];
