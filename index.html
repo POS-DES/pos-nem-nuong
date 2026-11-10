@@ -1046,11 +1046,36 @@ const attTb=()=>attRows().map(a=>`<tr><td>${new Date(a.in).toLocaleDateString("v
 function attList(){return{sub:attSum(),html:attTb()}}
 let aeM=null;
 const attKey=a=>a.sk||a.sid+"_"+a.in,hmS=t=>{const d=new Date(t);return hz(d.getHours())+":"+hz(d.getMinutes())};
-function todayEd(sid,k,cst,ak){if(!isOwner())return;if(ak){attEd(ak);return}const s=S.staff.find(x=>x.id===sid);if(!s)return;aeM={nw:1,sid,name:s.name,in:cst||Date.now()};view();const i=$("#ae_in");if(i)i.select()}
-function attEd(key){if(!isOwner())return;const a=S.att.find(x=>attKey(x)===key);if(!a)return;aeM={key};view();const i=$("#ae_in");if(i)i.select()}
+function todayEd(sid,k,cst,ak){if(!isOwner())return;if(ak){attEd(ak,k,cst);return}const s=S.staff.find(x=>x.id===sid);if(!s)return;aeM={nw:1,sid,name:s.name,in:cst||Date.now(),k:k||"",cst:+cst||0};view();const i=$("#ae_in");if(i)i.select()}
+function attEd(key,k,cst){if(!isOwner())return;const a=S.att.find(x=>attKey(x)===key);if(!a)return;aeM={key,k:k||"",cst:+cst||0};view();const i=$("#ae_in");if(i)i.select()}
 function attEdX(){aeM=null;view()}
+/* Xóa ca: bỏ ca đã xếp trong lịch (nếu mở từ một ca có lịch) và ẩn bản ghi chấm công của ca đó (nếu có). Bấm hai lần để xác nhận. */
+function attEdDel(){
+  if(!isOwner()||!aeM)return;
+  if(!aeM.dq){aeM.dq=1;const b=$("#ae_d");if(b){b.textContent="Bấm lần nữa để xóa ca";b.style.borderColor="#dc2626"}return}
+  const a=aeM.nw?null:S.att.find(x=>attKey(x)===aeM.key);if(!aeM.nw&&!a)return;
+  const sid=aeM.nw?aeM.sid:a.sid,nm=aeM.nw?aeM.name:a.name,parts=[];
+  if(aeM.k){
+    const d=pD(aeM.k);d.setDate(d.getDate()-((d.getDay()+6)%7));
+    const wk=ovKey(d.getTime()),r=(S.sch||{})[wk];
+    if(r){
+      const k=aeM.k,st=aeM.cst,blk=st?dayShifts(sid,k).find(c=>c.st===st):null,en=blk?blk.en:st+1;
+      const keep=schShifts(r,sid,k).filter(c=>{if(!st)return !!c.s;if(!c.s)return true;const t=stT(k,c.s);return !(t>=st&&t<en)});
+      ((r.as||(r.as={}))[sid]||(r.as[sid]={}))[k]=keep;
+      parts.push("ca đã xếp");
+    }
+  }
+  if(a){
+    if(!a.sk)a.sk=attKey(a);
+    a.gh=1;a.del={by:meName(),at:Date.now()};
+    const stf=S.staff.find(x=>x.id===a.sid);
+    if(stf&&!S.att.some(x=>x!==a&&x.sid===a.sid&&!x.out&&!x.gh))stf.on=false;
+    parts.push("chấm công "+tm(a.in)+(a.out?"–"+tm(a.out):""));
+  }
+  lg("Chấm công","Xóa ca của "+nm+(aeM.k?" ngày "+aeM.k.split("-").reverse().join("/"):"")+(parts.length?" ("+parts.join(", ")+")":""));
+  aeM=null;save();view()}
 function attEdModal(){const a=aeM&&(aeM.nw?{sid:aeM.sid,name:aeM.name,in:aeM.in,out:null}:S.att.find(x=>attKey(x)===aeM.key));if(!a)return"";const o=shOf(a),d=new Date(a.in);
-  return `<div class="mo" onclick="if(event.target===this)attEdX()"><div class="md" style="max-width:420px"><div class="mh"><div><b>${aeM.nw?"Chấm công hộ":"Sửa giờ chấm công"} · ${esc(a.name)}</b><br><small class="mu">${d.toLocaleDateString("vi-VN")}${a.adj?" · đã chỉnh trước đó (gốc "+tm(a.adj.in0)+")":""}</small></div><button class="mx" onclick="attEdX()">×</button></div><div class="mb" style="gap:12px"><label class="mf"><span>Giờ vào</span><input id="ae_in" value="${fm12(hmS(a.in))}" placeholder="9h"></label>${o&&o.st?`<button type="button" onclick="$('#ae_in').value='${fm12(hmS(o.st))}'">Lấy giờ bắt đầu ca (${fm12(hmS(o.st))})</button>`:""}<label class="mf"><span>Giờ ra${a.out?"":" (để trống nếu nhân viên vẫn đang làm; điền để đóng ca bị treo/trùng)"}</span><input id="ae_out" value="${a.out?fm12(hmS(a.out)):""}" placeholder="16h"></label><label class="mf"><span>Lý do (không bắt buộc)</span><input id="ae_n" placeholder="VD: vào làm từ 9h, chưa có phần mềm"></label><small id="ae_e" style="color:#dc2626;display:block"></small></div><div class="mfoot"><button onclick="attEdX()">Hủy</button><button class="p" onclick="attEdSave()">Lưu</button></div></div></div>`}
+  return `<div class="mo" onclick="if(event.target===this)attEdX()"><div class="md" style="max-width:420px"><div class="mh"><div><b>${aeM.nw?"Chấm công hộ":"Sửa giờ chấm công"} · ${esc(a.name)}</b><br><small class="mu">${d.toLocaleDateString("vi-VN")}${a.adj?" · đã chỉnh trước đó (gốc "+tm(a.adj.in0)+")":""}</small></div><button class="mx" onclick="attEdX()">×</button></div><div class="mb" style="gap:12px"><label class="mf"><span>Giờ vào</span><input id="ae_in" value="${fm12(hmS(a.in))}" placeholder="9h"></label>${o&&o.st?`<button type="button" onclick="$('#ae_in').value='${fm12(hmS(o.st))}'">Lấy giờ bắt đầu ca (${fm12(hmS(o.st))})</button>`:""}<label class="mf"><span>Giờ ra${a.out?"":" (để trống nếu nhân viên vẫn đang làm; điền để đóng ca bị treo/trùng)"}</span><input id="ae_out" value="${a.out?fm12(hmS(a.out)):""}" placeholder="16h"></label><label class="mf"><span>Lý do (không bắt buộc)</span><input id="ae_n" placeholder="VD: vào làm từ 9h, chưa có phần mềm"></label><small id="ae_e" style="color:#dc2626;display:block"></small></div><div class="mfoot">${aeM.k||!aeM.nw?`<button id="ae_d" style="margin-right:auto;color:#dc2626" onclick="attEdDel()">Xóa ca</button>`:""}<button onclick="attEdX()">Hủy</button><button class="p" onclick="attEdSave()">Lưu</button></div></div></div>`}
 function attEdSave(){if(!isOwner()||!aeM)return;const a=aeM.nw?{sid:aeM.sid,name:aeM.name,in:aeM.in,out:null}:S.att.find(x=>attKey(x)===aeM.key),er=t=>{$("#ae_e").textContent=t};if(!a)return;
   const ti=pTime($("#ae_in").value);if(!ti)return er("Nhập giờ vào hợp lệ, ví dụ 9h hoặc 9h30.");
   const base=new Date(a.in),mk=(t,add)=>{const q=t.split(":").map(Number),x=new Date(base);x.setHours(q[0],q[1]||0,0,0);return x.getTime()+(add||0)*864e5};
