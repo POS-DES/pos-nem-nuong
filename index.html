@@ -2265,7 +2265,7 @@ function ntScan(){
     const me=S.staff.find(x=>x.id===S.me);if(!me)throw 0;
     attHeal();
     const now=Date.now(),gr=GR()*6e4,lead=ntLead()*6e4,mgr=can("staffMgr"),cs=CH.cur,ks=[ovKey(now-864e5),ovKey(now)];
-    S.staff.filter(s=>s.role!=="Chủ quán"&&(s.id===me.id||mgr)).forEach(s=>{
+    S.staff.filter(s=>s.role!=="Chủ quán"&&s.id===me.id).forEach(s=>{
       const mine=s.id===me.id,seen=new Set();
       ks.forEach(k=>dayShifts(s.id,k).forEach(c=>{
         if(!c.st)return;const x=shAtt(s.id,c,k),rg=tm(c.st)+"–"+tm(c.en),base=cs+"_"+s.id+"_"+c.st;if(x)seen.add(x);
@@ -2284,7 +2284,7 @@ function ntScan(){
   ntRender(A)}
 function ntRender(A){
   const n=Date.now(),L=A.filter(a=>!(NTX[a.id]>n));let h=L.map(a=>`<div class="nti l${a.lv}"><b>${a.lv===2?"🔴":a.lv===1?"🟠":"⏰"} ${esc(a.t)}</b><small>${esc(a.b)}</small><div class="nta"><button data-nt="later" data-id="${esc(a.id)}">Để sau</button>${a.go?`<button class="p" data-nt="go" data-id="${esc(a.id)}">${a.go}</button>`:""}</div></div>`).join("");
-  if(ntSup()&&Notification.permission==="default"&&(!needLogin()||sessOk())&&S.staff.length&&!NTX.ask)h+=`<div class="nti"><b>🔔 Bật thông báo ca làm</b><small>Cho phép thông báo để điện thoại nhắc khi sắp tới ca, trễ ca hoặc quên chấm ra ca.</small><div class="nta"><button data-nt="skip">Để sau</button><button class="p" data-nt="ask">Bật thông báo</button></div></div>`;
+  if(ntSup()&&Notification.permission==="default"&&(!needLogin()||sessOk())&&S.staff.length&&!NTX.ask&&(S.staff.find(x=>x.id===S.me)||{}).role!=="Chủ quán")h+=`<div class="nti"><b>🔔 Bật thông báo ca làm</b><small>Cho phép thông báo để điện thoại nhắc khi sắp tới ca, trễ ca hoặc quên chấm ra ca.</small><div class="nta"><button data-nt="skip">Để sau</button><button class="p" data-nt="ask">Bật thông báo</button></div></div>`;
   if(h!==NTH){NTH=h;const e=document.getElementById("ntf");if(e)e.innerHTML=h}}
 document.addEventListener("click",e=>{const b=e.target.closest&&e.target.closest("#ntf [data-nt]");if(!b)return;e.preventDefault();e.stopPropagation();const k=b.dataset.nt;if(k==="later")ntLater(b.dataset.id);else if(k==="go")ntGo(b.dataset.id);else if(k==="skip"){NTX.ask=1;NTH="~";ntScan()}else if(k==="ask"){NTX.ask=1;NTH="~";ntAsk()}},true);
 function ntLater(id){NTX[id]=Date.now()+6e5;ntScan()}
