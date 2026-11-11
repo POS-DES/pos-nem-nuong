@@ -502,18 +502,9 @@ function dnMigrate(){const M=new Map();
   Object.keys(D).forEach(k=>{if(!D[k].some(e=>e.L.some(o=>!o.dn)))return;D[k].sort((x,y)=>x.t-y.t||x.no-y.no).forEach((e,i)=>e.L.forEach(o=>{o.dn=i+1}))});
   save()}
 /* Các lần kiểm kho cũ bị trùng (cùng nguyên liệu, cùng giờ) làm đồng bộ mất bản ghi: tách ra mỗi bản một mốc giờ riêng, bản chốt trước giữ nguyên khóa */
-/* Bản cũ mỗi lần sửa lại kiểm kho trong ngày lại thêm một bản ghi mới nên ra số âm. Gộp các bản ghi cùng nguyên liệu, cùng ngày thành một (tổng tiêu hao giữ nguyên), rồi tính lại số dự kiến của các ngày sau và tồn hiện tại cho khớp. */
-function kkMerge(){let ch=false;
-  S.ing.forEach(i=>{const by={};S.kk.filter(z=>z.iid===i.id).forEach(z=>(by[dk(z.ts)]=by[dk(z.ts)]||[]).push(z));
-    const days=Object.keys(by).sort().map(k=>by[k].sort((p,q)=>p.ts-q.ts||(p.at||0)-(q.at||0)));let first=-1;
-    days.forEach((g,x)=>{if(g.length<2)return;const L=g[g.length-1],E=g.slice(0,-1);if(!E.some(z=>z.d!==0))return;const tot=g.reduce((t,z)=>t+z.d,0);E.forEach(z=>{z.b=z.a;z.d=0});L.d=tot;L.a=L.b+tot;if(first<0)first=x});
-    if(first<0)return;ch=true;
-    for(let x=first+1;x<days.length;x++){const p=days[x-1][days[x-1].length-1],L=days[x][days[x].length-1];L.a=p.b+S.imp.filter(z=>z.iid===i.id&&z.ts>p.ts&&z.ts<=L.ts).reduce((t,z)=>t+z.q,0);L.d=L.a-L.b}
-    const last=days[days.length-1],Ll=last[last.length-1];i.qty=Math.max(0,Ll.b+S.imp.filter(z=>z.iid===i.id&&z.ts>Ll.ts).reduce((t,z)=>t+z.q,0))});
-  if(ch)save()}
 function kkHeal(){const seen={};let ch=false;S.kk.slice().sort((x,y)=>(x.at||0)-(y.at||0)).forEach(z=>{if(!seen[z.iid+"_"+z.ts]){seen[z.iid+"_"+z.ts]=1;return}let t=z.ts;while(seen[z.iid+"_"+t])t++;z.ts=t;seen[z.iid+"_"+t]=1;ch=true});if(ch){S.kk.sort((x,y)=>x.ts-y.ts);save()}}
 function view(){
-  ingSort();kkHeal();kkMerge();
+  ingSort();kkHeal();kkNorm();
   if(S.orders.some(o=>!o.dn)||S.sales.some(z=>!z.dn))dnMigrate();
   if(needLogin()){if(!sessOk()){loginShow();return}S.me=SESS;const lo=$("#lgin");if(lo)lo.remove()}else{const lo=$("#lgin");if(lo)lo.remove()}
   const h=PG;let k=NAV.some(n=>n[0]===h)?h:"ban";if(!navOk(k)){const f=NAV.find(n=>navOk(n[0]));if(f)k=f[0]}
@@ -1386,19 +1377,24 @@ function kkHint(id){const i=ing(id),el=$("#kh"+id);if(!i||!el)return;const v=kvk
 const kkN=()=>Object.values(kvk).filter(v=>v!=="").length;
 function kkOk(){const n=kkN(),b=$("#kk_ok");b.disabled=!n;b.textContent="Chốt kho ("+n+"/"+S.ing.length+")";$("#kk_n").textContent=n+"/"+S.ing.length}
 function chotKho(){if(kiemRO()){view();return}S.ing.forEach(i=>{const v=kvk[i.id];if(v===undefined||v==="")return;const b=Math.max(0,+v),k0=kkDay(i);
-  /* Sửa lại lần kiểm đã chốt trong ngày: cập nhật chính bản ghi đó (không thêm bản ghi mới, không bị âm). Số đếm là mốc tuyệt đối, nên phần chênh lệch được chuyển sang lần kiểm kế tiếp (nếu có); nếu không có thì tồn hiện tại = số đếm + hàng nhập sau đó. */
-  if(k0){const dl=b-k0.b,pv=S.kk.filter(z=>z!==k0&&z.iid===i.id&&dk(z.ts)<dk(k0.ts)).sort((p,q)=>q.ts-p.ts||(q.at||0)-(p.at||0))[0],nx=S.kk.filter(z=>z!==k0&&z.iid===i.id&&z.ts>k0.ts).sort((p,q)=>p.ts-q.ts||(p.at||0)-(q.at||0))[0];
-    if(pv)k0.a=pv.b+S.imp.filter(z=>z.iid===i.id&&z.ts>pv.ts&&z.ts<=k0.ts).reduce((t,z)=>t+z.q,0);
-    k0.b=b;k0.d=k0.a-b;k0.at=Date.now();k0.by=meName();
-    if(nx){if(dl){nx.a+=dl;nx.d+=dl}}else i.qty=Math.max(0,b+S.imp.filter(z=>z.iid===i.id&&z.ts>k0.ts).reduce((t,z)=>t+z.q,0));
-    return}
-  const c=kCut(i),a=exOn(i,c.e);let kts=c.ts;while(S.kk.some(z=>z.iid===i.id&&z.ts===kts))kts++;S.kk.push({ts:kts,at:Date.now(),by:meName(),iid:i.id,a,b,d:a-b});i.qty=Math.max(0,i.qty+b-a)});S.kk.sort((x,y)=>x.ts-y.ts);kp=null;kvk={};kvx={};save();view()}
+  /* Đã kiểm trong ngày: sửa thẳng số đếm của bản ghi đó, không thêm bản ghi mới */
+  if(k0){k0.b=b;k0.at=Date.now();k0.by=meName();return}
+  const c=kCut(i),a=exOn(i,c.e);let kts=c.ts;while(S.kk.some(z=>z.iid===i.id&&z.ts===kts))kts++;S.kk.push({ts:kts,at:Date.now(),by:meName(),iid:i.id,a,b,d:a-b})});S.kk.sort((x,y)=>x.ts-y.ts);kkNorm();kp=null;kvk={};kvx={};save();view()}
+/* Nguyên tắc duy nhất: SỐ ĐẾM là gốc. Với mỗi nguyên liệu, theo thứ tự thời gian:
+   dự kiến của lần kiểm = số đếm lần kiểm trước + hàng nhập giữa hai lần; tiêu hao = dự kiến - số đếm; tồn hiện tại = số đếm lần kiểm cuối + hàng nhập sau đó.
+   Sửa số đếm một ngày thì tiêu hao ngày đó và ngày kế tiếp tự đổi theo, mọi thứ khác giữ nguyên. Lần kiểm đầu tiên giữ nguyên số dự kiến đã ghi. Các bản ghi trùng ngày (do bản cũ tạo ra) được gộp vào bản cuối của ngày. */
+function kkNorm(){let ch=false;const set=(o,k,v)=>{if(o[k]!==v){o[k]=v;ch=true}};
+  S.ing.forEach(i=>{const L=S.kk.filter(z=>z.iid===i.id).sort((p,q)=>p.ts-q.ts||(p.at||0)-(q.at||0));if(!L.length)return;
+    L.forEach((z,x)=>{const p=L[x-1],n=L[x+1];if(p)set(z,"a",p.b+S.imp.filter(m=>m.iid===i.id&&m.ts>p.ts&&m.ts<=z.ts).reduce((t,m)=>t+m.q,0));if(n&&dk(n.ts)===dk(z.ts))set(z,"b",z.a);set(z,"d",z.a-z.b)});
+    const l=L[L.length-1];set(i,"qty",Math.max(0,l.b+S.imp.filter(m=>m.iid===i.id&&m.ts>l.ts).reduce((t,m)=>t+m.q,0)))});
+  if(ch)save()}
+const kkWhy=(i,k)=>{const P=S.kk.filter(z=>z.iid===i.id&&z!==k&&(z.ts<k.ts||(z.ts===k.ts&&(z.at||0)<(k.at||0)))).sort((p,q)=>q.ts-p.ts)[0];if(!P)return"";const im=S.imp.filter(m=>m.iid===i.id&&m.ts>P.ts&&m.ts<=k.ts).reduce((t,m)=>t+m.q,0);return `<br><small class="mu">Tồn đầu ${nf(k.a)} ${esc(i.u)} = lần kiểm ${dmy(dk(P.ts))} đếm ${nf(P.b)}${im?" + nhập "+nf(im):""}</small>`};
 function vKiem(){
   if(!kPast()&&kd!==dk(Date.now())&&kd!==dk(Date.now()-DAY)){kd=dk(Date.now());kvk={};kvx={}}const ro=kiemRO();
   const e=new Date(kd+"T00:00").getTime()+DAY,done=S.kk.some(z=>dk(z.ts)===kd),n=kkN(),cn=S.ing.filter(i=>kkDay(i)).length,kds=S.ing.map(i=>kkDay(i)).filter(Boolean),who=[...new Set(kds.map(z=>z.by).filter(Boolean))],kat=Math.max(0,...kds.map(z=>z.at||0)),dw=kds.filter(z=>z.d<0&&z.a>0);
   return `<div class="bar" style="margin:0 0 14px;align-items:flex-start"><div><h2 style="margin:0">Kiểm kho</h2><span class="mu">${new Date(kd+"T00:00").toLocaleDateString("vi-VN",{weekday:"short",day:"2-digit",month:"2-digit"})}</span></div><button style="margin-left:auto" onclick="kp=null;kvk={};kvx={};view()">← Kho</button></div>${kiemBar()}${ro?`<div style="margin:10px 0 0;padding:8px 12px;border-radius:10px;background:var(--hov);font-size:13px">Đây là ngày đã qua nên chỉ xem được. Chỉ chủ quán mới sửa được kiểm kho ngày đã qua.</div>`:""}
   <div style="margin:10px 0"><span class="pill ${done?"pg":""}" style="${done?"":"background:#ffedd5;color:#c2410c"}">${done?"Đã chốt":"Chưa chốt"}</span>${done&&who.length?` <span class="mu">· Chốt bởi <b style="color:var(--tx)">${esc(who.join(", "))}</b>${kat?" lúc "+new Date(kat).toLocaleString("vi-VN",{hour:"2-digit",minute:"2-digit",day:"2-digit",month:"2-digit"}):""}</span>`:""} <span class="mu" id="kk_n">${n||(done?cn:0)}/${S.ing.length}</span></div>${dw.length?`<div style="margin:0 0 8px;padding:8px 12px;border-radius:10px;background:#fef3c7;color:#92400e;font-size:13px">⚠ Các nguyên liệu này bạn đếm nhiều hơn số phần mềm tính: ${dw.map(z=>esc((ing(z.iid)||{}).name||"?")+" (nhiều hơn "+nf(-z.d)+")").join(", ")}. Có thể đã mua hàng mà chưa nhập vào phần mềm, hoặc đếm nhầm.</div>`:""}${srch()}
-  <div class="card" style="padding:0;overflow:hidden">${S.ing.map(i=>{const k0=kkDay(i),x=k0?k0.a:exOn(i,kCut(i).e),ims=S.imp.filter(z=>z.iid===i.id&&dk(z.ts)===kd).sort((p,q)=>p.ts-q.ts);return `<div class="row ir" data-n="${esc(i.name.toLowerCase())}" style="padding:12px 16px;border-top:1px solid var(--bd)"><div><b>${esc(i.name)}</b><br><small class="mu">Dự kiến ${nf(x)} ${esc(i.u)}${pk(i)?` (${nf(x/i.f)} ${esc(i.pu)})`:""}</small>${k0?`<br><small style="color:#16a34a;font-weight:600">Đã chốt ${nf(k0.b)} ${esc(i.u)}${pk(i)?` (${nf(k0.b/i.f)} ${esc(i.pu)})`:""}${k0.d>0?" · tiêu hao "+nf(k0.d):""}</small>${k0.d<0&&k0.a>0?`<br><small style="color:#d97706;font-weight:600">⚠ Bạn đếm nhiều hơn phần mềm ${nf(-k0.d)} ${esc(i.u)} (phần mềm tính còn ${nf(k0.a)}, bạn đếm được ${nf(k0.b)}). Có thể đã mua hàng mà chưa nhập vào phần mềm, hoặc đếm nhầm.</small>`:""}`:""}<small id="kh${i.id}" style="display:block;color:#d97706;font-weight:600"></small></div><div class="ib" style="width:150px"><input id="kq${i.id}" type="number" min="0" placeholder="–" ${ro?"disabled":""} value="${!ro&&kvk[i.id]!=null?kvk[i.id]:k0?k0.b:""}" oninput="kvk[${i.id}]=this.value;kkOk();kkHint(${i.id})"><span class="su">${esc(i.u)}</span></div></div>`}).join("")||`<p class="mu" style="padding:16px;margin:0">Chưa có nguyên liệu.</p>`}</div>
+  <div class="card" style="padding:0;overflow:hidden">${S.ing.map(i=>{const k0=kkDay(i),x=k0?k0.a:exOn(i,kCut(i).e),ims=S.imp.filter(z=>z.iid===i.id&&dk(z.ts)===kd).sort((p,q)=>p.ts-q.ts);return `<div class="row ir" data-n="${esc(i.name.toLowerCase())}" style="padding:12px 16px;border-top:1px solid var(--bd)"><div><b>${esc(i.name)}</b><br><small class="mu">Dự kiến ${nf(x)} ${esc(i.u)}${pk(i)?` (${nf(x/i.f)} ${esc(i.pu)})`:""}</small>${k0?`<br><small style="color:#16a34a;font-weight:600">Đã chốt ${nf(k0.b)} ${esc(i.u)}${pk(i)?` (${nf(k0.b/i.f)} ${esc(i.pu)})`:""}${k0.d>0?" · tiêu hao "+nf(k0.d):""}</small>${k0.d<0&&k0.a>0?`<br><small style="color:#d97706;font-weight:600">⚠ Bạn đếm nhiều hơn phần mềm ${nf(-k0.d)} ${esc(i.u)} (phần mềm tính còn ${nf(k0.a)}, bạn đếm được ${nf(k0.b)}). Có thể đã mua hàng mà chưa nhập vào phần mềm, hoặc đếm nhầm.</small>`:""}`:""}${k0?kkWhy(i,k0):""}<small id="kh${i.id}" style="display:block;color:#d97706;font-weight:600"></small></div><div class="ib" style="width:150px"><input id="kq${i.id}" type="number" min="0" placeholder="–" ${ro?"disabled":""} value="${!ro&&kvk[i.id]!=null?kvk[i.id]:k0?k0.b:""}" oninput="kvk[${i.id}]=this.value;kkOk();kkHint(${i.id})"><span class="su">${esc(i.u)}</span></div></div>`}).join("")||`<p class="mu" style="padding:16px;margin:0">Chưa có nguyên liệu.</p>`}</div>
   ${ro?"":`<div style="position:sticky;bottom:12px;margin-top:14px"><button id="kk_ok" class="p" style="width:100%;padding:14px;font-size:16px;border-radius:14px" onclick="chotKho()" ${n?"":"disabled"}>${n||!done?`Chốt kho (${n}/${S.ing.length})`:`Đã chốt (${cn}/${S.ing.length}) · sửa số để chốt lại`}</button></div>`}`}
 
 let imE=null;
