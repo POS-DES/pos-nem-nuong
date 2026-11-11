@@ -502,9 +502,18 @@ function dnMigrate(){const M=new Map();
   Object.keys(D).forEach(k=>{if(!D[k].some(e=>e.L.some(o=>!o.dn)))return;D[k].sort((x,y)=>x.t-y.t||x.no-y.no).forEach((e,i)=>e.L.forEach(o=>{o.dn=i+1}))});
   save()}
 /* Các lần kiểm kho cũ bị trùng (cùng nguyên liệu, cùng giờ) làm đồng bộ mất bản ghi: tách ra mỗi bản một mốc giờ riêng, bản chốt trước giữ nguyên khóa */
+/* Bản cũ mỗi lần sửa lại kiểm kho trong ngày lại thêm một bản ghi mới nên ra số âm. Gộp các bản ghi cùng nguyên liệu, cùng ngày thành một (tổng tiêu hao giữ nguyên), rồi tính lại số dự kiến của các ngày sau và tồn hiện tại cho khớp. */
+function kkMerge(){let ch=false;
+  S.ing.forEach(i=>{const by={};S.kk.filter(z=>z.iid===i.id).forEach(z=>(by[dk(z.ts)]=by[dk(z.ts)]||[]).push(z));
+    const days=Object.keys(by).sort().map(k=>by[k].sort((p,q)=>p.ts-q.ts||(p.at||0)-(q.at||0)));let first=-1;
+    days.forEach((g,x)=>{if(g.length<2)return;const L=g[g.length-1],E=g.slice(0,-1);if(!E.some(z=>z.d!==0))return;const tot=g.reduce((t,z)=>t+z.d,0);E.forEach(z=>{z.b=z.a;z.d=0});L.d=tot;L.a=L.b+tot;if(first<0)first=x});
+    if(first<0)return;ch=true;
+    for(let x=first+1;x<days.length;x++){const p=days[x-1][days[x-1].length-1],L=days[x][days[x].length-1];L.a=p.b+S.imp.filter(z=>z.iid===i.id&&z.ts>p.ts&&z.ts<=L.ts).reduce((t,z)=>t+z.q,0);L.d=L.a-L.b}
+    const last=days[days.length-1],Ll=last[last.length-1];i.qty=Math.max(0,Ll.b+S.imp.filter(z=>z.iid===i.id&&z.ts>Ll.ts).reduce((t,z)=>t+z.q,0))});
+  if(ch)save()}
 function kkHeal(){const seen={};let ch=false;S.kk.slice().sort((x,y)=>(x.at||0)-(y.at||0)).forEach(z=>{if(!seen[z.iid+"_"+z.ts]){seen[z.iid+"_"+z.ts]=1;return}let t=z.ts;while(seen[z.iid+"_"+t])t++;z.ts=t;seen[z.iid+"_"+t]=1;ch=true});if(ch){S.kk.sort((x,y)=>x.ts-y.ts);save()}}
 function view(){
-  ingSort();kkHeal();
+  ingSort();kkHeal();kkMerge();
   if(S.orders.some(o=>!o.dn)||S.sales.some(z=>!z.dn))dnMigrate();
   if(needLogin()){if(!sessOk()){loginShow();return}S.me=SESS;const lo=$("#lgin");if(lo)lo.remove()}else{const lo=$("#lgin");if(lo)lo.remove()}
   const h=PG;let k=NAV.some(n=>n[0]===h)?h:"ban";if(!navOk(k)){const f=NAV.find(n=>navOk(n[0]));if(f)k=f[0]}
@@ -1378,7 +1387,7 @@ const kkN=()=>Object.values(kvk).filter(v=>v!=="").length;
 function kkOk(){const n=kkN(),b=$("#kk_ok");b.disabled=!n;b.textContent="Chốt kho ("+n+"/"+S.ing.length+")";$("#kk_n").textContent=n+"/"+S.ing.length}
 function chotKho(){if(kiemRO()){view();return}S.ing.forEach(i=>{const v=kvk[i.id];if(v===undefined||v==="")return;const b=Math.max(0,+v),k0=kkDay(i);
   /* Sửa lại lần kiểm đã chốt trong ngày: cập nhật chính bản ghi đó (không thêm bản ghi mới, không bị âm). Số đếm là mốc tuyệt đối, nên phần chênh lệch được chuyển sang lần kiểm kế tiếp (nếu có); nếu không có thì tồn hiện tại = số đếm + hàng nhập sau đó. */
-  if(k0){const dl=b-k0.b,pv=S.kk.filter(z=>z!==k0&&z.iid===i.id&&z.ts<k0.ts).sort((p,q)=>q.ts-p.ts||(q.at||0)-(p.at||0))[0],nx=S.kk.filter(z=>z!==k0&&z.iid===i.id&&z.ts>k0.ts).sort((p,q)=>p.ts-q.ts||(p.at||0)-(q.at||0))[0];
+  if(k0){const dl=b-k0.b,pv=S.kk.filter(z=>z!==k0&&z.iid===i.id&&dk(z.ts)<dk(k0.ts)).sort((p,q)=>q.ts-p.ts||(q.at||0)-(p.at||0))[0],nx=S.kk.filter(z=>z!==k0&&z.iid===i.id&&z.ts>k0.ts).sort((p,q)=>p.ts-q.ts||(p.at||0)-(q.at||0))[0];
     if(pv)k0.a=pv.b+S.imp.filter(z=>z.iid===i.id&&z.ts>pv.ts&&z.ts<=k0.ts).reduce((t,z)=>t+z.q,0);
     k0.b=b;k0.d=k0.a-b;k0.at=Date.now();k0.by=meName();
     if(nx){if(dl){nx.a+=dl;nx.d+=dl}}else i.qty=Math.max(0,b+S.imp.filter(z=>z.iid===i.id&&z.ts>k0.ts).reduce((t,z)=>t+z.q,0));
