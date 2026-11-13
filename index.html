@@ -1120,7 +1120,7 @@ function attHeal(){
 const attDupX=x=>{if(x.gh)return true;const i=S.att.indexOf(x),m=t=>Math.floor((t||0)/6e4);return i>0&&S.att.some((y,j)=>j<i&&!y.gh&&y.sid===x.sid&&m(y.in)===m(x.in)&&m(y.out)===m(x.out)&&!!y.out===!!x.out)};
 const attGov=x=>{const d=new Date(x.in);d.setDate(d.getDate()-((d.getDay()+6)%7));const wk=ovKey(d.getTime()),r=(S.sch||{})[wk];if(!r||!schLocked(wk))return false;return Object.values(r.as||{}).some(m=>Object.values(m).some(a=>(Array.isArray(a)?a:[a]).some(z=>z&&z.h>0)))||Object.values(r.reg||{}).some(m=>Object.values(m).some(z=>z&&z.h>0))};
 const attDup=(x,o)=>{if(!o)return false;const ix=S.att.indexOf(x),now=Date.now();return S.att.some((y,iy)=>{if(y===x||y.gh||y.sid!==x.sid)return false;const yo=shOf(y);if(!yo||yo.st!==o.st)return false;if(!(y.in<x.in||(y.in===x.in&&iy<ix)))return false;return (y.out||now)>x.in})};
-function attPay(x,w){w=wOv(x,w);const c=PAYC();const o0=shOf(x);if(attDupX(x)||attDup(x,o0)||(!o0&&attGov(x)))return{h:0,reg:0,ot:0,pay:0};const ss=regS(x),lt=ss>0&&x.in>ss?Math.round((x.in-ss)/6e4):0,bad=lt>GR()&&!x.exc,pi=ss>x.in?ss:(lt>0&&!bad?ss:x.in);let h=Math.max(0,((x.out||Date.now())-pi)/36e5);if(c.rnd>0){const m=c.rnd/60;h=Math.round(h/m)*m}const sd=regH(x),reg=sd>0?Math.min(h,sd):h,ot=h-reg;const pn=bad&&PNL().m>0&&lt>=PNL().m?Math.round(w*PNL().h):0;return{h,reg,ot,pen:pn,pay:Math.round(w*(reg+ot*c.otx)*hx(x.in))-pn}}
+function attPay(x,w){const w0=w;const c=PAYC();const o0=shOf(x);if(attDupX(x)||attDup(x,o0)||(!o0&&attGov(x)))return{h:0,reg:0,ot:0,pay:0};const ss=regS(x),lt=ss>0&&x.in>ss?Math.round((x.in-ss)/6e4):0,bad=lt>GR()&&!x.exc,pi=ss>x.in?ss:(lt>0&&!bad?ss:x.in);w=wOv(x,w0,pi,x.out||Date.now());let h=Math.max(0,((x.out||Date.now())-pi)/36e5);if(c.rnd>0){const m=c.rnd/60;h=Math.round(h/m)*m}const sd=regH(x),reg=sd>0?Math.min(h,sd):h,ot=h-reg;const pn=bad&&PNL().m>0&&lt>=PNL().m?Math.round(w*PNL().h):0;return{h,reg,ot,pen:pn,pay:Math.round(w*(reg+ot*c.otx)*hx(x.in))-pn}}
 let pmv="h";
 const pD=k=>new Date(+k.slice(0,4),+k.slice(5,7)-1,+k.slice(8,10));
 const pRl=()=>pD(pfr).toLocaleDateString("vi-VN")+" – "+pD(pto).toLocaleDateString("vi-VN");
@@ -1217,10 +1217,17 @@ let ovm=null;
 const ovKey=ts=>{const d=new Date(ts);return d.getFullYear()+"-"+hz(d.getMonth()+1)+"-"+hz(d.getDate())};
 const ovN=e=>e.g?e:{id:e.id,from:e.d,to:e.d,ids:e.ids||[],g:[{ids:e.ids||[],s:"",h:0,m:e.m,v:e.v,note:e.note||""}]};
 /* Lương giờ riêng: khoảng ngày + nhân viên áp dụng + nhiều ca (mỗi ca có nhóm người, giờ, mức lương). Chấm công thuộc ca nào (theo giờ trùng nhiều nhất) thì dùng mức của ca đó. */
-function wOv(x,w){const L=(S.store.pay||{}).ov||[],k=ovKey(x.in),en=x.out||Date.now();let b=null,bo=0;
+function wOv(x,w,a,b){const L=(S.store.pay||{}).ov||[],k=ovKey(x.in),en=x.out||Date.now();let b0=null,bo=0;const G=[];
   for(let i=L.length-1;i>=0;i--){const e=ovN(L[i]);if(k<e.from||k>e.to||!e.ids.includes(x.sid))continue;
-    e.g.forEach(g=>{if(!g.ids.includes(x.sid))return;let ov=1;if(g.s&&g.h>0){const st=stT(k,g.s);ov=Math.max(0,Math.min(en,st+g.h*36e5)-Math.max(x.in,st))}if(ov>bo){bo=ov;b=g}})}
-  return b?(b.m==="grp"&&b.ids.length>1?b.v/b.ids.length:b.v):w}
+    e.g.forEach(g=>{if(!g.ids.includes(x.sid))return;G.push(g);let ov=1;if(g.s&&g.h>0){const st=stT(k,g.s);ov=Math.max(0,Math.min(en,st+g.h*36e5)-Math.max(x.in,st))}if(ov>bo){bo=ov;b0=g}})}
+  const rt=g=>g.m==="grp"&&g.ids.length>1?g.v/g.ids.length:g.v;
+  if(!b0)return w;
+  /* Nếu có khoảng giờ cần tính và mọi ca riêng đều có giờ cụ thể: tính mức lương trung bình theo từng phút (ca riêng dùng mức riêng, phần còn lại dùng lương thường) */
+  if(a!=null&&b!=null&&b>a&&G.every(g=>g.s&&g.h>0)){
+    const R=G.map(g=>{const st=stT(k,g.s);return{a:st,b:st+g.h*36e5,r:rt(g)}});let sum=0,n=0;
+    for(let t=a;t<b;t+=6e4){const m=Math.min(6e4,b-t),g=R.find(z=>t+m/2>=z.a&&t+m/2<z.b);sum+=(g?g.r:w)*m;n+=m}
+    return n>0?sum/n:w}
+  return rt(b0)}
 const ovNm=id=>(S.staff.find(s=>s.id===id)||{name:"?"}).name;
 const ovRg=e=>e.from===e.to?dmy(e.from):dmy(e.from)+" – "+dmy(e.to);
 const ovDays=m=>!m.from||!m.to||m.to<m.from?0:Math.round((pD(m.to)-pD(m.from))/DAY)+1;
