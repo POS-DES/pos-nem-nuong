@@ -380,7 +380,7 @@ const $=s=>document.querySelector(s);
 const fmt=n=>Math.round(n).toLocaleString("vi-VN")+"đ";
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const tm=t=>new Date(t).toLocaleTimeString("vi-VN",{hour:"2-digit",minute:"2-digit"});
-const NAV=[["ban","Bàn","▦"],["bep","Bếp","🍳"],["donhang","Đơn hàng","🧾"],["chamcong","Chấm công","🕒"],["kho","Kho","📦"],["baocao","Báo cáo","📊"],["tonghop","Tổng hợp","🗂"],["menu","Thực đơn","🍴"],["khach","Khách sỉ","🏷"],["sodo","Sơ đồ bàn","🪑"],["nhanvien","Nhân viên","👥"],["caidat","Cài đặt","⚙️"]];
+const NAV=[["ban","Bàn","▦"],["bep","Bếp","🍳"],["donhang","Đơn hàng","🧾"],["chamcong","Chấm công","🕒"],["kho","Kho","📦"],["si","Bán sỉ","🏷"],["baocao","Báo cáo","📊"],["tonghop","Tổng hợp","🗂"],["menu","Thực đơn","🍴"],["sodo","Sơ đồ bàn","🪑"],["nhanvien","Nhân viên","👥"],["caidat","Cài đặt","⚙️"]];
 function seed(){
   const m=[["Phở bò",55000,"Món chính"],["Cơm tấm sườn",50000,"Món chính"],["Bún chả",55000,"Món chính"],["Bánh mì thịt",25000,"Món chính"],["Gỏi cuốn",35000,"Khai vị"],["Chả giò",40000,"Khai vị"],["Trà đá",5000,"Đồ uống"],["Cà phê sữa",25000,"Đồ uống"],["Nước cam",30000,"Đồ uống"],["Bia Tiger",20000,"Đồ uống"],["Chè khúc bạch",25000,"Tráng miệng"],["Sữa chua",15000,"Tráng miệng"]];
   return {store:{name:"Quán của bạn",owner:"Chủ quán"},me:1,
@@ -398,7 +398,7 @@ let S=load();if(!S.ing){S.ing=[];S.imp=[];S.kk=[];S.iid=1}
 let PG=(location.hash||"#ban").slice(1);
 function nav(k){if(k===PG&&!pend)return false;leave();PG=k;try{history.replaceState(null,"","#"+k)}catch(e){}if(pend){cur=pend;pend=null}view();return false}
 let cur=null,cat="Tất cả",rst=false,qrMode=false,edI=null,sv=null,cx=false,pend=null,qrOkNo=0,qrGot=0,qrBusy=false,qrOpen=0,qrWrong=0;
-let cq="",cmod=null,cSync=false,cdel=false,cerr="";
+let wtab="ban",cq="",cmod=null,cdel=false,cerr="",cSync=false,pmod=null,pdel=false,perr="",wcid=0,wv={},wsq="",wsin=false,wiv={},wsd=null,wRange="7",wlq="";
 const BANKS=[["970436","Vietcombank"],["970415","VietinBank"],["970418","BIDV"],["970405","Agribank"],["970407","Techcombank"],["970422","MB Bank"],["970416","ACB"],["970432","VPBank"],["546034","Cake"],["970423","TPBank"],["970403","Sacombank"],["970441","VIB"],["970443","SHB"],["970437","HDBank"],["970448","OCB"],["970426","MSB"],["970440","SeABank"],["970431","Eximbank"],["970449","LPBank"]];
 const bank=()=>S.bank||(S.bank={bin:"",acc:"",name:""});
 const tlv=(id,v)=>id+String(v.length).padStart(2,"0")+v;
@@ -428,17 +428,17 @@ const who=o=>`<small class="tw">${esc(o.staff||"—")} · ${ago(o.ts)}</small>`;
 const bdg=o=>unsent(o)?`<span class="pill">${unsent(o)} chưa báo bếp</span>`:"";
 const meName=()=>(S.staff.find(s=>s.id===S.me)||S.staff[0]||{name:"—"}).name;
 const today=ts=>new Date(ts).toDateString()===new Date().toDateString();
-const PERMS=[["order","Mở đơn, gọi món, báo bếp"],["move","Chuyển bàn, gộp bàn"],["discount","Giảm giá đơn"],["cancelItem","Hủy món đã báo bếp"],["pay","Thu tiền, in hóa đơn"],["kitchen","Màn hình bếp"],["shift","Mở ca, đóng ca"],["menuEdit","Sửa thực đơn"],["mapEdit","Sửa sơ đồ bàn"],["report","Xem báo cáo, lịch sử đơn"],["sum","Xem Tổng hợp (gồm các cơ sở khác)"],["staffMgr","Quản lý nhân viên, phân quyền"],["settings","Cài đặt quán, thanh toán, in"],["stockCheck","Kho: kiểm kho"],["stockView","Kho: xem tồn kho, phiếu nhập (không xem giá)"],["stockIn","Kho: nhập hàng, nguyên liệu"],["stockEdit","Kho: sửa, xóa phiếu nhập"],["cost","Xem giá nhập, giá vốn, lãi gộp"],["stockPast","Kho: sửa ngày đã qua"],["schDl","Lịch ca: chỉnh hạn đăng ký"],["custEdit","Quản lý khách sỉ, giá sỉ"]];
+const PERMS=[["order","Mở đơn, gọi món, báo bếp"],["move","Chuyển bàn, gộp bàn"],["discount","Giảm giá đơn"],["cancelItem","Hủy món đã báo bếp"],["pay","Thu tiền, in hóa đơn"],["kitchen","Màn hình bếp"],["shift","Mở ca, đóng ca"],["menuEdit","Sửa thực đơn"],["mapEdit","Sửa sơ đồ bàn"],["report","Xem báo cáo, lịch sử đơn"],["sum","Xem Tổng hợp (gồm các cơ sở khác)"],["staffMgr","Quản lý nhân viên, phân quyền"],["settings","Cài đặt quán, thanh toán, in"],["stockCheck","Kho: kiểm kho"],["stockView","Kho: xem tồn kho, phiếu nhập (không xem giá)"],["stockIn","Kho: nhập hàng, nguyên liệu"],["stockEdit","Kho: sửa, xóa phiếu nhập"],["cost","Xem giá nhập, giá vốn, lãi gộp"],["stockPast","Kho: sửa ngày đã qua"],["schDl","Lịch ca: chỉnh hạn đăng ký"],["wsale","Bán sỉ: khách, kho sỉ, bán hàng"]];
 const RL=["Quản lý","Thu ngân","Phục vụ","Bếp"];
 const mkP=l=>{const o={};PERMS.forEach(p=>o[p[0]]=l.includes(p[0]));return o};
-const PD={"Quản lý":mkP(["order","move","discount","cancelItem","pay","kitchen","shift","menuEdit","mapEdit","report","sum","staffMgr","settings","stockCheck","stockView","stockIn","stockEdit","cost","stockPast","schDl","custEdit"]),"Thu ngân":mkP(["order","move","discount","pay","kitchen","shift","stockCheck"]),"Phục vụ":mkP(["order","move","stockCheck"]),"Bếp":mkP(["kitchen","stockCheck","stockView"])};
-const normP=m=>{const o={};RL.forEach(r=>{o[r]={};PERMS.forEach(p=>o[r][p[0]]=(p[0]==="schDl"||p[0]==="custEdit"||p[0]==="stockEdit"||p[0]==="sum"||p[0]==="stockView")&&!(m&&m[r]&&p[0] in m[r])?!!(PD[r]&&PD[r][p[0]]):!!(m&&m[r]&&m[r][p[0]]))});return o};
+const PD={"Quản lý":mkP(["order","move","discount","cancelItem","pay","kitchen","shift","menuEdit","mapEdit","report","sum","staffMgr","settings","stockCheck","stockView","stockIn","stockEdit","cost","stockPast","schDl","wsale"]),"Thu ngân":mkP(["order","move","discount","pay","kitchen","shift","stockCheck"]),"Phục vụ":mkP(["order","move","stockCheck"]),"Bếp":mkP(["kitchen","stockCheck","stockView"])};
+const normP=m=>{const o={};RL.forEach(r=>{o[r]={};PERMS.forEach(p=>o[r][p[0]]=(p[0]==="schDl"||p[0]==="wsale"||p[0]==="stockEdit"||p[0]==="sum"||p[0]==="stockView")&&!(m&&m[r]&&p[0] in m[r])?!!(PD[r]&&PD[r][p[0]]):!!(m&&m[r]&&m[r][p[0]]))});return o};
 const rpm=()=>S.store.rp?normP(S.store.rp):PD;
 const PM={view:"report",reprint:"pay",cancel:"cancelItem"};
 const pv=(m,k)=>m.role==="Chủ quán"||!!((rpm()[m.role]||{})[PM[k]||k]);
 const isOwner=()=>{const m=S.staff.find(s=>s.id===S.me);return !m||m.role==="Chủ quán"};
 const can=k=>{const m=S.staff.find(s=>s.id===S.me);return !m||pv(m,k)};
-const navOk=k=>({ban:can("order"),bep:can("kitchen"),donhang:can("report"),chamcong:true,kho:can("stockCheck")||can("stockView")||can("stockIn"),baocao:can("report"),tonghop:can("sum"),menu:can("menuEdit"),khach:can("custEdit"),sodo:can("mapEdit"),nhanvien:can("staffMgr"),caidat:true})[k];
+const navOk=k=>({ban:can("order"),bep:can("kitchen"),donhang:can("report"),chamcong:true,kho:can("stockCheck")||can("stockView")||can("stockIn"),baocao:can("report"),tonghop:can("sum"),menu:can("menuEdit"),si:can("wsale"),sodo:can("mapEdit"),nhanvien:can("staffMgr"),caidat:true})[k];
 
 const ico=p=>`<svg viewBox="0 0 24 24">${p}</svg>`;
 const SV=(p,s)=>`<svg viewBox="0 0 24 24" width="${s||15}" height="${s||15}" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${p}</svg>`,USERS='<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>',BIKE='<circle cx="18.5" cy="17.5" r="3.5"/><circle cx="5.5" cy="17.5" r="3.5"/><circle cx="15" cy="5" r="1"/><path d="M12 17.5V14l-3-3 4-3 2 3h2"/>';
@@ -453,7 +453,7 @@ tonghop:'<path d="m12 3 9 5-9 5-9-5 9-5Z"/><path d="m3 13 9 5 9-5"/>',
 menu:'<path d="M5 3v7a2 2 0 0 0 2 2 2 2 0 0 0 2-2V3M7 3v18M17 21V3c-2 1-4 4-4 8 0 2 1 3 4 3"/>',
 sodo:'<path d="M5 11V8a3 3 0 0 1 3-3h8a3 3 0 0 1 3 3v3"/><path d="M3 13a2 2 0 0 1 4 0v2h10v-2a2 2 0 0 1 4 0v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2Z"/><path d="M6 19v2M18 19v2"/>',
 nhanvien:'<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.9M16 3.1a4 4 0 0 1 0 7.8"/>',
-caidat:'<path d="M4 6h10M18 6h2M4 12h4M12 12h8M4 18h12"/><circle cx="16" cy="6" r="2"/><circle cx="10" cy="12" r="2"/><circle cx="18" cy="18" r="2"/>',khach:'<path d="M20.6 13.4 13.4 20.6a2 2 0 0 1-2.8 0L3 13V3h10l7.6 7.6a2 2 0 0 1 0 2.8Z"/><circle cx="7.5" cy="7.5" r="1.5"/>'};
+caidat:'<path d="M4 6h10M18 6h2M4 12h4M12 12h8M4 18h12"/><circle cx="16" cy="6" r="2"/><circle cx="10" cy="12" r="2"/><circle cx="18" cy="18" r="2"/>',si:'<path d="M20.6 13.4 13.4 20.6a2 2 0 0 1-2.8 0L3 13V3h10l7.6 7.6a2 2 0 0 1 0 2.8Z"/><circle cx="7.5" cy="7.5" r="1.5"/>'};
 let SESS=(()=>{try{return+localStorage.getItem("postest_sess")||0}catch(e){return 0}})(),lgErr="",lgPhone="",lgFail=0,lgUntil=0;
 const phoneKey=p=>{let d=String(p||"").replace(/\D/g,"");if(d.startsWith("84"))d="0"+d.slice(2);return d};
 const needLogin=()=>S.staff.some(s=>s.role==="Chủ quán"&&s.phone&&s.pw);
@@ -516,11 +516,11 @@ function view(){
   $("#side").innerHTML=`<div class="sw"><span class="logo">${ico(IC.store)}</span><div class="t"><b>${esc(S.store.name)}</b><small>${esc(me.name)} · ${esc(me.role)}</small></div>${isOwner()&&CH.list.length>1?stSw():needLogin()?"":`<span class="chev ic">${ico('<path d="m7 15 5 5 5-5M7 9l5-5 5 5"/>')}</span><select title="Đổi người thao tác" onchange="S.me=+this.value;save();view()">${S.staff.map(s=>`<option value="${s.id}" ${s.id===S.me?"selected":""}>${esc(s.name)} · ${esc(s.role)}</option>`).join("")}</select>`}</div>`+
    NAV.filter(n=>navOk(n[0])).map(n=>`<a href="#${n[0]}" onclick="return nav('${n[0]}')" class="${n[0]===k?"on":""}" title="${n[1]}"><span class="ic">${ico(IC[n[0]])}</span><span class="lb">${n[1]}</span>${n[0]==="bep"&&kcnt()?`<i class="bd kb">${kcnt()}</i>`:""}</a>`).join("")+(`<a class="lgo" href="#" onclick="logout();return false" title="Đăng xuất"><span class="ic">${ico('<path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/>')}</span><span class="lb">Đăng xuất</span></a>${syPill()}`);mobShell(k);
   $("#side").classList.add("lo");
-  const V={ban:()=>ordN(cur)?vOrder(ordN(cur)):vTables(),bep:vKitchen,donhang:vOrders,chamcong:vAtt,kho:vStock,baocao:vReport,tonghop:vSum,menu:vMenu,khach:vCust,sodo:vMap,nhanvien:vStaff,caidat:vSet};
+  const V={ban:()=>ordN(cur)?vOrder(ordN(cur)):vTables(),bep:vKitchen,donhang:vOrders,chamcong:vAtt,kho:vStock,baocao:vReport,tonghop:vSum,menu:vMenu,si:vWs,sodo:vMap,nhanvien:vStaff,caidat:vSet};
   applyColor();document.body.classList.toggle("ordp",k==="ban"&&!!ordN(cur));$("#app").innerHTML=loginBn()+(!navOk(k)?`<div class="card" style="max-width:480px;margin:60px auto;text-align:center"><h3>Chưa có quyền</h3><p class="mu">Vai trò của bạn chưa được cấp quyền dùng mục này. Hãy nhờ chủ quán cấp trong Nhân viên → Phân quyền.</p></div>`:V[k]());
   {const oh=$(".ohead");document.documentElement.style.setProperty("--oh",oh?oh.offsetHeight+"px":"0px")}const rph=$("#rphrs");if(rph)rph.scrollLeft=+rph.dataset.sl||0;
 }
-function leave(){cmod=null;cSync=false;bo=false;mq="";ck=false;qrMode=false;edI=null;sv=null;cx=false;const o=ordN(cur);if(o&&!o.items.length){S.orders=S.orders.filter(x=>x!==o);save()}cur=null}
+function leave(){cmod=null;pmod=null;cSync=false;wsin=false;wsd=null;bo=false;mq="";ck=false;qrMode=false;edI=null;sv=null;cx=false;const o=ordN(cur);if(o&&!o.items.length){S.orders=S.orders.filter(x=>x!==o);save()}cur=null}
 function back(){leave();view()}
 
 /* ===== Bàn ===== */
@@ -553,7 +553,7 @@ function vOrder(o){if(qrMode)return vQR(o);if(ck)return vCheckout(o);
   ${promoStrip(o)}<div class="chips">${cats.map(c=>`<button class="${c===cat?"on":""}" onclick="cat=this.dataset.c;view()" data-c="${esc(c)}">${esc(c)}</button>`).join("")}</div></div>
   <div class="two ordw"><div class="omenu"><div class="grid">${list.map(m=>`<div class="card item ${m.off?"off":""}" onclick="add(${m.id})">${qn(o,m.id)?`<i class="qb">${qn(o,m.id)}</i>`:""}${m.img?`<img class="mi" src="${m.img}" alt="">`:""}<b>${esc(m.name)}</b>${m.off?`<span class="mu">Hết món</span>`:(()=>{const b=pbest(m.id,m.price,o);return b.d>0.5?`<span class="kmp"><b>${fmt(m.price-b.d)}</b><s>${fmt(m.price)}</s><em class="kmb">-${Math.round(b.d/m.price*100)}%</em></span>`:`<span class="mu">${fmt(m.price)}</span>`+tierHint(m.id,o)})()}</div>`).join("")}</div></div>
   ${bo?`<div class="obk" onclick="bo=false;view()"></div>`:""}<div class="card bill ${bo?"open":""}"><div class="bh"><b style="font-size:16px">Hóa đơn</b><button class="bx" onclick="bo=false;view()" aria-label="Đóng">×</button></div><div class="bb">
-  ${o.tid==null?`<div class="row"><span>Khách</span><input value="${esc(o.cust)}" style="width:150px" onchange="ordN(cur).cust=this.value;save()"></div>`:""}${custRow(o)}${shipUI(o)}
+  ${o.tid==null?`<div class="row"><span>Khách</span><input value="${esc(o.cust)}" style="width:150px" onchange="ordN(cur).cust=this.value;save()"></div>`:""}${shipUI(o)}
   ${o.items.length?o.items.map((i,x)=>{const m=menuOf(i.id);if(!m)return"";const pr=i.p!=null?i.p:m.price;return `<div class="row"><span>${esc(m.name)} ${i.s>=i.q?"✓":""}<br><small>${i.p!=null?`<b style="color:var(--pr)">${fmt(pr)}</b> (gốc ${fmt(m.price)})`:fmt(pr)}${i.n?" · "+esc(i.n):""}${i.q>1?`<br>${i.q} × ${fmt(pr)} = ${fmt(pr*i.q)}`:""}</small>${(()=>{const L=LD[x];if(!L||L.d<=0.5)return"";return `<br><small style="color:var(--pr);font-weight:600">🎁 ${esc([...L.n.keys()].join(", "))}: -${fmt(L.d)} → ${fmt(pr*i.q-L.d)}${L.t?`<br>${grpU(L.u)}`:""}</small>`})()}</span><button onclick="openEd(${x})" title="Sửa giá / ghi chú">✎</button><button onclick="qty(${x},-1)">−</button><b>${i.q}</b><button onclick="qty(${x},1)">+</button></div>${edI===x?edForm(i,x,m):""}`}).join(""):`<p class="mu">Chưa có món nào.</p>`}
   <div class="row"><span>Giảm giá (%)</span><input type="number" min="0" max="100" value="${o.disc}" style="width:80px" ${can("discount")?"":"disabled"} onchange="ordN(cur).disc=Math.min(100,Math.max(0,+this.value||0));save();view()"></div>
   ${fbrk(o)}</div><div class="bf"><div class="tot" style="padding-top:0"><span>Tổng</span><span>${fmt(stot(o))}</span></div>
@@ -566,10 +566,10 @@ function vCheckout(o){const t=o.tid!=null?tbl(o.tid):null,u=unsent(o),ok=o.items
   const LD=lineD(o),rows=o.items.map((i,x)=>{const m=menuOf(i.id);if(!m)return"";const og=m.price,pr=i.p!=null?i.p:m.price,ed=Math.abs(pr-og)>0.5,L=LD[x],dd=L.d>0.5,g=pr*i.q,base=ed?og:pr,fin=pr-(dd?L.d/i.q:0),pc=Math.round((base-fin)/base*100);if(ed){E.d+=(og-pr)*i.q;if(og>pr)E.q+=i.q}if(dd){L.n.forEach((e,n)=>{const v=V[n]||(V[n]={d:0,q:0});v.d+=e.d;v.q+=e.q})}
     return `<div class="ckl"><span class="cth">${m.img?`<img src="${m.img}" alt="">`:esc((m.name.trim()[0]||"?").toUpperCase())}</span><div class="ckn"><b>${esc(m.name)}</b>${i.n?`<br><small class="mu">${esc(i.n)}</small>`:""}<br><small class="mu">${ed?`<s>${fmt(og)}</s> `:""}${fmt(pr)}/suất</small>${L.t?`<br><small class="mu">${grpU(L.u)}</small>`:""}${pc>0?` <span class="ckt">-${pc}%</span>`:(ed?` <span class="ckt">Giá sửa</span>`:"")}</div><div class="ckp">${dd||ed?`<s>${fmt(base*i.q)}</s><b>${fmt(fin*i.q)}</b>`:`<b>${fmt(g)}</b>`}<small class="mu">x${i.q}</small></div></div>`}).join("");
   const tag='<path d="M20.6 13.4 13.4 20.6a2 2 0 0 1-2.8 0L3 13V3h10l7.6 7.6a2 2 0 0 1 0 2.8Z"/><circle cx="7.5" cy="7.5" r="1.5"/>',vc=(n,sub,v)=>`<div class="vch"><div class="vl"><span class="ic">${ico(tag)}</span>VOUCHER</div><div class="vr"><b>${esc(n)}</b><small class="mu">${sub}</small></div><div class="vv">-${fmt(v)}</div></div>`;
-  const vch=(E.d>0.5?vc((o.cid?"Giá sỉ khách":"Giảm giá món (sửa giá)"),"Áp dụng cho "+E.q+" suất",E.d):"")+Object.keys(V).map(n=>vc(n,"Áp dụng cho "+V[n].q+" suất",V[n].d)).join("")+(F.md>0.5?vc("Giảm giá đơn "+o.disc+"%","Áp dụng cho cả đơn",F.md):"");
+  const vch=(E.d>0.5?vc("Giảm giá món (sửa giá)","Áp dụng cho "+E.q+" suất",E.d):"")+Object.keys(V).map(n=>vc(n,"Áp dụng cho "+V[n].q+" suất",V[n].d)).join("")+(F.md>0.5?vc("Giảm giá đơn "+o.disc+"%","Áp dụng cho cả đơn",F.md):"");
   const sav=F.pd+F.md+Math.max(E.d,0);
   const sr=(l,v,c)=>`<div class="cks ${c||""}"><span>${l}</span><span>${v}</span></div>`,
-  sum=sr("Tổng tiền hàng",fmt(F.sub+E.d))+(E.d>0.5?sr((o.cid?"Giá sỉ khách":"Giảm giá món (sửa giá)"),"-"+fmt(E.d),"d"):E.d<-0.5?sr("Phụ thu món (sửa giá)","+"+fmt(-E.d)):"")+(F.pd>0.5?sr("Giảm giá khuyến mãi","-"+fmt(F.pd),"d"):"")+(F.md>0.5?sr("Giảm giá đơn ("+o.disc+"%)","-"+fmt(F.md),"d"):"")+(F.sv>0.5?sr("Phí phục vụ ("+S.store.svc+"%)","+"+fmt(F.sv)):"")+(F.vat>0.5?sr("VAT ("+S.store.vat+"%)","+"+fmt(F.vat)):"")+(F.ship>0.5?sr("Phụ phí ship"+(o.km?" ("+o.km+" km)":""),"+"+fmt(F.ship)):"")+`<div class="cks tt"><span>Tổng thanh toán</span><b>${fmt(stot(o))}</b></div>`;
+  sum=sr("Tổng tiền hàng",fmt(F.sub+E.d))+(E.d>0.5?sr("Giảm giá món (sửa giá)","-"+fmt(E.d),"d"):E.d<-0.5?sr("Phụ thu món (sửa giá)","+"+fmt(-E.d)):"")+(F.pd>0.5?sr("Giảm giá khuyến mãi","-"+fmt(F.pd),"d"):"")+(F.md>0.5?sr("Giảm giá đơn ("+o.disc+"%)","-"+fmt(F.md),"d"):"")+(F.sv>0.5?sr("Phí phục vụ ("+S.store.svc+"%)","+"+fmt(F.sv)):"")+(F.vat>0.5?sr("VAT ("+S.store.vat+"%)","+"+fmt(F.vat)):"")+(F.ship>0.5?sr("Phụ phí ship"+(o.km?" ("+o.km+" km)":""),"+"+fmt(F.ship)):"")+`<div class="cks tt"><span>Tổng thanh toán</span><b>${fmt(stot(o))}</b></div>`;
   const ic=p=>`<span class="ic">${ico(p)}</span>`,rd=(v,n,d,pi,cl)=>`<div class="rd ${pmSel===v?"on":""} ${ok?"":"dis"}" onclick="${ok?`pmSel='${v}';view()`:""}"><span class="pi" style="background:color-mix(in srgb,${cl} 16%,var(--card));color:${cl}">${ic(pi)}</span><span class="rt"><b>${n}</b><small class="mu">${d}</small></span><span class="rb"></span></div>`;
   return `<div class="ohead"><div class="bar" style="margin:0 0 10px;flex-wrap:nowrap"><button onclick="ck=false;view()" aria-label="Quay lại" style="font-size:18px;padding:8px 14px">←</button><div style="min-width:0"><b style="font-size:16px">Thanh toán</b><br><small class="mu">${t?esc(t.name):"Đơn mang về"} · #${dnum(o)}${paxOf(o)?" · "+paxOf(o)+" khách":""}</small></div></div></div>
   <div class="ckw">
@@ -600,7 +600,7 @@ const qn=(o,id)=>o.items.filter(i=>i.id===id).reduce((a,i)=>a+i.q,0);
 function obarH(o,u){const n=o.items.reduce((a,i)=>a+i.q,0),F=fees(o),dc=F.pd+F.md>0.5,bag=ico('<path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/>'),up=ico('<path d="m6 15 6-6 6 6"/>');
   const tx=n?`<small class="oml">${n} món${dc?`<span class="odc">Tiết kiệm ${fmt(F.pd+F.md)}</span>`:""}</small><span class="otl"><b>${fmt(stot(o))}</b>${dc?`<s>${fmt(F.sub)}</s>`:""}</span>`:`<small class="oml">Chưa có món</small><span class="otl"><b style="font-size:16px;color:var(--mu)">Chọn món để bắt đầu</b></span>`;
   return `<div id="obar"><button class="obv" onclick="bo=true;view()" aria-label="Xem đơn"><span class="ocart ic">${bag}</span><span class="otx">${tx}</span><span class="ic ocv">${up}</span></button><button class="okb ${u?"hot":""}" onclick="kitchenSend()" ${u?"":"disabled"} aria-label="Báo bếp"><span class="ic">${ico(IC.bep)}</span>${u?`<i>${u}</i>`:""}<span>${u||!n?"Báo bếp":o.items.every(i=>!needK(i))?"Không báo bếp":"Đã báo"}</span></button><button class="p obk2" onclick="ck=true;bo=false;view()" ${n&&can("pay")?"":"disabled"}>Thanh toán</button></div>`}
-function add(id){const m=menuOf(id);if(!m||m.off)return;const o=ordN(cur),wp=wsFor(o,id),i=wp!=null?o.items.find(x=>x.id===id&&x.w&&!x.n):o.items.find(x=>x.id===id&&x.p==null&&!x.n);i?i.q++:o.items.push(wp!=null?{id,q:1,s:0,p:wp,n:"",w:1}:{id,q:1,s:0,p:null,n:""});save();view()}
+function add(id){const m=menuOf(id);if(!m||m.off)return;const o=ordN(cur),i=o.items.find(x=>x.id===id&&x.p==null&&!x.n);i?i.q++:o.items.push({id,q:1,s:0,p:null,n:""});save();view()}
 function openEd(x){edI=edI===x?null:x;view()}
 function edForm(i,x,m){return `<div class="card" style="margin:6px 0;background:var(--hov)"><div class="row"><span>Giá / suất</span><input id="ep" data-m type="text" inputmode="decimal" value="${i.p!=null?i.p:m.price}" style="width:110px"></div>
 <div class="row"><span>Áp dụng cho (suất)</span><input id="ek" type="number" min="1" max="${i.q}" value="1" style="width:80px"></div>
@@ -611,11 +611,11 @@ function saveEd(x,reset){
   const o=ordN(cur),it=o.items[x],k=Math.min(it.q,Math.max(1,Math.floor(+$("#ek").value)||1)),n=$("#en").value.trim(),pv=$("#ep").value.trim();
   const p=reset||pv===""?null:Math.max(0,+pv);
   if(k<it.q){const rs=Math.min(it.s,it.q-k),ns=Math.min(k,it.s-rs);o.items.splice(x+1,0,{id:it.id,q:k,s:ns,p,n});it.q-=k;it.s=rs}
-  else{if(p!==it.p)delete it.w;it.p=p;it.n=n}
+  else{it.p=p;it.n=n}
   edI=null;save();view();
 }
 function qty(x,d){const o=ordN(cur),i=o.items[x];
-  if(d>0&&i.p!=null&&!i.w){const b=o.items.find(y=>y.id===i.id&&y.p==null&&!y.n);b?b.q++:o.items.splice(x+1,0,{id:i.id,q:1,s:0,p:null,n:""});edI=null;save();view();return}
+  if(d>0&&i.p!=null){const b=o.items.find(y=>y.id===i.id&&y.p==null&&!y.n);b?b.q++:o.items.splice(x+1,0,{id:i.id,q:1,s:0,p:null,n:""});edI=null;save();view();return}
   const s0=i.s;i.q+=d;i.s=Math.min(i.s,i.q);if(s0>i.s)kcut(o,i,s0-i.s);if(i.q<=0){o.items.splice(x,1);edI=null}save();view()}
 function kcut(o,i,n){const m=menuOf(i.id);if(!m||n<=0)return;const nm=m.name+(i.n?" ("+i.n+")":""),wh=o.tid!=null?(tbl(o.tid)||{}).name:"Mang về #"+dnum(o);
   for(let k=S.kitchen.length-1;k>=0&&n>0;k--){const t=S.kitchen[k];if(t.st==="done")continue;if(t.no!=null?t.no!==o.no:t.where!==wh)continue;
@@ -631,7 +631,7 @@ function pay(m){
   const o=ordN(cur);if(!o||!o.items.length||o.paid)return;
   const items=o.items.map(i=>{const x=menuOf(i.id);return {id:i.id,orig:x?x.price:0,name:(x?x.name:"?")+(i.n?" ("+i.n+")":""),q:i.q,price:i.p!=null?i.p:(x?x.price:0)}});
   const now=Date.now(),d=new Date(now),code=String(d.getFullYear()).slice(2)+String(d.getMonth()+1).padStart(2,"0")+String(d.getDate()).padStart(2,"0")+String.fromCharCode(65+Math.random()*26|0,65+Math.random()*26|0)+String(Math.random()*1e4|0).padStart(4,"0");
-  const F=fees(o);S.sales.push({ts:now,opened:o.ts,no:o.no,dn:o.dn,code,type:o.tid!=null?"ban":"ship",table:o.tid!=null?tbl(o.tid).name:"Mang về",cust:o.cust,cid:o.cid||0,pax:paxOf(o),staff:o.staff,payBy:meName(),sub:F.sub,pd:F.pd,pn:F.pn,disc:o.disc,md:F.md,sv:F.sv,vat:F.vat,ship:F.ship,km:o.km||0,total:F.total,method:m,ref:(m==="Tiền mặt"?"TM":"QP")+String(Math.random()*1e6|0).padStart(6,"0"),items});
+  const F=fees(o);S.sales.push({ts:now,opened:o.ts,no:o.no,dn:o.dn,code,type:o.tid!=null?"ban":"ship",table:o.tid!=null?tbl(o.tid).name:"Mang về",cust:o.cust,pax:paxOf(o),staff:o.staff,payBy:meName(),sub:F.sub,pd:F.pd,pn:F.pn,disc:o.disc,md:F.md,sv:F.sv,vat:F.vat,ship:F.ship,km:o.km||0,total:F.total,method:m,ref:(m==="Tiền mặt"?"TM":"QP")+String(Math.random()*1e6|0).padStart(6,"0"),items});
   o.paid={method:m,ts:Date.now()};qrMode=false;ck=false;edI=null;save();cur=null;view();
 }
 
@@ -682,7 +682,7 @@ const PAP={K58:["58mm",210],K80:["80mm",290],A6:["A6",400],A5:["A5",540],A4:["A4
 function printSale(n){const s=S.sales.find(x=>x.no===n);if(!s||!can("reprint"))return;const t=S.store,pp=PAP[t.paper||"K80"],R=(a,b,bd)=>`<div style="display:flex;justify-content:space-between${bd?";font-weight:700":""}"><span>${a}</span><span>${b}</span></div>`;
   $("#rc").style.width=pp[1]+"px";let g=$("#pgs");if(!g){g=document.createElement("style");g.id="pgs";document.head.appendChild(g)}
   g.textContent="@page{size:"+(pp[0][0]==="A"?pp[0]:pp[0]+" auto")+";margin:4mm}";
-  $("#rc").innerHTML=`<div style="text-align:center">${t.hdr?`<div>${esc(t.hdr)}</div>`:""}<b>${esc(t.name)}</b>${t.addr?`<br>${esc(t.addr)}`:""}${t.phone?`<br>ĐT: ${esc(t.phone)}`:""}<br>HÓA ĐƠN #${dnum(s)}${s.code?" · "+s.code:""}<br>${new Date(s.ts).toLocaleString("vi-VN")}${s.cid&&s.cust?`<br>Khách sỉ: ${esc(s.cust)}`:""}</div><hr>${s.items.map(i=>R(i.q+" × "+esc(i.name),fmt(i.price*i.q))).join("")}<hr>${s.pd>0.5?R("Khuyến mãi","-"+fmt(s.pd)):""}${s.md>0.5?R("Giảm giá","-"+fmt(s.md)):""}${s.sv>0.5?R("Phí phục vụ",fmt(s.sv)):""}${s.vat>0.5?R("VAT",fmt(s.vat)):""}${s.ship>0.5?R("Phụ phí ship"+(s.km?" ("+s.km+" km)":""),fmt(s.ship)):""}${R("TỔNG",fmt(s.total),1)}<div>${esc(s.method)}${s.cancel?" · ĐÃ HỦY":""}</div><div style="text-align:center;margin-top:6px">${t.ftr?esc(t.ftr):"Cảm ơn quý khách!"}${t.wifi?`<br>Wifi: ${esc(t.wifi)}`:""}</div>`;
+  $("#rc").innerHTML=`<div style="text-align:center">${t.hdr?`<div>${esc(t.hdr)}</div>`:""}<b>${esc(t.name)}</b>${t.addr?`<br>${esc(t.addr)}`:""}${t.phone?`<br>ĐT: ${esc(t.phone)}`:""}<br>HÓA ĐƠN #${dnum(s)}${s.code?" · "+s.code:""}<br>${new Date(s.ts).toLocaleString("vi-VN")}</div><hr>${s.items.map(i=>R(i.q+" × "+esc(i.name),fmt(i.price*i.q))).join("")}<hr>${s.pd>0.5?R("Khuyến mãi","-"+fmt(s.pd)):""}${s.md>0.5?R("Giảm giá","-"+fmt(s.md)):""}${s.sv>0.5?R("Phí phục vụ",fmt(s.sv)):""}${s.vat>0.5?R("VAT",fmt(s.vat)):""}${s.ship>0.5?R("Phụ phí ship"+(s.km?" ("+s.km+" km)":""),fmt(s.ship)):""}${R("TỔNG",fmt(s.total),1)}<div>${esc(s.method)}${s.cancel?" · ĐÃ HỦY":""}</div><div style="text-align:center;margin-top:6px">${t.ftr?esc(t.ftr):"Cảm ơn quý khách!"}${t.wifi?`<br>Wifi: ${esc(t.wifi)}`:""}</div>`;
   window.print()}
 function vSale(){
   const s=sv&&S.sales.find(x=>x.no===sv);if(!s)return"";
@@ -1687,49 +1687,126 @@ function vSum(){
 function catList(){const base=S.cats||[],ex=[...new Set(S.menu.map(m=>m.cat))].filter(c=>c&&!base.includes(c));if(!S.cats||ex.length)S.cats=[...base,...ex];return S.cats}
 const sortM=a=>{const c=catList();return a.slice().sort((x,y)=>c.indexOf(x.cat)-c.indexOf(y.cat))};
 let mtab="mon",mfq="",mfc="Tất cả",mmod=null,mimg="",mdel=false,gEd=null,gDel=null,gErr="";
-/* ===== Khách sỉ & giá sỉ ===== */
-const custs=()=>S.cust||(S.cust=[]);
-const custOf=id=>custs().find(c=>c.id===id);
-/* Giá sỉ của khách cho 1 món: khách dùng giá riêng thì lấy giá riêng (thiếu thì lấy giá chung), còn lại lấy giá sỉ chung của món */
-function wsPrice(c,mid){const m=menuOf(mid);if(!m)return null;if(c&&c.own&&c.ws&&+c.ws[mid]>0)return +c.ws[mid];return +m.ws>0?+m.ws:null}
-function wsFor(o,mid){const c=o&&o.cid?custOf(o.cid):null;if(!c)return null;const m=menuOf(mid),p=wsPrice(c,mid);return p!=null&&m&&Math.abs(p-m.price)>0.5?p:null}
-function repriceO(o){if(!o||o.paid)return;o.items.forEach(i=>{if(i.p!=null&&!i.w)return;const wp=wsFor(o,i.id);if(wp!=null){i.p=wp;i.w=1}else if(i.w){i.p=null;delete i.w}})}
-function repriceAll(){S.orders.forEach(repriceO)}
-function custRow(o){const L=custs();if(!L.length||!can("order"))return"";return `<div class="row"><span>Khách sỉ<br><small class="mu">Chọn khách để tự áp giá sỉ</small></span><select style="max-width:190px" onchange="setCust(this.value)"><option value="">Khách lẻ</option>${L.map(c=>`<option value="${c.id}" ${o.cid===c.id?"selected":""}>${esc(c.code)} · ${esc(c.name)}</option>`).join("")}</select></div>`}
-function setCust(v){const o=ordN(cur);if(!o||o.paid)return;const c=custOf(+v);if(c){o.cid=c.id;o.cust=c.name}else{delete o.cid;o.cust=o.tid==null?"Khách lẻ":""}repriceO(o);save();view()}
+/* ===== Bán sỉ: khách, kho sỉ, bán hàng. Làm độc lập, không dùng chung tồn kho, đơn hay báo cáo của quán ===== */
+const wsI=()=>S.wsi||(S.wsi=[]),wsL=()=>S.wsl||(S.wsl=[]),custs=()=>S.cust||(S.cust=[]);
+const custOf=id=>custs().find(c=>c.id===id),wsP=id=>wsI().find(p=>p.id===id);
+const wsF=p=>pk(p)?(+p.f||1):1,wsU=p=>pk(p)?(p.pu||p.u):(p.u||"");
+const wsStk=p=>nf((+p.qty||0)/wsF(p))+" "+esc(wsU(p));
+/* Giá của khách cho 1 sản phẩm: khách có giá riêng thì lấy giá riêng, món nào chưa đặt riêng thì lấy giá sỉ chung */
+function wsPr(c,p){if(c&&c.own&&c.ws&&+c.ws[p.id]>0)return{v:+c.ws[p.id],t:"riêng"};if(+p.price>0)return{v:+p.price,t:"chung"};return{v:0,t:""}}
+function vWs(){const T=[["ban","Bán sỉ"],["khach","Khách"],["kho","Kho sỉ"],["ls","Lịch sử"]],F={ban:wSell,khach:wCust,kho:wStock,ls:wHist};
+  return `<h2 style="margin:0">Bán sỉ</h2><p class="mu" style="margin:2px 0 16px">Kho sỉ và doanh thu sỉ tính riêng, không lẫn với quán.</p><div class="seg" style="margin-bottom:16px">${T.map(t=>`<button class="${wtab===t[0]?"on":""}" onclick="wtab='${t[0]}';view()">${t[1]}</button>`).join("")}</div>${(F[wtab]||wSell)()}${cmod?custModal():""}${pmod?prodModal():""}${wsin?wsInModal():""}${wsd?wsDetail():""}`}
+/* ---- Bán hàng ---- */
+const wTotT=()=>{let s=0,n=0;wsI().forEach(p=>{const v=wv[p.id];if(!v)return;const q=+v[0];if(!(q>0))return;s+=Math.round(+v[2]||q*(+v[1]||0));n++});return n?fmt(s)+" · "+n+" mặt hàng":"0đ"};
+function wTot(){const e=$("#w_tot");if(e)e.textContent=wTotT()}
+function wOk(){const b=$("#w_ok");if(b)b.disabled=!wsI().some(p=>+(wv[p.id]||[])[0]>0)}
+function wTag(id){const e=$("#xk"+id),p=wsP(id);if(!e||!p)return;const r=wsPr(custOf(wcid),p);e.textContent=r.t?"Giá "+r.t+": "+fmt(r.v):"Chưa có giá sỉ";e.style.color=r.t==="riêng"?"#1e40af":""}
+function wCalc(id,s){const p=wsP(id),q=+$("#xs"+id).value,g=$("#xg"+id),t=$("#xt"+id),r2=x=>Math.round(x*100)/100;let man=(wv[id]||[])[3]||0;
+  if(s==="s"){if(!(q>0)){g.value="";t.value="";man=0}
+    else if(man&&g.value!=="")t.value=Math.round(q*g.value);
+    else if(man&&t.value!=="")g.value=r2(+t.value/q);
+    else{const pr=wsPr(custOf(wcid),p).v;if(pr>0){g.value=pr;t.value=Math.round(q*pr);man=0}else if(g.value!=="")t.value=Math.round(q*g.value)}}
+  else if(s==="g"){man=1;t.value=q>0&&g.value!==""?Math.round(q*g.value):""}
+  else if(t.value!==""){man=1;if(q>0)g.value=r2(+t.value/q)}
+  else{man=0;g.value=""}
+  wv[id]=[$("#xs"+id).value,g.value,t.value,man];wTot();wOk()}
+function wsPick(v){wcid=+v||0;wsI().forEach(p=>{if(!$("#xs"+p.id))return;wTag(p.id);if(+$("#xs"+p.id).value>0)wCalc(p.id,"s")})}
+function wFind(v){v=v.trim().toLowerCase();document.querySelectorAll(".wr").forEach(r=>{r.style.display=!v||r.dataset.n.includes(v)?"":"none"})}
+function wClear(){wv={};view()}
+function wSell(){const L=custs(),P=wsI(),c=custOf(wcid),empty=P.length&&!P.some(p=>p.qty>0);
+  if(!P.length)return `<div class="card"><b>Chưa có sản phẩm sỉ</b><p class="mu" style="margin:6px 0 12px">Vào tab Kho sỉ để lấy danh sách từ nguyên liệu kho quán, rồi nhập số lượng hàng sỉ.</p><button class="p" onclick="wtab='kho';view()">Đến Kho sỉ</button></div>`;
+  const inp=(p,id,ph,v,fn,sx)=>`<div class="ib"><input id="${p}${id}" ${p==="xs"?'type="number" min="0" step="any"':'data-m type="text" inputmode="decimal"'} placeholder="${ph}" value="${v}" oninput="wCalc(${id},'${fn}')"><span class="su">${sx}</span></div>`;
+  return `<div class="card"><div class="r2" style="align-items:flex-end"><label class="mf" style="flex:1;min-width:200px"><span>Khách</span><select id="w_c" onchange="wsPick(this.value)"><option value="">— Chọn khách —</option>${L.map(x=>`<option value="${x.id}" ${x.id===wcid?"selected":""}>${esc(x.code)} · ${esc(x.name)}</option>`).join("")}</select></label><button onclick="newCust()">+ Khách mới</button></div>
+  ${c?`<small class="mu">${c.own?"Khách này có giá riêng: món nào chưa đặt riêng thì lấy giá sỉ chung.":"Khách này dùng giá sỉ chung."}</small>`:`<small class="mu">${L.length?"Chọn khách để tự điền giá sỉ.":"Chưa có khách, bấm Khách mới để tạo."}</small>`}
+  ${empty?`<br><small style="color:#d97706">Kho sỉ đang trống. Hãy nhập hàng ở tab Kho sỉ trước khi bán.</small>`:""}
+  <div class="ib" style="margin:10px 0 6px"><span class="ic su">${ico('<circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/>')}</span><input placeholder="Tìm nguyên liệu" oninput="wFind(this.value)" style="text-align:left"></div>
+  <div class="card scroll" style="padding:0"><table><tr><th>Nguyên liệu</th><th style="text-align:right">Số lượng</th><th style="text-align:right">Đơn giá</th><th style="text-align:right">Thành tiền</th></tr>${P.map(p=>{const v=wv[p.id]||["","","",0],r=wsPr(c,p);return `<tr class="wr" data-n="${esc(p.name.toLowerCase())}"><td>${esc(p.name)}${pk(p)?`<br><small class="mu">1 ${esc(p.pu)} = ${nf(p.f)} ${esc(p.u)}</small>`:""}<br><small class="mu" style="${p.qty>0?"":"color:#dc2626"}">Tồn: ${wsStk(p)}</small> <small id="xk${p.id}" style="${r.t==="riêng"?"color:#1e40af":"color:var(--mu)"}">${r.t?"Giá "+r.t+": "+fmt(r.v):"Chưa có giá sỉ"}</small></td><td>${inp("xs",p.id,"SL",v[0],"s",esc(wsU(p)))}</td><td>${inp("xg",p.id,"Giá",v[1],"g","đ")}</td><td>${inp("xt",p.id,"Tiền",v[2],"t","đ")}</td></tr>`}).join("")}</table></div>
+  <small id="w_e" style="color:#dc2626;display:block;margin-top:8px"></small>
+  <div class="bar" style="margin:12px 0 0"><div style="margin-right:auto;display:flex;flex-direction:column;line-height:1.3"><small class="mu">Tổng tiền phiếu</small><b id="w_tot" style="font-size:18px">${wTotT()}</b></div><button onclick="wClear()">Hủy</button><button id="w_ok" class="p" onclick="wsSave()" ${P.some(p=>+(wv[p.id]||[])[0]>0)?"":"disabled"}>Lưu phiếu</button></div></div>`}
+function wsSave(){if(!can("wsale"))return;const e=$("#w_e"),er=m=>{if(e)e.textContent=m},c=custOf(wcid);er("");
+  if(!c){er("Chọn khách trước khi lưu phiếu.");return}
+  const items=[];let bad="";
+  wsI().forEach(p=>{const q=+$("#xs"+p.id).value;if(!(q>0))return;const f=wsF(p),amt=Math.round(+$("#xt"+p.id).value||q*(+$("#xg"+p.id).value||0));
+    if(q*f>(+p.qty||0)+1e-9&&!bad)bad="Không đủ tồn: "+p.name+" (còn "+wsStk(p).replace(/&[a-z]+;/g,"")+"). Nhập thêm hàng ở tab Kho sỉ.";
+    items.push({pid:p.id,name:p.name,su:wsU(p),q,f,u:p.u,price:Math.round(amt/q*100)/100,amt})});
+  if(!items.length)return;if(bad){er(bad);return}
+  items.forEach(i=>{const p=wsP(i.pid);p.qty=Math.round(((+p.qty||0)-i.q*i.f)*1000)/1000});
+  const total=items.reduce((a,i)=>a+i.amt,0);
+  wsL().push({id:++S.nid,ts:Date.now(),cid:c.id,cust:c.name,code:c.code,by:meName(),items,total});
+  lg("Bán sỉ","Phiếu "+c.name+" · "+items.length+" mặt hàng · "+fmt(total));wv={};save();view()}
+/* ---- Khách ---- */
 function cNext(){const n=custs().reduce((m,c)=>{const x=/(\d+)$/.exec(c.code||"");return Math.max(m,x?+x[1]:0)},0)+1;return "KS"+String(n).padStart(3,"0")}
 function cRows(){const q=cq.trim().toLowerCase(),L=custs().filter(c=>!q||(c.name+" "+c.code+" "+(c.phone||"")).toLowerCase().includes(q));
   return L.map(c=>{const n=c.own?Object.keys(c.ws||{}).filter(k=>+c.ws[k]>0).length:0;return `<div class="orow" onclick="editCust(${c.id})"><span class="mth">${esc((c.name.trim()[0]||"?").toUpperCase())}</span><div style="flex:1;min-width:0"><b>${esc(c.name)}</b><br><small class="mu">${esc(c.code)}${c.phone?" · "+esc(c.phone):""}</small></div><span class="pill" style="${c.own?"background:#dbeafe;color:#1e40af":"background:#dcfce7;color:#166534"}">${c.own?"Giá riêng · "+n+" món":"Giá chung"}</span></div>`}).join("")||`<p class="mu" style="padding:16px;margin:0">${custs().length?"Không tìm thấy khách.":"Chưa có khách sỉ. Bấm Thêm khách để tạo."}</p>`}
-function vCust(){const L=custs(),nOwn=L.filter(c=>c.own).length;
-  return `<h2 style="margin:0">Khách sỉ</h2><p class="mu" style="margin:2px 0 16px">${L.length} khách · ${nOwn} khách dùng giá riêng</p>
-  <div class="bar"><input type="search" placeholder="Tìm tên hoặc mã khách" value="${esc(cq)}" oninput="cq=this.value;$('#cl').innerHTML=cRows()" style="flex:1;min-width:160px"><button class="p" onclick="newCust()">+ Thêm khách</button></div>
+function wCust(){const nOwn=custs().filter(c=>c.own).length;
+  return `<div class="bar"><input type="search" placeholder="Tìm tên hoặc mã khách" value="${esc(cq)}" oninput="cq=this.value;$('#cl').innerHTML=cRows()" style="flex:1;min-width:160px"><button class="p" onclick="newCust()">+ Thêm khách</button></div>
   <div class="card" style="padding:0;overflow:hidden" id="cl">${cRows()}</div>
-  <div class="card" style="margin-top:16px"><div class="bar" style="margin:0 0 6px"><b style="font-size:16px">Giá sỉ chung</b><span style="margin-left:auto;display:flex;gap:8px">${cSync?`<button onclick="cSync=false;view()">Hủy</button><button class="p" onclick="syncWs()">Xác nhận đồng bộ</button>`:`<button onclick="syncWs()">Đồng bộ cho tất cả khách</button>`}</span></div>
-  <small class="mu" style="display:block">Khách dùng "Giá chung" sẽ lấy theo bảng này. Khách có "Giá riêng" lấy giá riêng, món nào để trống thì lấy giá chung.${cSync?`<br><b style="color:#dc2626">Bấm Xác nhận: ${nOwn?nOwn+" khách đang giá riêng sẽ bị xóa giá riêng và":"mọi khách sẽ"} dùng giá chung.</b>`:""}</small>
-  <div class="scroll" style="max-height:420px;margin-top:10px">${sortM(S.menu).map(m=>`<div class="row"><span>${esc(m.name)}<br><small class="mu">Giá lẻ ${fmt(m.price)}</small></span><div class="ib" style="width:140px"><input data-m type="text" inputmode="decimal" value="${m.ws||""}" placeholder="Giá sỉ" onchange="setWs(${m.id},this.value)"><span class="su">đ</span></div></div>`).join("")}</div></div>${cmod?custModal():""}`}
-function setWs(id,v){const m=menuOf(id);if(!m)return;v=Math.round(+v||0);if(v>0)m.ws=v;else delete m.ws;lg("Giá sỉ","Giá sỉ chung "+m.name+": "+(v>0?fmt(v):"bỏ giá sỉ"));repriceAll();save()}
-function syncWs(){if(!cSync){cSync=true;view();return}custs().forEach(c=>{c.own=false;c.ws={}});cSync=false;lg("Giá sỉ","Đồng bộ giá sỉ chung cho tất cả khách");repriceAll();save();view()}
+  <div class="card" style="margin-top:16px"><div class="bar" style="margin:0 0 6px"><b style="font-size:16px">Cách tính giá</b><span style="margin-left:auto;display:flex;gap:8px">${cSync?`<button onclick="cSync=false;view()">Hủy</button><button class="p" onclick="syncWs()">Xác nhận đồng bộ</button>`:`<button onclick="syncWs()">Đồng bộ giá chung cho tất cả khách</button>`}</span></div>
+  <small class="mu" style="display:block">Khách "Giá chung" lấy theo bảng giá sỉ chung ở tab Kho sỉ. Khách "Giá riêng" lấy giá riêng đã đặt, món nào để trống thì lấy giá sỉ chung. Khi lập phiếu vẫn sửa được giá từng dòng.${cSync?`<br><b style="color:#dc2626">Bấm Xác nhận: ${nOwn?nOwn+" khách đang giá riêng sẽ bị xóa giá riêng và":"mọi khách sẽ"} dùng giá chung.</b>`:""}</small></div>`}
+function syncWs(){if(!cSync){cSync=true;view();return}custs().forEach(c=>{c.own=false;c.ws={}});cSync=false;lg("Bán sỉ","Đồng bộ giá sỉ chung cho tất cả khách");save();view()}
 function newCust(){cmod={id:0};cdel=false;cerr="";view();const e=$("#c_n");if(e)e.focus()}
 function editCust(id){if(!custOf(id))return;cmod={id};cdel=false;cerr="";view()}
 function custModal(){const e=cmod.id?custOf(cmod.id)||{}:{},own=!!e.own,cl="cmod=null;cdel=false;cerr='';view()";
-  const rows=sortM(S.menu).map(m=>`<div class="row"><span>${esc(m.name)}<br><small class="mu">Lẻ ${fmt(m.price)}${+m.ws>0?" · chung "+fmt(m.ws):""}</small></span><div class="ib" style="width:140px"><input class="c_pi" data-id="${m.id}" data-m type="text" inputmode="decimal" value="${e.ws&&+e.ws[m.id]>0?e.ws[m.id]:""}" placeholder="${fmtM(+m.ws>0?m.ws:m.price)}"><span class="su">đ</span></div></div>`).join("");
+  const rows=wsI().map(p=>`<div class="row"><span>${esc(p.name)}<br><small class="mu">${+p.price>0?"Chung "+fmt(p.price):"Chưa có giá chung"} / ${esc(wsU(p))}</small></span><div class="ib" style="width:140px"><input class="c_pi" data-id="${p.id}" data-m type="text" inputmode="decimal" value="${e.ws&&+e.ws[p.id]>0?e.ws[p.id]:""}" placeholder="${+p.price>0?fmtM(p.price):"Giá"}"><span class="su">đ</span></div></div>`).join("")||`<p class="mu">Chưa có sản phẩm sỉ. Hãy lấy danh sách ở tab Kho sỉ trước.</p>`;
   return `<div class="mo" onclick="if(event.target===this){${cl}}"><div class="md" style="max-width:520px"><div class="mh"><b>${cmod.id?"Sửa khách sỉ":"Thêm khách sỉ"}</b><button class="mx" onclick="${cl}">×</button></div><div class="mb">
   <div class="r2"><label class="mf" style="width:130px"><span>Mã khách</span><input id="c_c" value="${esc(e.code||cNext())}"></label><label class="mf" style="flex:1;min-width:150px"><span>Tên khách</span><input id="c_n" value="${esc(e.name||"")}"></label></div>
   <label class="mf"><span>Số điện thoại</span><input id="c_p" type="tel" value="${esc(e.phone||"")}"></label>
   <label class="mf"><span>Cách tính giá sỉ</span><select id="c_m" onchange="$('#c_ow').style.display=this.value==='own'?'':'none'"><option value="all" ${own?"":"selected"}>Dùng giá sỉ chung</option><option value="own" ${own?"selected":""}>Giá riêng cho khách này</option></select></label>
-  <div id="c_ow" style="${own?"":"display:none"}"><div class="bar" style="margin:0 0 6px"><small class="mu" style="flex:1">Để trống = lấy giá sỉ chung (chưa có thì giá lẻ).</small><button onclick="cFill()">Lấy giá chung làm mẫu</button></div><div class="scroll" style="max-height:300px">${rows}</div></div>
+  <div id="c_ow" style="${own?"":"display:none"}"><div class="bar" style="margin:0 0 6px"><small class="mu" style="flex:1">Để trống = lấy giá sỉ chung.</small><button onclick="cFill()">Điền giá chung làm mẫu</button></div><div class="scroll" style="max-height:300px">${rows}</div></div>
   <small id="c_e" style="color:#dc2626">${esc(cerr)}</small></div>
   <div class="mfoot">${cmod.id?`<button id="c_d" class="ic" style="color:#dc2626;align-items:center;gap:6px" aria-label="Xóa khách" onclick="delCust(${cmod.id})">${trashI}</button>`:""}<button class="p" onclick="saveCust()">Lưu</button></div></div></div>`}
-function cFill(){document.querySelectorAll(".c_pi").forEach(i=>{const m=menuOf(+i.dataset.id);i.value=m&&+m.ws>0?m.ws:""})}
+function cFill(){document.querySelectorAll(".c_pi").forEach(i=>{const p=wsP(+i.dataset.id);i.value=p&&+p.price>0?p.price:""})}
 function saveCust(){const g=k=>$("#"+k).value.trim(),n=g("c_n"),c=g("c_c").toUpperCase(),er=m=>{$("#c_e").textContent=m;cerr=m};
   if(!n){er("Nhập tên khách.");return}if(!c){er("Nhập mã khách.");return}
   if(custs().some(x=>String(x.code).toUpperCase()===c&&x.id!==cmod.id)){er("Mã khách này đã có.");return}
   const own=g("c_m")==="own",ws={};if(own)document.querySelectorAll(".c_pi").forEach(i=>{const v=Math.round(+i.value||0);if(v>0)ws[i.dataset.id]=v});
-  if(cmod.id){const e=custOf(cmod.id);if(!e)return;Object.assign(e,{code:c,name:n,phone:g("c_p"),own,ws});S.orders.forEach(o=>{if(o.cid===e.id&&!o.paid)o.cust=n});lg("Khách sỉ","Sửa khách "+n+" ("+c+")"+(own?" · giá riêng":" · giá chung"))}
-  else{custs().push({id:++S.nid,code:c,name:n,phone:g("c_p"),own,ws});lg("Khách sỉ","Thêm khách "+n+" ("+c+")"+(own?" · giá riêng":" · giá chung"))}
-  cmod=null;cdel=false;cerr="";repriceAll();save();view()}
+  if(cmod.id){const e=custOf(cmod.id);if(!e)return;Object.assign(e,{code:c,name:n,phone:g("c_p"),own,ws});lg("Bán sỉ","Sửa khách "+n+" ("+c+")"+(own?" · giá riêng":" · giá chung"))}
+  else{const id=++S.nid;custs().push({id,code:c,name:n,phone:g("c_p"),own,ws});if(wtab==="ban"&&!wcid)wcid=id;lg("Bán sỉ","Thêm khách "+n+" ("+c+")"+(own?" · giá riêng":" · giá chung"))}
+  cmod=null;cdel=false;cerr="";save();view()}
 function delCust(id){if(!cdel){cdel=true;const b=$("#c_d");b.innerHTML=trashI+"<span>Bấm lần nữa để xóa</span>";b.style.borderColor="#dc2626";return}
-  const c=custOf(id);S.cust=custs().filter(x=>x.id!==id);S.orders.forEach(o=>{if(o.cid===id){delete o.cid;if(!o.paid)o.cust=o.tid==null?"Khách lẻ":"";repriceO(o)}});if(c)lg("Khách sỉ","Xóa khách "+c.name);cmod=null;cdel=false;save();view()}
+  const c=custOf(id);S.cust=custs().filter(x=>x.id!==id);if(wcid===id)wcid=0;if(c)lg("Bán sỉ","Xóa khách "+c.name);cmod=null;cdel=false;save();view()}
+/* ---- Kho sỉ và giá sỉ chung ---- */
+function wsImport(){let n=0;S.ing.forEach(i=>{if(wsI().some(p=>p.src===i.id))return;const k=pk(i);wsI().push({id:++S.nid,src:i.id,name:i.name,u:i.u||"cái",pu:k?(i.pu||""):"",f:k?(+i.f||1):1,qty:0,price:0});n++});if(n)lg("Kho sỉ","Lấy "+n+" nguyên liệu từ kho quán");save();view()}
+function wsSetPrice(id,v){const p=wsP(id);if(!p)return;v=Math.round(+v||0);p.price=v>0?v:0;lg("Kho sỉ","Giá sỉ chung "+p.name+": "+(v>0?fmt(v):"bỏ giá"));save();const e=$("#xk"+id);if(e)wTag(id)}
+function wStock(){const P=wsI(),miss=S.ing.filter(i=>!P.some(p=>p.src===i.id)).length,q=wsq.trim().toLowerCase();
+  return `${!P.length?`<div class="card" style="margin-bottom:12px"><b>Chưa có sản phẩm sỉ</b><p class="mu" style="margin:6px 0 12px">Lấy danh sách từ nguyên liệu trong Kho của quán (chỉ lấy tên và quy cách, không lấy tồn kho). Tồn kho sỉ tính riêng.</p><button class="p" onclick="wsImport()" ${S.ing.length?"":"disabled"}>Lấy từ kho quán${S.ing.length?" ("+S.ing.length+" nguyên liệu)":""}</button></div>`:""}
+  <div class="bar"><input type="search" placeholder="Tìm sản phẩm" value="${esc(wsq)}" oninput="wsq=this.value;$('#wl').innerHTML=wRows()" style="flex:1;min-width:160px">${miss&&P.length?`<button onclick="wsImport()">Lấy thêm ${miss} từ kho quán</button>`:""}<button onclick="pmod={id:0};pdel=false;perr='';view();$('#p_n').focus()">+ Thêm</button><button class="p" onclick="wsin=true;wiv={};view()" ${P.length?"":"disabled"}>Nhập kho sỉ</button></div>
+  <div class="card scroll" style="padding:0"><table><tr><th>Sản phẩm</th><th style="text-align:right">Giá sỉ chung</th><th style="text-align:right">Tồn kho sỉ</th></tr><tbody id="wl">${wRows()}</tbody></table></div>`}
+function wRows(){const q=wsq.trim().toLowerCase();return wsI().filter(p=>!q||p.name.toLowerCase().includes(q)).map(p=>`<tr><td style="cursor:pointer" onclick="pmod={id:${p.id}};pdel=false;perr='';view()"><b>${esc(p.name)}</b>${pk(p)?`<br><small class="mu">1 ${esc(p.pu)} = ${nf(p.f)} ${esc(p.u)}</small>`:""}</td><td><div class="ib" style="width:140px;margin-left:auto"><input data-m type="text" inputmode="decimal" value="${p.price||""}" placeholder="Chưa có" onchange="wsSetPrice(${p.id},this.value)"><span class="su">đ/${esc(wsU(p))}</span></div></td><td style="text-align:right;${p.qty>0?"":"color:#dc2626"}"><b>${wsStk(p)}</b>${pk(p)?`<br><small class="mu">${nf(p.qty)} ${esc(p.u)}</small>`:""}</td></tr>`).join("")||`<tr><td colspan="3" class="mu">Không có sản phẩm.</td></tr>`}
+function prodModal(){const e=pmod.id?wsP(pmod.id)||{}:{},cl="pmod=null;pdel=false;perr='';view()";
+  return `<div class="mo" onclick="if(event.target===this){${cl}}"><div class="md" style="max-width:480px"><div class="mh"><b>${pmod.id?"Sửa sản phẩm sỉ":"Thêm sản phẩm sỉ"}</b><button class="mx" onclick="${cl}">×</button></div><div class="mb">
+  <label class="mf"><span>Tên</span><input id="p_n" value="${esc(e.name||"")}"></label>
+  <div class="r2"><label class="mf" style="flex:1;min-width:120px"><span>Đơn vị nhỏ nhất</span><input id="p_u" placeholder="g, que, tệp" value="${esc(e.u||"")}"></label><label class="mf" style="flex:1;min-width:120px"><span>Quy cách bán</span><input id="p_pu" placeholder="túi, gói (để trống nếu không có)" value="${esc(pk(e)?e.pu:"")}"></label><label class="mf" style="flex:1;min-width:120px"><span>1 quy cách =</span><input id="p_f" type="number" min="1" step="any" placeholder="số đơn vị" value="${pk(e)?e.f:""}"></label></div>
+  <div class="r2"><label class="mf" style="flex:1;min-width:150px"><span>Giá sỉ chung</span><div class="ib"><input id="p_g" data-m type="text" inputmode="decimal" value="${e.price||""}" placeholder="0"><span class="su">đ</span></div></label><label class="mf" style="flex:1;min-width:150px"><span>Tồn hiện tại (theo quy cách)</span><input id="p_q" type="number" min="0" step="any" value="${pmod.id?nf((+e.qty||0)/wsF(e)).replace(/\./g,"").replace(",","."):""}" placeholder="0"></label></div>
+  <small id="p_e" style="color:#dc2626">${esc(perr)}</small></div>
+  <div class="mfoot">${pmod.id?`<button id="p_d" class="ic" style="color:#dc2626;align-items:center;gap:6px" aria-label="Xóa sản phẩm" onclick="delProd(${pmod.id})">${trashI}</button>`:""}<button class="p" onclick="saveProd()">Lưu</button></div></div></div>`}
+function saveProd(){const g=k=>$("#"+k).value.trim(),n=g("p_n"),u=g("p_u")||"cái",pu=g("p_pu"),f=pu?Math.max(1,+g("p_f")||1):1,pr=Math.round(+$("#p_g").value||0),q=g("p_q");
+  if(!n){perr="Nhập tên sản phẩm.";$("#p_e").textContent=perr;return}
+  let p=pmod.id?wsP(pmod.id):null;if(pmod.id&&!p)return;
+  if(p){Object.assign(p,{name:n,u,pu,f,price:pr})}else{p={id:++S.nid,name:n,u,pu,f,price:pr,qty:0};wsI().push(p)}
+  if(q!==""){const nq=Math.round(+q*wsF(p)*1000)/1000;if(Math.abs(nq-(+p.qty||0))>1e-9){lg("Kho sỉ","Chỉnh tồn "+n+": "+nf(p.qty||0)+" → "+nf(nq)+" "+u);p.qty=nq}}
+  lg("Kho sỉ",(pmod.id?"Sửa ":"Thêm ")+"sản phẩm "+n);pmod=null;pdel=false;perr="";save();view()}
+function delProd(id){if(!pdel){pdel=true;const b=$("#p_d");b.innerHTML=trashI+"<span>Bấm lần nữa để xóa</span>";b.style.borderColor="#dc2626";return}
+  const p=wsP(id);S.wsi=wsI().filter(x=>x.id!==id);custs().forEach(c=>{if(c.ws)delete c.ws[id]});delete wv[id];if(p)lg("Kho sỉ","Xóa sản phẩm "+p.name);pmod=null;pdel=false;save();view()}
+function wiOk(){const b=$("#wi_ok");if(b)b.disabled=!Object.values(wiv).some(v=>+v>0)}
+function wsInModal(){const cl="wsin=false;wiv={};view()",P=wsI();
+  return `<div class="mo" onclick="if(event.target===this){${cl}}"><div class="md" style="max-width:640px"><div class="mh"><b>Nhập kho sỉ</b><button class="mx" onclick="${cl}">×</button></div><div class="mb">
+  <div class="ib" style="margin:6px 0"><span class="ic su">${ico('<circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/>')}</span><input placeholder="Tìm nguyên liệu" oninput="wFind(this.value)" style="text-align:left"></div>
+  <div class="card scroll" style="padding:0"><table><tr><th>Nguyên liệu</th><th style="text-align:right">Số lượng nhập</th></tr>${P.map(p=>`<tr class="wr" data-n="${esc(p.name.toLowerCase())}"><td>${esc(p.name)}${pk(p)?`<br><small class="mu">1 ${esc(p.pu)} = ${nf(p.f)} ${esc(p.u)}</small>`:""}<br><small class="mu">Đang tồn: ${wsStk(p)}</small></td><td><div class="ib"><input type="number" min="0" step="any" placeholder="SL" value="${wiv[p.id]||""}" oninput="wiv[${p.id}]=this.value;wiOk()"><span class="su">${esc(wsU(p))}</span></div></td></tr>`).join("")}</table></div></div>
+  <div class="mfoot"><button onclick="${cl}">Hủy</button><button id="wi_ok" class="p" onclick="wsInSave()" ${Object.values(wiv).some(v=>+v>0)?"":"disabled"}>Lưu</button></div></div></div>`}
+function wsInSave(){let n=0;wsI().forEach(p=>{const q=+wiv[p.id];if(!(q>0))return;p.qty=Math.round(((+p.qty||0)+q*wsF(p))*1000)/1000;lg("Kho sỉ","Nhập "+p.name+": +"+nf(q)+" "+wsU(p));n++});wsin=false;wiv={};if(n)save();view()}
+/* ---- Lịch sử ---- */
+function wHList(){const t=new Date();t.setHours(0,0,0,0);let a=0;if(wRange==="d")a=t.getTime();else if(wRange==="7")a=t.getTime()-6*DAY;else if(wRange==="m"){const m=new Date();m.setDate(1);m.setHours(0,0,0,0);a=m.getTime()}
+  const q=wlq.trim().toLowerCase();return wsL().filter(s=>s.ts>=a&&(!q||((s.cust||"")+" "+(s.code||"")).toLowerCase().includes(q))).sort((x,y)=>y.ts-x.ts)}
+function wHRows(){const L=wHList(),ok=L.filter(s=>!s.cancel),tot=ok.reduce((a,s)=>a+s.total,0);let day="",h=`<div class="stats" style="margin-bottom:12px"><div class="card"><small class="mu">Doanh thu sỉ</small><br><b style="font-size:20px">${fmt(tot)}</b><br><small class="mu">${ok.length} phiếu</small></div></div>`;
+  L.forEach(s=>{const d=new Date(s.ts).toLocaleDateString("vi-VN",{weekday:"short",day:"2-digit",month:"2-digit"});if(d!==day){day=d;h+=`<h3 style="margin:14px 0 6px">${d}</h3>`}
+    h+=`<div class="orow" onclick="wsd=${s.id};cdel=false;view()"><span class="mu" style="width:48px;flex:none">${tm(s.ts)}</span><div style="flex:1;min-width:0"><b>${esc(s.cust)}</b> <small class="mu">${esc(s.code||"")}</small><br><small class="mu">${s.items.length} mặt hàng${s.cancel?" · ĐÃ HỦY":""}</small></div><b style="${s.cancel?"text-decoration:line-through;color:var(--mu)":""}">${fmt(s.total)}</b></div>`});
+  return L.length?h:h+`<p class="mu">Chưa có phiếu bán sỉ trong khoảng này.</p>`}
+function wHist(){return `<div class="bar"><input type="search" placeholder="Tìm tên hoặc mã khách" value="${esc(wlq)}" oninput="wlq=this.value;$('#wh').innerHTML=wHRows()" style="flex:1;min-width:160px"><div class="seg">${[["d","Hôm nay"],["7","7 ngày"],["m","Tháng này"],["a","Tất cả"]].map(r=>`<button class="${wRange===r[0]?"on":""}" onclick="wRange='${r[0]}';view()">${r[1]}</button>`).join("")}</div></div><div id="wh">${wHRows()}</div>`}
+function wsDetail(){const s=wsL().find(x=>x.id===wsd);if(!s)return"";const cl="wsd=null;cdel=false;view()";
+  return `<div class="mo" onclick="if(event.target===this){${cl}}"><div class="md" style="max-width:560px"><div class="mh"><div><b>Phiếu bán sỉ · ${esc(s.cust)}</b><br><small class="mu">${esc(s.code||"")} · ${tm(s.ts)} ${new Date(s.ts).toLocaleDateString("vi-VN")} · ${esc(s.by||"")}${s.cancel?" · ĐÃ HỦY":""}</small></div><button class="mx" onclick="${cl}">×</button></div><div class="mb">${s.items.map(i=>`<div class="row"><span>${nf(i.q)} ${esc(i.su)} × ${esc(i.name)}<br><small class="mu">${fmt(i.price)}/${esc(i.su)}</small></span><b>${fmt(i.amt)}</b></div>`).join("")}<div class="row"><b>Tổng</b><b>${fmt(s.total)}</b></div></div><div class="mfoot">${s.cancel||!can("wsale")?"":`<button id="c_d" style="color:#dc2626" onclick="wsCancel(${s.id})">Hủy phiếu, hoàn lại kho</button>`}<button class="p" onclick="${cl}">Đóng</button></div></div></div>`}
+function wsCancel(id){const s=wsL().find(x=>x.id===id);if(!s||s.cancel)return;if(!cdel){cdel=true;const b=$("#c_d");b.textContent="Bấm lần nữa để hủy phiếu";b.style.borderColor="#dc2626";return}
+  s.items.forEach(i=>{const p=wsP(i.pid);if(p)p.qty=Math.round(((+p.qty||0)+i.q*i.f)*1000)/1000});s.cancel=Date.now();s.cby=meName();lg("Bán sỉ","Hủy phiếu "+s.cust+" · "+fmt(s.total));cdel=false;save();view()}
 function vMenu(){
   const C=catList();
   return `<h2 style="margin:0">Thực đơn</h2><p class="mu" style="margin:2px 0 16px">${S.menu.length} món · ${C.length} nhóm</p><div class="seg" style="margin-bottom:16px">${[["mon","Món"],["nhom","Nhóm món"]].map(t=>`<button class="${mtab===t[0]?"on":""}" onclick="mtab='${t[0]}';gEd=gDel=null;gErr='';view()">${t[1]}</button>`).join("")}</div>${mtab==="mon"?mItems():mGroups()}${mmod?menuModal():""}`;
@@ -1751,8 +1828,7 @@ function menuModal(){
   return `<div class="mo" onclick="if(event.target===this){${cl}}"><div class="md" style="max-width:480px"><div class="mh"><b>${mmod.id?"Sửa món":"Thêm món"}</b><button class="mx" onclick="${cl}">×</button></div><div class="mb">
   <div class="mf"><span>Ảnh minh họa</span><div class="r2" style="align-items:center"><span class="mth big" id="mpv">${mimg?`<img src="${mimg}" alt="">`:"Chưa có ảnh"}</span><div style="display:flex;flex-direction:column;gap:8px"><label class="bl">Chọn ảnh<input type="file" accept="image/*" hidden onchange="mimgSet(this)"></label><button onclick="mimg='';$('#mpv').textContent='Chưa có ảnh'">Xóa ảnh</button></div></div></div>
   <label class="mf"><span>Tên món</span><input id="mm_n" value="${esc(e.name||"")}"></label>
-  <div class="r2"><label class="mf" style="flex:1;min-width:150px"><span>Giá</span><div class="ib"><input id="mm_p" data-m type="text" inputmode="decimal" value="${e.price||""}" placeholder="0"><span class="su">đ</span></div></label><label class="mf" style="flex:1;min-width:150px"><span>Giá sỉ chung</span><div class="ib"><input id="mm_w" data-m type="text" inputmode="decimal" value="${e.ws||""}" placeholder="Để trống = không có"><span class="su">đ</span></div></label></div>
-  <div class="r2"><label class="mf" style="flex:1;min-width:150px"><span>Nhóm món</span><select id="mm_c">${(C.includes(dc)?C:[...C,dc]).map(c=>`<option ${c===dc?"selected":""}>${esc(c)}</option>`).join("")}</select></label></div>
+  <div class="r2"><label class="mf" style="flex:1;min-width:150px"><span>Giá</span><div class="ib"><input id="mm_p" data-m type="text" inputmode="decimal" value="${e.price||""}" placeholder="0"><span class="su">đ</span></div></label><label class="mf" style="flex:1;min-width:150px"><span>Nhóm món</span><select id="mm_c">${(C.includes(dc)?C:[...C,dc]).map(c=>`<option ${c===dc?"selected":""}>${esc(c)}</option>`).join("")}</select></label></div>
   <div class="row" style="border:0"><span><b>Tính là 1 khách</b><br><small class="mu">Bật cho món chính (buffet nem nướng, món lẻ). Tắt cho nước, món ăn thêm.</small></span><label class="tg"><input id="mm_x" type="checkbox" aria-label="Tính là 1 khách" ${(mmod.id?itemPax(e):paxCats().includes(dc))?"checked":""}><span></span></label></div>
   <div class="row" style="border:0"><span><b>Đang bán</b><br><small class="mu">Tắt khi hết món, món sẽ mờ đi và không gọi được.</small></span><label class="tg"><input id="mm_o" type="checkbox" aria-label="Đang bán" ${e.off?"":"checked"}><span></span></label></div></div>
   <div class="mfoot">${mmod.id?`<button id="mm_d" class="ic" style="color:#dc2626;align-items:center;gap:6px" aria-label="Xóa món" onclick="delMenuM(${mmod.id})">${trashI}</button>`:""}<button class="p" onclick="saveMenu()">Lưu</button></div></div></div>`;
@@ -1761,9 +1837,9 @@ function mimgSet(inp){const f=inp.files[0];if(!f)return;const r=new FileReader()
 function saveMenu(){
   const n=$("#mm_n").value.trim(),p=+$("#mm_p").value,c=$("#mm_c").value||"Khác",on=$("#mm_o").checked;
   if(!n){$("#mm_n").focus();return}if(!(p>0)){$("#mm_p").focus();return}
-  if(mmod.id){const m=menuOf(mmod.id);if(!m)return;m.name=n;m.price=p;{const w=Math.round(+$("#mm_w").value||0);w>0?m.ws=w:delete m.ws}m.cat=c;m.pax=$("#mm_x").checked;on?delete m.off:m.off=true;mimg?m.img=mimg:delete m.img;lg("Thực đơn","Sửa món "+n)}
-  else{const m={id:++S.nid,name:n,price:p,cat:c,stock:50,pax:$("#mm_x").checked};if(!on)m.off=true;if(mimg)m.img=mimg;{const w=Math.round(+$("#mm_w").value||0);if(w>0)m.ws=w}S.menu.push(m);lg("Thực đơn","Thêm món "+n)}
-  mmod=null;mdel=false;mimg="";repriceAll();save();view()}
+  if(mmod.id){const m=menuOf(mmod.id);if(!m)return;m.name=n;m.price=p;m.cat=c;m.pax=$("#mm_x").checked;on?delete m.off:m.off=true;mimg?m.img=mimg:delete m.img;lg("Thực đơn","Sửa món "+n)}
+  else{const m={id:++S.nid,name:n,price:p,cat:c,stock:50,pax:$("#mm_x").checked};if(!on)m.off=true;if(mimg)m.img=mimg;S.menu.push(m);lg("Thực đơn","Thêm món "+n)}
+  mmod=null;mdel=false;mimg="";save();view()}
 function delMenuM(id){
   if(!mdel){mdel=true;const b=$("#mm_d");b.innerHTML=trashI+"<span>Bấm lần nữa để xóa</span>";b.style.borderColor="#dc2626";return}
   mmod=null;mdel=false;mimg="";delMenu(id)}
@@ -1865,7 +1941,7 @@ function delStaff(id){
   S.staff=S.staff.filter(x=>x.id!==id);pvDel(id);if(S.me===id)S.me=S.staff[0].id;
   lg("Nhân viên","Xóa "+s.name);stm=null;sdl=false;save();view()}
 const rpDirty=()=>JSON.stringify(rpD)!==JSON.stringify(rpm());
-const PERMG=[["Bán hàng",["order","move","discount","cancelItem","pay","kitchen","shift"]],["Kho",["stockCheck","stockView","stockIn","stockEdit","stockPast"]],["Báo cáo & số liệu",["report","sum","cost"]],["Quản lý quán",["menuEdit","mapEdit","staffMgr","settings","schDl","custEdit"]]];
+const PERMG=[["Bán hàng",["order","move","discount","cancelItem","pay","kitchen","shift"]],["Kho",["stockCheck","stockView","stockIn","stockEdit","stockPast"]],["Báo cáo & số liệu",["report","sum","cost"]],["Quản lý quán",["menuEdit","mapEdit","staffMgr","settings","schDl","wsale"]]];
 function rpCnt(){RL.forEach(r=>{const e=document.getElementById("rpc_"+r);if(e)e.textContent=PERMS.filter(p=>rpD[r][p[0]]).length+"/"+PERMS.length});const d=document.getElementById("rp_d");if(d)d.hidden=!rpDirty()}
 function nvPerm(){
   if(!rpD)rpD=JSON.parse(JSON.stringify(rpm()));
@@ -2121,7 +2197,7 @@ const sySave=()=>{try{localStorage.setItem(SYK,JSON.stringify(SY))}catch(e){}};
 const canon=v=>v===null||typeof v!=="object"?JSON.stringify(v):Array.isArray(v)?"["+v.map(x=>canon(x===undefined?null:x)).join(",")+"]":"{"+Object.keys(v).filter(k=>v[k]!==undefined).sort().map(k=>JSON.stringify(k)+":"+canon(v[k])).join(",")+"}";
 const hsh=s=>{let a=5381,b=52711;for(let i=0;i<s.length;i++){const c=s.charCodeAt(i);a=(a*33^c)>>>0;b=(b*31+c)>>>0}return a.toString(36)+b.toString(36)+s.length.toString(36)};
 /* del:1 = xóa ở máy này thì xóa luôn trên máy chủ. Còn lại chỉ thêm, không bao giờ xóa (lịch sử bán hàng, chấm công, kho, nhật ký). */
-const SYA={menu:{k:r=>r.id,del:1},tables:{k:r=>r.id,del:1},staff:{k:r=>r.id,del:1},areas:{k:r=>r.id,del:1},orders:{k:r=>r.no+"_"+r.ts,del:1},kitchen:{k:r=>r.id+"_"+r.ts,del:1},ing:{k:r=>r.id,del:1},cust:{k:r=>r.id,del:1},
+const SYA={menu:{k:r=>r.id,del:1},tables:{k:r=>r.id,del:1},staff:{k:r=>r.id,del:1},areas:{k:r=>r.id,del:1},orders:{k:r=>r.no+"_"+r.ts,del:1},kitchen:{k:r=>r.id+"_"+r.ts,del:1},ing:{k:r=>r.id,del:1},cust:{k:r=>r.id,del:1},wsi:{k:r=>r.id,del:1},wsl:{k:r=>r.id},
   sales:{k:r=>r.no+"_"+r.ts},att:{k:r=>r.sk||r.sid+"_"+r.in},imp:{k:r=>r.id+"_"+r.ts,del:1},kk:{k:r=>r.iid+"_"+r.ts},log:{k:r=>r.ts+"_"+hsh(r.a+"|"+r.d+"|"+r.by)}};
 const SYN=["ono","nid","iid","kid"];
 let SYL={},SYC={s:null,init:false},SYS={st:SY.on?"sync":"off",msg:"",t:0},SYUI={},SYB=false,SYD=false,SYV=false,syKT=0,syN=0;
@@ -2189,7 +2265,7 @@ function syApply(rows,force,wipe){
   if(n){
     const mx=(a,f)=>(a||[]).reduce((m,x)=>Math.max(m,+f(x)||0),0);
     S.ono=Math.max(S.ono||0,mx(S.orders,o=>o.no),mx(S.sales,o=>o.no));S.kid=Math.max(S.kid||0,mx(S.kitchen,o=>o.id));
-    S.nid=Math.max(S.nid||0,mx(S.menu,o=>o.id),mx(S.tables,o=>o.id),mx(S.staff,o=>o.id),mx(S.areas,o=>o.id),mx(S.cust,o=>o.id));S.iid=Math.max(S.iid||0,mx(S.ing,o=>o.id),mx(S.imp,o=>o.id));
+    S.nid=Math.max(S.nid||0,mx(S.menu,o=>o.id),mx(S.tables,o=>o.id),mx(S.staff,o=>o.id),mx(S.areas,o=>o.id),mx(S.cust,o=>o.id),mx(S.wsi,o=>o.id),mx(S.wsl,o=>o.id));S.iid=Math.max(S.iid||0,mx(S.ing,o=>o.id),mx(S.imp,o=>o.id));
     _save();
   }
   return n;
