@@ -392,8 +392,8 @@ function seed(){
 const CHK="postest_chain";
 let CH=(()=>{try{return JSON.parse(localStorage.getItem(CHK))}catch(e){}})()||{cur:"main",list:[{id:"main",key:"postest"}]};
 let SK=(CH.list.find(x=>x.id===CH.cur)||CH.list[0]).key;
-function load(){try{const r=localStorage.getItem(SK);if(r)return JSON.parse(r)}catch(e){}return seed()}
-function save(){try{localStorage.setItem(SK,JSON.stringify(S))}catch(e){}}
+var KD=true;function load(){KD=true;try{const r=localStorage.getItem(SK);if(r)return JSON.parse(r)}catch(e){}return seed()}
+function save(){KD=true;try{localStorage.setItem(SK,JSON.stringify(S))}catch(e){}}
 let S=load();if(!S.ing){S.ing=[];S.imp=[];S.kk=[];S.iid=1}
 let PG=(location.hash||"#ban").slice(1);
 function nav(k){if(k===PG&&!pend)return false;leave();PG=k;try{history.replaceState(null,"","#"+k)}catch(e){}if(pend){cur=pend;pend=null}view();return false}
@@ -505,19 +505,26 @@ function dnMigrate(){const M=new Map();
   save()}
 /* Các lần kiểm kho cũ bị trùng (cùng nguyên liệu, cùng giờ) làm đồng bộ mất bản ghi: tách ra mỗi bản một mốc giờ riêng, bản chốt trước giữ nguyên khóa */
 function kkHeal(){const seen={};let ch=false;S.kk.slice().sort((x,y)=>(x.at||0)-(y.at||0)).forEach(z=>{if(!seen[z.iid+"_"+z.ts]){seen[z.iid+"_"+z.ts]=1;return}let t=z.ts;while(seen[z.iid+"_"+t])t++;z.ts=t;seen[z.iid+"_"+t]=1;ch=true});if(ch){S.kk.sort((x,y)=>x.ts-y.ts);save()}}
+var SOFT=false;
+function setH(el,h){if(SOFT&&el._h===h)return;el.innerHTML=h;el._h=h}
+function viewSoft(){
+  const mn=document.querySelector("main"),y=window.scrollY,mt=mn?mn.scrollTop:0,key=PG+"|"+cur;
+  SOFT=true;try{view()}finally{SOFT=false}
+  if(key===PG+"|"+cur){if(window.scrollY!==y)window.scrollTo(0,y);const m2=document.querySelector("main");if(m2&&m2.scrollTop!==mt)m2.scrollTop=mt}
+}
 function view(){
-  ingSort();kkHeal();kkNorm();
+  if(KD){KD=false;ingSort();kkHeal();kkNorm();KD=false}
   if(S.orders.some(o=>!o.dn)||S.sales.some(z=>!z.dn))dnMigrate();
   if(needLogin()){if(!sessOk()){loginShow();return}S.me=SESS;const lo=$("#lgin");if(lo)lo.remove()}else{const lo=$("#lgin");if(lo)lo.remove()}
   const h=PG;let k=NAV.some(n=>n[0]===h)?h:"ban";if(!navOk(k)){const f=NAV.find(n=>navOk(n[0]));if(f)k=f[0]}
   const pend=S.kitchen.filter(t=>t.st!=="done").length;
   const me=S.staff.find(s=>s.id===S.me)||S.staff[0]||{name:"—",role:""};
   document.title=S.store.name;
-  $("#side").innerHTML=`<div class="sw"><span class="logo">${ico(IC.store)}</span><div class="t"><b>${esc(S.store.name)}</b><small>${esc(me.name)} · ${esc(me.role)}</small></div>${isOwner()&&CH.list.length>1?stSw():needLogin()?"":`<span class="chev ic">${ico('<path d="m7 15 5 5 5-5M7 9l5-5 5 5"/>')}</span><select title="Đổi người thao tác" onchange="S.me=+this.value;save();view()">${S.staff.map(s=>`<option value="${s.id}" ${s.id===S.me?"selected":""}>${esc(s.name)} · ${esc(s.role)}</option>`).join("")}</select>`}</div>`+
-   NAV.filter(n=>navOk(n[0])).map(n=>`<a href="#${n[0]}" onclick="return nav('${n[0]}')" class="${n[0]===k?"on":""}" title="${n[1]}"><span class="ic">${ico(IC[n[0]])}</span><span class="lb">${n[1]}</span>${n[0]==="bep"&&kcnt()?`<i class="bd kb">${kcnt()}</i>`:""}</a>`).join("")+(`<a class="lgo" href="#" onclick="logout();return false" title="Đăng xuất"><span class="ic">${ico('<path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/>')}</span><span class="lb">Đăng xuất</span></a>${syPill()}`);mobShell(k);
+  setH($("#side"),`<div class="sw"><span class="logo">${ico(IC.store)}</span><div class="t"><b>${esc(S.store.name)}</b><small>${esc(me.name)} · ${esc(me.role)}</small></div>${isOwner()&&CH.list.length>1?stSw():needLogin()?"":`<span class="chev ic">${ico('<path d="m7 15 5 5 5-5M7 9l5-5 5 5"/>')}</span><select title="Đổi người thao tác" onchange="S.me=+this.value;save();view()">${S.staff.map(s=>`<option value="${s.id}" ${s.id===S.me?"selected":""}>${esc(s.name)} · ${esc(s.role)}</option>`).join("")}</select>`}</div>`+
+   NAV.filter(n=>navOk(n[0])).map(n=>`<a href="#${n[0]}" onclick="return nav('${n[0]}')" class="${n[0]===k?"on":""}" title="${n[1]}"><span class="ic">${ico(IC[n[0]])}</span><span class="lb">${n[1]}</span>${n[0]==="bep"&&kcnt()?`<i class="bd kb">${kcnt()}</i>`:""}</a>`).join("")+(`<a class="lgo" href="#" onclick="logout();return false" title="Đăng xuất"><span class="ic">${ico('<path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/>')}</span><span class="lb">Đăng xuất</span></a>${syPill()}`));mobShell(k);
   $("#side").classList.add("lo");
   const V={ban:()=>ordN(cur)?vOrder(ordN(cur)):vTables(),bep:vKitchen,donhang:vOrders,chamcong:vAtt,kho:vStock,baocao:vReport,tonghop:vSum,menu:vMenu,si:vWs,sodo:vMap,nhanvien:vStaff,caidat:vSet};
-  applyColor();document.body.classList.toggle("ordp",k==="ban"&&!!ordN(cur));$("#app").innerHTML=loginBn()+(!navOk(k)?`<div class="card" style="max-width:480px;margin:60px auto;text-align:center"><h3>Chưa có quyền</h3><p class="mu">Vai trò của bạn chưa được cấp quyền dùng mục này. Hãy nhờ chủ quán cấp trong Nhân viên → Phân quyền.</p></div>`:V[k]());
+  applyColor();document.body.classList.toggle("ordp",k==="ban"&&!!ordN(cur));setH($("#app"),loginBn()+(!navOk(k)?`<div class="card" style="max-width:480px;margin:60px auto;text-align:center"><h3>Chưa có quyền</h3><p class="mu">Vai trò của bạn chưa được cấp quyền dùng mục này. Hãy nhờ chủ quán cấp trong Nhân viên → Phân quyền.</p></div>`:V[k]()));
   {const oh=$(".ohead");document.documentElement.style.setProperty("--oh",oh?oh.offsetHeight+"px":"0px")}const rph=$("#rphrs");if(rph)rph.scrollLeft=+rph.dataset.sl||0;
 }
 function leave(){wpend=null;cmod=null;pmod=null;cSync=false;wsin=false;wsd=null;bo=false;mq="";ck=false;qrMode=false;edI=null;sv=null;cx=false;const o=ordN(cur);if(o&&!o.items.length){S.orders=S.orders.filter(x=>x!==o);save()}cur=null}
@@ -1349,8 +1356,8 @@ function vPay(){
    <div class="r2" style="margin-top:12px;align-items:flex-end"><label class="mf" style="width:150px"><span>Cho phép đi trễ (phút)</span><input type="number" min="0" inputmode="numeric" value="${GR()}" onchange="paySet('grace',Math.max(0,Math.floor(+this.value||0)))"></label><label class="mf" style="width:150px"><span>Trừ thêm khi trễ từ (phút, 0 = tắt)</span><input type="number" min="0" inputmode="numeric" value="${PNL().m}" onchange="paySet('pnm',Math.max(0,Math.floor(+this.value||0)))"></label><label class="mf" style="width:150px"><span>Số giờ lương bị trừ thêm</span><input type="number" min="0" step="0.5" inputmode="decimal" value="${PNL().h}" onchange="paySet('pnh',Math.max(0,+this.value||0))"></label><label class="mf" style="width:150px"><span>Hệ số giờ vượt (0 = không trả)</span><input type="number" min="0" step="0.1" inputmode="decimal" value="${C.otx}" onchange="paySet('otx',Math.max(0,+this.value||0))"></label><label class="mf" style="width:150px"><span>Làm tròn giờ làm</span><select onchange="paySet('rnd',+this.value)">${[[0,"Không làm tròn"],[15,"Gần nhất 15 phút"],[30,"Gần nhất 30 phút"]].map(x=>`<option value="${x[0]}" ${C.rnd===x[0]?"selected":""}>${x[1]}</option>`).join("")}</select></label></div>
    <p class="mu" style="margin:10px 0 0">${ex} Đi trễ trong ${GR()} phút vẫn tính đủ công. Trễ hơn ${GR()} phút thì không tính lương đúng số phút đã trễ.${PNL().m>0&&PNL().h>0?` Trễ từ ${PNL().m} phút trở lên thì ngoài ra còn bị trừ thêm ${hm(PNL().h)} lương. Ví dụ: trễ ${PNL().m} phút → không tính ${PNL().m} phút trễ + trừ thêm ${hm(PNL().h)} = mất tổng ${dm(PNL().m+Math.round(PNL().h*60))} lương; trễ ${PNL().m+15} phút → mất ${dm(PNL().m+15+Math.round(PNL().h*60))}. Phần trừ thêm này cộng dồn với các ngày khác trong kỳ nên có thể trừ vào công ngày trước.`:""} Chủ quán có thể bấm Miễn trừ trễ ở từng ca trong Lịch sử chấm công (ví dụ nhân viên xin phép) để ca đó tính đủ. Mỗi lần vào ca và ra ca tính là một ca. Ca đang mở tính đến hiện tại.</p>
    <div class="bar" style="margin:16px 0 0"><span>Hoa hồng ship ngoài</span><input data-m type="text" inputmode="decimal" value="${com}" style="width:100px" onchange="S.store.com=+this.value||0;save();view()"><span>đ/suất · Chọn các món được tính hoa hồng (${le.size} món):</span></div>${cats.map(c=>{const L=S.menu.filter(m=>m.cat===c);if(!L.length)return"";const n=L.filter(m=>le.has(m.id)).length;return `<div style="margin:12px 0 0"><div class="bar" style="margin:0 0 6px;gap:8px"><b>${esc(c)}</b><small class="mu">${n}/${L.length} món</small><button class="r" style="padding:3px 10px;font-size:12px" data-c="${esc(c)}" onclick="togLeG(this.dataset.c)">${n===L.length?"Bỏ chọn cả nhóm":"Chọn cả nhóm"}</button></div><div class="chips" style="margin:0;flex-wrap:wrap;overflow:visible">${L.map(m=>`<button class="${le.has(m.id)?"on":""}" onclick="togLeI(${m.id})">${esc(m.name)}</button>`).join("")}</div></div>`}).join("")}</div>${holCard()}${ovCard()}`:""}`}
-setInterval(()=>{const e=document.activeElement;if(!document.hidden&&PG==="chamcong"&&!sh&&!so&&!aeM&&!(e&&/INPUT|TEXTAREA|SELECT/.test(e.tagName)))view()},3e4);
-setInterval(()=>{const e=document.activeElement;if(!document.hidden&&(PG==="bep"||PG==="ban"&&!ordN(cur))&&!(e&&/INPUT|TEXTAREA|SELECT/.test(e.tagName)))view()},3e4);
+setInterval(()=>{const e=document.activeElement;if(!document.hidden&&PG==="chamcong"&&!sh&&!so&&!aeM&&!(e&&/INPUT|TEXTAREA|SELECT/.test(e.tagName)))viewSoft()},3e4);
+setInterval(()=>{const e=document.activeElement;if(!document.hidden&&(PG==="bep"||PG==="ban"&&!ordN(cur))&&!(e&&/INPUT|TEXTAREA|SELECT/.test(e.tagName)))viewSoft()},3e4);
 
 function ingOk(){const n=$("#in_n").value.trim(),u=$("#in_u").value.trim();$("#in_ok").disabled=!(n&&u);document.querySelectorAll(".suu").forEach(x=>x.textContent=u)}
 function ingModal(e){
@@ -2323,6 +2330,7 @@ async function syPullRows(key,first){
 function syMax(rows){const m=rows.reduce((a,r)=>r.updated_at>a?r.updated_at:a,"");if(m&&m>(SYC.s||""))SYC.s=m}
 /* Áp dữ liệu từ máy chủ vào máy này. Bản ghi máy này đang sửa dở (chưa gửi) được giữ lại, không bị ghi đè. */
 function syApply(rows,force,wipe){
+  KD=true;
   let n=0;const by={};rows.forEach(r=>(by[r.kind]=by[r.kind]||[]).push(r));
   if(wipe)Object.keys(SYA).forEach(k=>{S[k]=[]});
   (by.meta||[]).forEach(r=>{
@@ -2430,7 +2438,7 @@ function syKick(){SYD=true;if(SY.on){clearTimeout(syKT);syKT=setTimeout(()=>syTi
 function syFlushView(){
   if(!SYV)return;const e=document.activeElement;
   if((e&&/INPUT|TEXTAREA|SELECT/.test(e.tagName))||$(".mo,.ov"))return;
-  SYV=false;view();
+  SYV=false;viewSoft();
 }
 /* ----- giao diện ----- */
 function syLabel(){return !SY.on?"Chưa bật đồng bộ":SYS.st==="err"?"Mất kết nối":SYS.st==="sync"?"Đang đồng bộ…":"Đã đồng bộ"+(SYS.t?" · "+tm(SYS.t):"")}
