@@ -1512,7 +1512,8 @@ function wnBase(a){const lim=dk(a),from=dk(a-WN_DAYS*DAY),rev={};S.sales.forEach
 /* Gắn nhãn: cur và avg là tỷ lệ tiêu hao/doanh thu (0.5 = 50%) */
 function wnTag(cur,avg){const df=(cur-avg)*100;let c,t,ar;
   if(df>WN_BAD){c="var(--bad,#dc2626)";t="Bất thường";ar="▲"}else if(df>WN_TOL){c="var(--bad,#dc2626)";t="Cao hơn";ar="▲"}else if(df<-WN_TOL){c="var(--good,#16a34a)";t="Thấp hơn";ar="▼"}else{c="var(--mu)";t="Bình thường";ar="≈"}
-  return{df,c,t,s:`${ar} ${df>0?"+":""}${wnP(df)}`,bad:df>WN_TOL}}
+  const rel=avg>0?(cur-avg)/avg*100:null,rl=rel==null||!isFinite(rel)?"":(rel>=0?"tăng ":"giảm ")+wnP(Math.abs(rel),Math.abs(rel)<10?1:0)+"%";
+  return{df,rel,rl,c,t,s:`${ar} ${df>0?"+":""}${wnP(df)}`,bad:df>WN_TOL}}
 function vStock(){
   if(kp==="kiem")return vKiem();
   const kIn=can("stockIn"),kCo=can("cost"),kAd=isOwner(),kBc=kCo||can("report"),kPh=kCo||kIn||can("stockView");
@@ -1533,12 +1534,12 @@ function vStock(){
     curM=new Map(),curI=r=>{if(!curM.has(r))curM.set(r,curI0(r));return curM.get(r)},
     gT=chot&&dt>0&&W.T?wnTag(hao/dt,W.T.avg):null,
     tL=gT?`<br><b style="color:${gT.c}">${gT.s} điểm % · ${gT.t}</b> so với TB ${wnP(W.T.avg*100)}% <span style="opacity:.8">(${W.T.n} lần kiểm trước đó)</span>${kCo&&Math.abs(gT.df)>WN_TOL?`<br><b style="color:${gT.c}">≈ ${gT.df>0?"+":"-"}${fmt(Math.abs(hao-W.T.avg*dt))}</b> so với mức TB`:""}`:"",
-    IB=r=>{const x=curI(r),bs=W.B[r.i.id];if(!x||!bs)return"";const g=wnTag(x.c,bs.avg);return`<br><small title="TB ${wnP(bs.avg*100)}% doanh thu (${bs.n} lần kiểm trước đó)">${wnP(x.c*100)}% DT · <span style="color:${g.c};font-weight:600">${g.s}</span></small>`},
+    IB=r=>{const x=curI(r),bs=W.B[r.i.id];if(!x||!bs)return"";const g=wnTag(x.c,bs.avg);return`<br><small class="mu" title="TB ${wnP(bs.avg*100)}% doanh thu (${bs.n} lần kiểm trước đó)">${wnP(x.c*100)}% DT · TB ${wnP(bs.avg*100)}%</small><br><small style="color:${g.c};font-weight:600">${g.s} điểm${g.rl?" · "+g.rl:""}</small>`},
     AL=(()=>{if(!kCo||!chot||!(dt>0))return"";const L=R.map(r=>{const x=curI(r),bs=W.B[r.i.id];if(!x||!bs)return null;const g=wnTag(x.c,bs.avg);return g.bad?{r,x,bs,g}:null}).filter(Boolean).sort((p,q)=>q.g.df-p.g.df).slice(0,6);
       if(!L.length&&!(gT&&gT.bad))return gT||R.some(r=>W.B[r.i.id])?`<div class="card" style="margin:12px 0;border-left:4px solid var(--good,#16a34a)"><b style="color:var(--good,#16a34a)">Tiêu hao trong mức bình thường</b><br><small class="mu">Không nguyên liệu nào cao hơn trung bình các lần kiểm trước quá ${WN_TOL} điểm %.</small></div>`:"";
       return`<div class="card" style="margin:12px 0;border-left:4px solid var(--bad,#dc2626)"><b style="color:var(--bad,#dc2626)">Tiêu hao cao hơn bình thường</b><br><small class="mu">So với trung bình các lần kiểm trước (tối đa ${WN_DAYS} ngày). Kiểm tra đếm kho, định lượng, hao hụt hoặc hàng xuất chưa ghi đơn.</small>${gT&&gT.bad?`<div class="row"><b>Cả quán</b><span style="text-align:right"><b>${wnP(hao/dt*100)}%</b> · TB ${wnP(W.T.avg*100)}% · <b style="color:var(--bad,#dc2626)">${gT.s} điểm</b> <small class="mu">≈ +${fmt(Math.max(0,Math.round(hao-W.T.avg*dt)))}</small></span></div>`:""}${L.map(z=>`<div class="row"><span>${esc(z.r.i.name)}</span><span style="text-align:right"><b>${wnP(z.x.c*100)}%</b> · TB ${wnP(z.bs.avg*100)}% · <b style="color:var(--bad,#dc2626)">${z.g.s} điểm</b> <small class="mu">≈ +${fmt(Math.max(0,Math.round((z.x.c-z.bs.avg)*z.x.rv)))}</small></span></div>`).join("")}</div>`})();
     const IN=S.imp.filter(z=>z.ts>=a&&z.ts<b),tn=IN.reduce((t,z)=>t+z.cost,0),ni=IN.length,svT=R.reduce((t,r)=>t+r.sv,0),pct=dt>0?(hao/dt*100).toLocaleString("vi-VN",{maximumFractionDigits:1}):"",
-    vs=gT?`<span style="color:${gT.c};font-weight:600">${gT.s} điểm</span> so với TB ${wnP(W.T.avg*100)}%`:"",
+    vs=gT?`<span style="color:${gT.c};font-weight:600">${gT.s} điểm${gT.rl?" ("+gT.rl+")":""}</span> so với TB ${wnP(W.T.avg*100)}%`:"",
     ab=r=>{const x=curI(r),bs=W.B[r.i.id];return x&&bs?x.c-bs.avg:-9},
     RS=kSo==="hao"&&kCo?R.slice().sort((p,q)=>q.hv-p.hv):kSo==="bt"&&kCo&&chot?R.slice().sort((p,q)=>ab(q)-ab(p)):R,
     so=`<div class="chips" style="margin:0 0 10px">${[["","Thứ tự kho"],["hao","Tiêu hao nhiều nhất"],["bt","Bất thường trước"]].filter(k=>k[0]==="hao"?kCo:k[0]==="bt"?kCo&&chot:true).map(k=>`<button class="${k[0]===kSo?"on":""}" onclick="kSo='${k[0]}';view()">${k[1]}</button>`).join("")}</div>`;
