@@ -1511,7 +1511,7 @@ function wnBase(a){const lim=dk(a),from=dk(a-WN_DAYS*DAY),rev={};S.sales.forEach
   return{rev,Mi,B,T}}
 /* Gắn nhãn: cur và avg là tỷ lệ tiêu hao/doanh thu (0.5 = 50%) */
 function wnTag(cur,avg){const df=(cur-avg)*100;let c,t,ar;
-  if(df>WN_BAD){c="var(--bad,#dc2626)";t="Bất thường";ar="▲"}else if(df>WN_TOL){c="var(--bad,#dc2626)";t="Cao hơn";ar="▲"}else if(df<-WN_TOL){c="var(--good,#16a34a)";t="Thấp hơn";ar="▼"}else{c="var(--mu)";t="Bình thường";ar=df>0?"▲":df<0?"▼":"="}
+  if(df>WN_BAD){c="var(--bad,#dc2626)";t="Bất thường";ar="▲"}else if(df>WN_TOL){c="var(--bad,#dc2626)";t="Cao hơn";ar="▲"}else if(df<-WN_TOL){c="var(--good,#16a34a)";t="Thấp hơn";ar="▼"}else{c=df>0?"var(--bad,#dc2626)":df<0?"var(--good,#16a34a)":"var(--mu)";t="Bình thường";ar=df>0?"▲":df<0?"▼":"="}
   const rel=avg>0?(cur-avg)/avg*100:null,rl=rel==null||!isFinite(rel)?"":(rel>=0?"tăng ":"giảm ")+wnP(Math.abs(rel),Math.abs(rel)<10?1:0)+"%";
   return{df,rel,rl,a:ar+" "+(rl||(df>0?"+":"")+wnP(df)+" điểm"),c,t,s:`${ar} ${df>0?"+":""}${wnP(df)}`,bad:df>WN_TOL}}
 function vStock(){
