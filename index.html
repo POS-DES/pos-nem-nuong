@@ -63,11 +63,11 @@ table{width:100%;border-collapse:collapse}td,th{padding:8px;text-align:left;bord
 .low{color:#dc2626;font-weight:700}
 .impr{display:grid;grid-template-columns:minmax(0,1.6fr) 130px 120px 130px 40px;align-items:center;gap:8px;padding:11px 16px;border-top:1px solid var(--bd)}.impr .in{display:flex;flex-direction:column;gap:2px;min-width:0}.impr .in b{font-size:15px}.impr .iq{font-weight:700;font-size:16px;text-align:right;font-variant-numeric:tabular-nums}.impr .iq span{font-weight:500;color:var(--mu);font-size:13px}.impr .ig{text-align:right;color:var(--mu);font-size:13px}.impr .it{text-align:right;font-weight:700;font-size:15px}.impr.imph{padding:7px 16px;border-top:1px solid var(--bd);font-size:11.5px;text-transform:uppercase;letter-spacing:.04em;color:var(--mu)}.impr.imph div:nth-child(n+2){text-align:right}@media(max-width:700px){.impr{grid-template-columns:minmax(0,1fr) auto 40px;grid-template-areas:"in it ed" "iq ig ed";row-gap:4px}.impr .in{grid-area:in}.impr .it{grid-area:it}.impr .iq{grid-area:iq;text-align:left;font-size:15px}.impr .ig{grid-area:ig}.impr>:last-child{grid-area:ed}.impr.imph{display:none}}.impr.np{grid-template-columns:minmax(0,1.6fr) 150px 40px}@media(max-width:700px){.impr.np{grid-template-columns:minmax(0,1fr) auto 40px;grid-template-areas:"in iq ed"}.impr.np .iq{text-align:right}}
 .sm-card{background:var(--bg);border:1px solid var(--bd)}.sm-h{font-size:15px}
-.chips.av{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;overflow:visible;padding:0;margin:0}
-.chips.av button{border-radius:12px;padding:10px 6px;min-height:58px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font-weight:700;font-size:15px;white-space:normal;line-height:1.2;background:var(--card);color:var(--tx);border:1.5px solid var(--bd)}
-.chips.av button small{font-weight:500;font-size:12px;color:var(--mu)}
-.chips.av button.p{background:var(--pr);color:#fff;border-color:var(--pr);box-shadow:0 2px 10px var(--ring)}
-.chips.av button.p small{color:#fff;opacity:.95}
+.chips.avg{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;overflow:visible;padding:0;margin:0}
+.chips.avg button{border-radius:12px;padding:10px 6px;min-height:58px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font-weight:700;font-size:15px;white-space:normal;line-height:1.2;background:var(--card);color:var(--tx);border:1.5px solid var(--bd)}
+.chips.avg button small{font-weight:500;font-size:12px;color:var(--mu)}
+.chips.avg button.p{background:var(--pr);color:#fff;border-color:var(--pr);box-shadow:0 2px 10px var(--ring)}
+.chips.avg button.p small{color:#fff;opacity:.95}
 #av_sum{margin-top:12px;padding:9px 12px;border-radius:10px;background:var(--card);border:1px solid var(--bd);font-size:14px;font-weight:600;color:var(--tx)}
 #av_box{background:var(--card);border:1px solid var(--bd);border-radius:10px;padding:10px 12px}
 #av_view .sm-h{margin-bottom:6px}
@@ -888,16 +888,16 @@ function schModal(){const m=schm,s=S.staff.find(x=>x.id===m.sid)||{name:"?"},q=m
   pre=Object.keys(AVP).some(x=>m.a===AVP[x][0]&&m.b===AVP[x][1]),cust=!m.any&&!m.off&&!!(m.a||m.b)&&!pre,wd=["Chủ nhật","Thứ 2","Thứ 3","Thứ 4","Thứ 5","Thứ 6","Thứ 7"][new Date(+q[0],+q[1]-1,+q[2]).getDay()],
   wrap='style="flex-wrap:wrap;overflow:visible;padding:0;margin:0"',
   avail0=ro?`<div class="sm-card"><div class="sm-h">Nhân viên đã đăng ký</div><div style="font-weight:700;font-size:16px${m.off?";color:#dc2626":""}">${av}</div></div>`
-   :`<div class="sm-card"><div class="sm-h">${other?"Giờ rảnh của "+esc(s.name)+" <small class=\"mu\" style=\"font-weight:400\">(bạn có thể chỉnh)</small>":"Bạn rảnh giờ nào?"}</div><div class="chips av">${bt("av_all","Cả ngày"+hn("Rảnh suốt ngày"),"schAv('all')")}${bt("av_s","Sáng"+sb("s"),"schAv('s')")}${bt("av_c","Chiều"+sb("c"),"schAv('c')")}${bt("av_t","Tối"+sb("t"),"schAv('t')")}${bt("av_off","Bận"+hn("Không làm được"),"schAv('off')")}${bt("av_x","Giờ khác"+hn("Tự nhập giờ"),"schX()")}</div><div id="av_sum">${schAvSum(m)}</div><div id="av_box" class="r2" style="${cust?"":"display:none;"}align-items:center;margin-top:10px">Từ <input id="av_a" value="${esc(m.a?fm12(m.a):"")}" placeholder="12h" oninput="schAvIn()" style="width:80px"> đến <input id="av_b" value="${esc(m.b?fm12(m.b):"")}" placeholder="23h" oninput="schAvIn()" style="width:80px"></div></div>`,
+   :`<div class="sm-card"><div class="sm-h">${other?"Giờ rảnh của "+esc(s.name)+" <small class=\"mu\" style=\"font-weight:400\">(bạn có thể chỉnh)</small>":"Bạn rảnh giờ nào?"}</div><div class="chips avg">${bt("av_all","Cả ngày"+hn("Rảnh suốt ngày"),"schAv('all')")}${bt("av_s","Sáng"+sb("s"),"schAv('s')")}${bt("av_c","Chiều"+sb("c"),"schAv('c')")}${bt("av_t","Tối"+sb("t"),"schAv('t')")}${bt("av_off","Bận"+hn("Không làm được"),"schAv('off')")}${bt("av_x","Giờ khác"+hn("Tự nhập giờ"),"schX()")}</div><div id="av_sum">${schAvSum(m)}</div><div id="av_box" class="avx" style="${cust?"":"display:none;"}">Từ <input id="av_a" value="${esc(m.a?fm12(m.a):"")}" placeholder="12h" oninput="schAvIn()"> đến <input id="av_b" value="${esc(m.b?fm12(m.b):"")}" placeholder="23h" oninput="schAvIn()"></div></div>`,
   rk=Object.keys(AVP).find(x=>m.a===AVP[x][0]&&m.b===AVP[x][1]),reg1=m.any||m.off||!!(m.a&&m.b),
   avTxt=m.off?esc(s.name)+" báo bận":m.any?esc(s.name)+" rảnh: <b>cả ngày</b>":(m.a&&m.b)?esc(s.name)+" rảnh: <b>"+(rk?AVN[rk]+" · ":"")+fm12(m.a)+" – "+fm12(m.b)+"</b>":esc(s.name)+" chưa đăng ký giờ rảnh",
   avail=other?`<div class="sm-card" id="av_view"><div class="sm-h">Giờ rảnh nhân viên đăng ký</div><div style="font-size:16px${m.off?";color:#dc2626":""}">${avTxt}</div><small class="mu" style="display:block;margin:6px 0 10px">Nhân viên tự đăng ký, bạn chỉ cần xếp ca bên dưới.</small><button type="button" style="font-size:13px;padding:6px 12px" onclick="document.getElementById('av_edit').style.display='';this.style.display='none'">${reg1?"Chỉnh giúp nhân viên":"Điền giúp nhân viên"}</button></div><div id="av_edit" style="display:none">${avail0}</div>`:avail0,
   info=!as&&m.sh.some(c=>c.h>0)?`<div class="sm-card"><div class="sm-h">Ca được xếp</div>${m.sh.filter(c=>c.h>0).map(c=>{const rt=schRate(s.id,c),w=rt!=null?rt:(s.wage||0),ok=schRateOk(s.id);return `<div class="sm-shift"${rt!=null?' style="border:1.5px solid #3b82f6"':""}><b>${c.s?fm12(c.s)+"–"+endT(c.s,c.h).replace(" (hôm sau)",""):"Ca"}</b> · ${c.h} giờ${rt!=null?` <span class="pill" style="background:color-mix(in srgb,#2563eb 20%,var(--card));color:#3b82f6">Lương riêng</span>`:""}${ok&&w>0?`<div style="margin-top:4px;color:${rt!=null?"#3b82f6":"var(--mu)"};font-weight:${rt!=null?700:500}">${fmt(w)}/giờ → ${fmt(Math.round(w*c.h))}</div>`:""}</div>`}).join("")}</div>`:"",
   shifts=as?`<div class="sm-card"><div class="sm-h">${other?"Xếp ca cho "+esc(s.name):"Xếp ca"}</div>${m.sh.map((c,i)=>`<div class="sm-shift" style="${schRate(s.id,c)!=null?"border:1.5px solid #3b82f6;":""}"><div class="bar" style="margin:0 0 8px"><b>Ca ${i+1}</b>${schRate(s.id,c)!=null?` <span class="pill" style="background:color-mix(in srgb,#2563eb 20%,var(--card));color:#3b82f6">Lương riêng</span>`:""}${i?`<button type="button" class="gi d r" aria-label="Xóa ca ${i+1}" onclick="schRmSh(${i})"><span class="ic">${trashI}</span></button>`:""}</div>
-   ${schRate(s.id,c)!=null?`<div style="margin:0 0 8px;font-weight:600;color:#3b82f6">${c.h} giờ × ${fmt(schRate(s.id,c))}/giờ = ${fmt(Math.round(c.h*schRate(s.id,c)))}</div><small class="mu" style="display:block;margin:-4px 0 8px">Mức này đặt ở mục "Ca làm và lương giờ riêng theo ngày" (Chấm công, Bảng lương). Muốn đổi giờ hoặc mức lương của ca này, hãy sửa ở mục đó.</small>`:""}<div class="r2" style="flex-wrap:nowrap;gap:8px"><label class="mf" style="flex:1;min-width:0"><span>Bắt đầu</span><input id="sh_s${i}" value="${esc(c.s?fm12(c.s):"")}" placeholder="18h" oninput="schPv()"></label><label class="mf" style="flex:1;min-width:0"><span>Kết thúc</span><input id="sh_e${i}" value="${esc(c.s&&c.h>0?endT(c.s,c.h).replace(" (hôm sau)",""):"")}" placeholder="12h" oninput="schPv()"></label><label class="mf" style="flex:1;min-width:0"><span>Số giờ</span><input id="sh_h${i}" readonly tabindex="-1" value="${c.h}" placeholder="tự tính" style="background:transparent;border-style:dashed"></label></div>
+   ${schRate(s.id,c)!=null?`<div style="margin:0 0 8px;font-weight:600;color:#3b82f6">${c.h} giờ × ${fmt(schRate(s.id,c))}/giờ = ${fmt(Math.round(c.h*schRate(s.id,c)))}</div><small class="mu" style="display:block;margin:-4px 0 8px">Mức này đặt ở mục "Ca làm và lương giờ riêng theo ngày" (Chấm công, Bảng lương). Muốn đổi giờ hoặc mức lương của ca này, hãy sửa ở mục đó.</small>`:""}<div class="shr"><label class="mf"><span>Bắt đầu</span><input id="sh_s${i}" value="${esc(c.s?fm12(c.s):"")}" placeholder="18h" oninput="schPv()"></label><label class="mf"><span>Kết thúc</span><input id="sh_e${i}" value="${esc(c.s&&c.h>0?endT(c.s,c.h).replace(" (hôm sau)",""):"")}" placeholder="12h" oninput="schPv()"></label><label class="mf"><span>Số giờ</span><input id="sh_h${i}" readonly tabindex="-1" value="${c.h}" placeholder="tự tính" style="background:transparent;border-style:dashed"></label></div>
    
    </div>`).join("")}<button type="button" onclick="schAddSh()" style="width:100%;border-style:dashed;margin-top:10px">+ Thêm ca nữa</button></div>`:"";
-  return `<div class="mo" onclick="if(event.target===this){${cl}}"><div class="md" style="max-width:480px"><div class="mh"><div><b>${esc(s.name)}</b><br><small class="mu">${wd}, ${q[2]}/${q[1]}/${q[0]}</small></div><button class="mx" onclick="${cl}">×</button></div><div class="mb" style="gap:12px">${avail}${info}${shifts}<small id="sc_p" style="display:block;color:#d97706"></small><small id="sc_e" style="color:#dc2626;display:block"></small></div><div class="mfoot">${m.has?`<button style="margin-right:auto;color:#dc2626" onclick="schDel()">Xóa</button>`:""}<button onclick="${cl}">Hủy</button><button class="p" onclick="schSave()">Lưu</button></div></div></div>`}
+  return `<div class="mo" onclick="if(event.target===this){${cl}}"><div class="md sch" role="dialog" aria-modal="true"><div class="mh"><div><b>${esc(s.name)}</b><br><small class="mu">${wd}, ${q[2]}/${q[1]}/${q[0]}</small></div><button class="mx" onclick="${cl}">×</button></div><div class="mb" style="gap:12px">${avail}${info}${shifts}<small id="sc_p" style="display:block;color:#d97706"></small><small id="sc_e" style="color:#dc2626;display:block"></small></div><div class="mfoot">${m.has?`<button style="margin-right:auto;color:#dc2626" onclick="schDel()">Xóa</button>`:""}<button onclick="${cl}">Hủy</button><button class="p" onclick="schSave()">Lưu</button></div></div></div>`}
 function schX(){const b=$("#av_box");b.style.display=b.style.display==="none"?"":"none"}
 function schAv(t){const m=schm,p=AVP[t];m.any=t==="all";m.off=t==="off";m.a=p?p[0]:"";m.b=p?p[1]:"";$("#av_a").value=m.a?fm12(m.a):"";$("#av_b").value=m.b?fm12(m.b):"";schPv()}
 function schAvIn(){const m=schm;m.any=false;m.off=false;m.a=pTime($("#av_a").value)||"";m.b=pTime($("#av_b").value)||"";schPv()}
@@ -2796,6 +2796,45 @@ html[data-dev=phone] main button,html[data-dev=phone] #msheet button{min-height:
 html[data-dev=phone] input:not([type=checkbox]):not([type=radio]),html[data-dev=phone] select,html[data-dev=phone] textarea{font-size:16px}
 #offb{display:none;position:fixed;left:50%;transform:translateX(-50%);top:calc(env(safe-area-inset-top,0px) + 8px);z-index:200;background:#b45309;color:#fff;padding:8px 14px;border-radius:99px;font-size:13px;font-weight:600;box-shadow:0 4px 16px rgba(0,0,0,.25);max-width:92vw;text-align:center;pointer-events:none}
 </style>
+<style id="schfix">
+/* ===== Modal xếp ca / giờ rảnh: máy tính + điện thoại ===== */
+.md.sch{max-width:520px;max-height:min(88dvh,760px)}
+.md.sch .mh{flex:none}.md.sch .mh b{font-size:17px}
+.md.sch .mx{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;padding:0}
+.md.sch .mb{flex:1 1 auto;min-height:0;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;gap:12px}
+.md.sch .mfoot{flex:none;padding-bottom:max(14px,env(safe-area-inset-bottom,0px))}
+.md.sch .mfoot button{min-height:42px;padding:0 20px;border-radius:10px}
+.md.sch .sm-card{margin:0}
+.md.sch input{min-height:42px;font-size:16px}
+.chips.avg button{min-width:0;overflow-wrap:anywhere}
+.chips.avg button small{display:block;font-size:12px;line-height:1.25;white-space:normal}
+.avx{display:grid;grid-template-columns:auto minmax(0,1fr) auto minmax(0,1fr);align-items:center;gap:8px;margin-top:10px}
+.avx input{width:100%;min-width:0}
+.shr{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.shr .mf{min-width:0}.shr .mf>span{font-size:13px;color:var(--mu);font-weight:600}
+.md.sch .sm-shift .bar{display:flex;align-items:center;gap:8px}
+@media(min-width:701px){
+  .md.sch .mh,.md.sch .mfoot{padding-left:24px;padding-right:24px}.md.sch .mb{padding:18px 24px}
+  .chips.avg button{min-height:62px}
+}
+@media(max-width:700px){
+  .mo:has(.md.sch){align-items:flex-end;padding:0!important}
+  .md.sch{max-width:100%!important;width:100%;max-height:92dvh!important;border-radius:20px 20px 0 0;border-bottom:0;animation:schUp .22s ease-out}
+  .md.sch .mh{position:relative;padding-top:20px}
+  .md.sch .mh::before{content:"";position:absolute;left:50%;top:7px;width:38px;height:4px;margin-left:-19px;border-radius:4px;background:var(--bd)}
+  .md.sch .mfoot{gap:8px}
+  .md.sch .mfoot button.p{flex:1.4}
+  .md.sch .mfoot button:not(.p){flex:1}
+  .md.sch .mfoot button[style*="margin-right"]{margin-right:0!important}
+  .md.sch .sm-card{padding:12px}
+  .chips.avg{gap:6px}.chips.avg button{padding:9px 4px;min-height:56px;font-size:14px}
+  .shr{gap:8px}
+}
+@media(max-width:360px){.chips.avg{grid-template-columns:repeat(2,minmax(0,1fr))}.shr{grid-template-columns:1fr 1fr}.shr .mf:last-child{grid-column:1/-1}}
+@keyframes schUp{from{transform:translateY(24px);opacity:.6}to{transform:none;opacity:1}}
+@media(prefers-reduced-motion:reduce){.md.sch{animation:none}}
+</style>
+
 
 
 <script>document.addEventListener("wheel",function(e){var t=e.target;if(t&&t.tagName==="INPUT"&&t.type==="number"&&document.activeElement===t)t.blur()},{passive:true});</script><script>(function(){var b=document.createElement("div");b.id="offb";b.setAttribute("role","status");b.textContent="Mất kết nối mạng · dữ liệu vẫn lưu trên máy, sẽ đồng bộ lại khi có mạng";document.body.appendChild(b);var up=function(){b.style.display=navigator.onLine?"none":"block"};addEventListener("offline",up);addEventListener("online",function(){up();try{syTick(true)}catch(e){}});up()})();</script></body></html>
