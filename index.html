@@ -1,4 +1,4 @@
-<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#f2500a"><link rel="manifest" href="manifest.webmanifest"><link rel="icon" type="image/png" href="icon-192.png"><link rel="apple-touch-icon" href="apple-touch-icon.png"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="POS Quán Ăn"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}input[type=number]{-moz-appearance:textfield;appearance:textfield}input[type=number]::-webkit-outer-spin-button,input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="app-build" content="2026-11-18.8"><meta name="theme-color" content="#f2500a"><link rel="manifest" href="manifest.webmanifest"><link rel="icon" type="image/png" href="icon-192.png"><link rel="apple-touch-icon" href="apple-touch-icon.png"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="POS Quán Ăn"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}input[type=number]{-moz-appearance:textfield;appearance:textfield}input[type=number]::-webkit-outer-spin-button,input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
 tr[data-ed]:hover td{background:var(--hov)}
 </style></head><body>
 <title>POS Quán Ăn</title>
@@ -2839,4 +2839,109 @@ html[data-dev=phone] input:not([type=checkbox]):not([type=radio]),html[data-dev=
 
 
 
-<script>document.addEventListener("wheel",function(e){var t=e.target;if(t&&t.tagName==="INPUT"&&t.type==="number"&&document.activeElement===t)t.blur()},{passive:true});</script><script>(function(){var b=document.createElement("div");b.id="offb";b.setAttribute("role","status");b.textContent="Mất kết nối mạng · dữ liệu vẫn lưu trên máy, sẽ đồng bộ lại khi có mạng";document.body.appendChild(b);var up=function(){b.style.display=navigator.onLine?"none":"block"};addEventListener("offline",up);addEventListener("online",function(){up();try{syTick(true)}catch(e){}});up()})();</script></body></html>
+<style id="adapt">
+/* ===== Responsive polish ===== */
+.seg{max-width:100%;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+.seg::-webkit-scrollbar{display:none}
+.seg button,.chips button{flex:none;white-space:nowrap}
+.chips{scrollbar-width:none;-webkit-overflow-scrolling:touch}
+.chips::-webkit-scrollbar{display:none}
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
+img,svg,video,canvas{max-width:100%}
+.card,.bar,.grid>*{min-width:0}
+.card h3,.card b{overflow-wrap:anywhere}
+table{max-width:100%}
+.tblw,.card:has(>table){overflow-x:auto;-webkit-overflow-scrolling:touch}
+@media (max-width:700px){
+ body{overscroll-behavior-y:none}
+ input,select,textarea{font-size:16px}
+ button,.seg button,.chips button{min-height:38px}
+ .bar{flex-wrap:wrap;gap:8px}
+ .seg{display:flex;width:100%}
+ .seg button{padding:8px 14px}
+ .ov,.mo{align-items:flex-end;padding:0}
+ .ov>*,.mo>*{max-width:100%;width:100%;border-bottom-left-radius:0;border-bottom-right-radius:0;max-height:92vh;max-height:92dvh;overflow:auto;padding-bottom:max(16px,env(safe-area-inset-bottom))}
+}
+@media (min-width:701px) and (max-width:1100px){
+ .grid{grid-template-columns:repeat(auto-fill,minmax(150px,1fr))}
+}
+@media (min-width:1600px){#app{max-width:1500px;margin-inline:auto}}
+/* ===== iOS-style motion ===== */
+:root{--ios:cubic-bezier(.32,.72,0,1)}
+@keyframes iosFade{from{opacity:0}to{opacity:1}}
+@keyframes iosPop{from{opacity:0;transform:scale(.94) translateY(8px)}to{opacity:1;transform:none}}
+@keyframes iosUp{from{transform:translateY(100%)}to{transform:none}}
+.ov,.mo{animation:iosFade .25s var(--ios)}
+.ov>*,.mo>*{animation:iosPop .38s var(--ios)}
+@media (max-width:700px){.ov>*,.mo>*{animation:iosUp .45s var(--ios)}}
+button,.card.tb,.seg button,#mbar a{transition:transform .18s var(--ios),background-color .2s,opacity .2s}
+.touch button:active,.touch .card.tb:active,.touch #mbar a:active{transform:scale(.96);opacity:.85}
+#app{will-change:auto}
+@media (prefers-reduced-motion:reduce){.ov,.mo,.ov>*,.mo>*{animation:none!important}#app{animation:none!important}}
+</style>
+<script id="ios">
+(function(){
+  var RM=matchMedia("(prefers-reduced-motion:reduce)").matches,EASE="cubic-bezier(.32,.72,0,1)";
+  var lastKey=null,lastDepth=0;
+  function g(n){try{return(0,eval)(n)}catch(e){return undefined}}
+  function state(){
+    var pg=g("PG")||"ban",d=0,sub="";
+    if(pg==="ban"||/^ban/.test(pg)){
+      var c=g("cur"),o=null;try{o=c!=null&&c!==false?ordN(c):null}catch(e){}
+      if(o){d=1;if(g("ck")){d=2}if(g("qrMode")){d=3}}
+    }
+    return{key:pg+"|"+d,pg:pg,d:d}
+  }
+  function anim(el,frames,dur){
+    if(!el||!el.animate||RM)return;
+    try{el.animate(frames,{duration:dur,easing:EASE,fill:"none"})}catch(e){}
+  }
+  function run(prev,now){
+    var app=document.getElementById("app");if(!app)return;
+    if(prev.pg===now.pg){
+      if(now.d>prev.d)anim(app,[{transform:"translateX(38%)",opacity:.2},{transform:"none",opacity:1}],420);
+      else if(now.d<prev.d)anim(app,[{transform:"translateX(-22%)",opacity:.3},{transform:"none",opacity:1}],420);
+    }else{
+      anim(app,[{opacity:0,transform:"translateY(10px) scale(.992)"},{opacity:1,transform:"none"}],320);
+    }
+  }
+  var v=window.view;
+  window.view=function(){
+    var soft=false;try{soft=!!g("SOFT")}catch(e){}
+    var r=v.apply(this,arguments);
+    try{
+      var s=state();
+      if(lastKey!==null&&s.key!==lastKey&&!soft)run({pg:lastKey.split("|")[0],d:lastDepth},s);
+      lastKey=s.key;lastDepth=s.d;
+    }catch(e){}
+    return r;
+  };
+  /* vuốt từ mép trái để quay lại (giống iPhone) */
+  var sx=0,sy=0,st=0,on=false;
+  document.addEventListener("touchstart",function(e){
+    var t=e.touches[0];on=e.touches.length===1&&t.clientX<24;sx=t.clientX;sy=t.clientY;st=Date.now();
+  },{passive:true});
+  document.addEventListener("touchend",function(e){
+    if(!on)return;on=false;
+    var t=e.changedTouches[0],dx=t.clientX-sx,dy=Math.abs(t.clientY-sy);
+    if(dx<70||dy>60||Date.now()-st>700)return;
+    if(document.querySelector(".ov,.mo")){var m=document.querySelector(".ov,.mo");try{m.click()}catch(_){}return}
+    var s=state();
+    if(s.d>0&&typeof window.back==="function"){window.back()}
+    else if(history.length>1&&s.d===0&&false){history.back()}
+  },{passive:true});
+})();
+</script>
+<script>document.addEventListener("wheel",function(e){var t=e.target;if(t&&t.tagName==="INPUT"&&t.type==="number"&&document.activeElement===t)t.blur()},{passive:true});</script><script>(function(){var b=document.createElement("div");b.id="offb";b.setAttribute("role","status");b.textContent="Mất kết nối mạng · dữ liệu vẫn lưu trên máy, sẽ đồng bộ lại khi có mạng";document.body.appendChild(b);var up=function(){b.style.display=navigator.onLine?"none":"block"};addEventListener("offline",up);addEventListener("online",function(){up();try{syTick(true)}catch(e){}});up()})();</script><script>
+(function(){
+  var BUILD=(document.querySelector('meta[name="app-build"]')||{}).content||"";
+  var tag=document.createElement("div");tag.textContent="v"+BUILD;tag.style.cssText="position:fixed;right:8px;bottom:3px;font-size:10px;opacity:.45;pointer-events:none;z-index:5";document.body.appendChild(tag);
+  async function refresh(){try{if(navigator.serviceWorker){var rs=await navigator.serviceWorker.getRegistrations();await Promise.all(rs.map(function(r){return r.unregister()}))}if(window.caches){var ks=await caches.keys();await Promise.all(ks.map(function(k){return caches.delete(k)}))}}catch(e){}location.reload()}
+  window.updNow=refresh;
+  function banner(){if(document.getElementById("updb"))return;var b=document.createElement("div");b.id="updb";b.style.cssText="position:fixed;left:50%;transform:translateX(-50%);bottom:16px;z-index:300;background:#18181b;color:#fff;padding:10px 14px;border-radius:12px;box-shadow:0 8px 24px rgba(0,0,0,.35);font:14px system-ui,sans-serif;display:flex;gap:12px;align-items:center";b.innerHTML='<span>Có phiên bản mới của phần mềm</span><button style="background:#f2500a;color:#fff;border:0;border-radius:8px;padding:6px 12px;font:inherit;cursor:pointer">Cập nhật ngay</button>';b.querySelector("button").onclick=refresh;document.body.appendChild(b)}
+  async function check(){if(!/^https?:$/.test(location.protocol)||/claude|anthropic/i.test(location.hostname))return;
+    try{var r=await fetch(location.pathname+"?_="+Date.now(),{cache:"no-store"}),t=await r.text(),m=/name="app-build" content="([^"]+)"/.exec(t);if(m&&m[1]&&m[1]!==BUILD)banner()}catch(e){}}
+  setTimeout(check,3000);setInterval(check,3e5);document.addEventListener("visibilitychange",function(){if(!document.hidden)check()});
+})();
+</script>
+</body></html>
