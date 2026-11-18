@@ -2877,59 +2877,217 @@ table{max-width:100%}
 button,.card.tb,.seg button,#mbar a{transition:transform .18s var(--ios),background-color .2s,opacity .2s}
 .touch button:active,.touch .card.tb:active,.touch #mbar a:active{transform:scale(.96);opacity:.85}
 #app{will-change:auto}
+/* ===== Hiện đại / native feel ===== */
+body{font-variant-numeric:tabular-nums;overscroll-behavior:none}
+button,.seg button,#mbar a{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+:focus-visible{outline:2px solid var(--ac,#f2500a);outline-offset:2px}
+@media (pointer:coarse){button,.seg button,.chips button{min-height:40px}}
+@media (max-width:700px){
+ .ov>.md::before,.mo>.md::before{content:"";display:block;flex:none;width:40px;height:5px;border-radius:3px;background:var(--bd,#ccc);margin:-6px auto 12px}
+ .ov>*,.mo>*{overscroll-behavior:contain}
+}
 @media (prefers-reduced-motion:reduce){.ov,.mo,.ov>*,.mo>*{animation:none!important}#app{animation:none!important}}
 </style>
 <script id="ios">
 (function(){
-  var RM=matchMedia("(prefers-reduced-motion:reduce)").matches,EASE="cubic-bezier(.32,.72,0,1)";
-  var lastKey=null,lastDepth=0;
-  function g(n){try{return(0,eval)(n)}catch(e){return undefined}}
+  "use strict";
+  var EASE="cubic-bezier(.32,.72,0,1)",D=380,PAR="-26%",SH="-10px 0 28px rgba(0,0,0,.20)";
+  var RM=matchMedia("(prefers-reduced-motion:reduce)");
+  var lastKey=null,lastDepth=0,busy=false;
+  function g(n){try{return(0,eval)(n)}catch(e){}}
+  function $1(s){return document.querySelector(s)}
+  function app(){return document.getElementById("app")}
+  function buzz(n){try{navigator.vibrate&&navigator.vibrate(n)}catch(e){}}
+  function bg(){return getComputedStyle(document.body).backgroundColor||"#fff"}
   function state(){
-    var pg=g("PG")||"ban",d=0,sub="";
-    if(pg==="ban"||/^ban/.test(pg)){
-      var c=g("cur"),o=null;try{o=c!=null&&c!==false?ordN(c):null}catch(e){}
-      if(o){d=1;if(g("ck")){d=2}if(g("qrMode")){d=3}}
+    var pg=g("PG")||"ban",d=0;
+    if(pg==="ban"){
+      var c=g("cur"),o=null;
+      try{o=(c!=null&&c!==false)?ordN(c):null}catch(e){}
+      if(o){d=1;if(g("ck"))d=2;if(g("qrMode"))d=3}
     }
     return{key:pg+"|"+d,pg:pg,d:d}
   }
-  function anim(el,frames,dur){
-    if(!el||!el.animate||RM)return;
-    try{el.animate(frames,{duration:dur,easing:EASE,fill:"none"})}catch(e){}
+  function A(el,frames,dur,opt){
+    if(!el||!el.animate)return null;
+    try{return el.animate(frames,Object.assign({duration:dur,easing:EASE},opt||{}))}catch(e){return null}
   }
-  function run(prev,now){
-    var app=document.getElementById("app");if(!app)return;
-    if(prev.pg===now.pg){
-      if(now.d>prev.d)anim(app,[{transform:"translateX(38%)",opacity:.2},{transform:"none",opacity:1}],420);
-      else if(now.d<prev.d)anim(app,[{transform:"translateX(-22%)",opacity:.3},{transform:"none",opacity:1}],420);
-    }else{
-      anim(app,[{opacity:0,transform:"translateY(10px) scale(.992)"},{opacity:1,transform:"none"}],320);
+  /* Tạo "lớp ảnh" của trang hiện tại. Phần tử fixed/sticky được chuyển thành absolute
+     tại đúng vị trí đang thấy, nên khi trượt thanh dưới/thanh đầu không bị nhảy. */
+  function layer(a,z){
+    var r=a.getBoundingClientRect(),c=a.cloneNode(true),w=document.createElement("div");
+    var src=a.querySelectorAll("*"),dst=c.querySelectorAll("*"),i,cs,b,d;
+    for(i=0;i<src.length;i++){
+      cs=getComputedStyle(src[i]);
+      if(cs.position==="fixed"||cs.position==="sticky"){
+        b=src[i].getBoundingClientRect();d=dst[i];
+        d.style.inset="auto";d.style.position="absolute";d.style.margin="0";d.style.transform="none";
+        d.style.left=(b.left-r.left)+"px";d.style.top=(b.top-r.top)+"px";
+        d.style.width=b.width+"px";d.style.height=b.height+"px";
+      }
     }
+    c.querySelectorAll("[id]").forEach(function(e){e.removeAttribute("id")});
+    c.removeAttribute("id");c.setAttribute("aria-hidden","true");c.setAttribute("inert","");
+    c.style.cssText+=";position:absolute;margin:0;box-sizing:border-box;left:0;top:"+r.top+"px;width:"+r.width+"px;max-width:none;background:"+bg()+";pointer-events:none";
+    w.className="iosnap";
+    w.style.cssText="position:fixed;top:0;height:100%;left:"+r.left+"px;width:"+r.width+"px;overflow:hidden;pointer-events:none;z-index:"+z;
+    w.appendChild(c);document.body.appendChild(w);
+    return {w:w,c:c};
   }
+  function shade(L,o){
+    var d=document.createElement("div");
+    d.style.cssText="position:absolute;inset:0;background:#000;pointer-events:none;opacity:"+o;
+    L.w.appendChild(d);L.d=d;return d;
+  }
+  function clearAll(){
+    document.querySelectorAll(".iosnap").forEach(function(n){n.remove()});
+    var a=app();if(a)a.style.visibility="";
+  }
+  function finish(ls){
+    var done=false;
+    function f(){if(done)return;done=true;ls.forEach(function(L){L&&L.w&&L.w.remove()});var a=app();if(a)a.style.visibility=""}
+    return f;
+  }
+  function push(a,oldL){
+    var nl=layer(a,22);oldL.w.style.zIndex=21;a.style.visibility="hidden";
+    A(oldL.c,[{transform:"translate3d(0,0,0)"},{transform:"translate3d("+PAR+",0,0)"}],D,{fill:"forwards"});
+    var dm=shade(oldL,0);dm.style.zIndex=5;A(dm,[{opacity:0},{opacity:.14}],D,{fill:"forwards"});
+    var an=A(nl.c,[{transform:"translate3d(100%,0,0)",boxShadow:SH},{transform:"translate3d(0,0,0)",boxShadow:SH}],D,{fill:"forwards"});
+    var f=finish([oldL,nl]);if(an)an.onfinish=f;else f();setTimeout(f,D+150);
+  }
+  function pop(a,oldL){
+    var nl=layer(a,21);oldL.w.style.zIndex=22;a.style.visibility="hidden";
+    var dm=shade(nl,.14);A(dm,[{opacity:.14},{opacity:0}],D,{fill:"forwards"});
+    A(nl.c,[{transform:"translate3d("+PAR+",0,0)"},{transform:"translate3d(0,0,0)"}],D,{fill:"forwards"});
+    var an=A(oldL.c,[{transform:"translate3d(0,0,0)",boxShadow:SH},{transform:"translate3d(100%,0,0)",boxShadow:SH}],D,{fill:"forwards"});
+    var f=finish([oldL,nl]);if(an)an.onfinish=f;else f();setTimeout(f,D+150);
+  }
+  function fade(a){A(a,[{opacity:.4},{opacity:1}],260,{easing:"ease-out"})}
+
   var v=window.view;
   window.view=function(){
-    var soft=false;try{soft=!!g("SOFT")}catch(e){}
+    var a=app(),s=state(),soft=false,oldL=null,mode=null;
+    try{soft=!!g("SOFT")}catch(e){}
+    var changed=lastKey!==null&&s.key!==lastKey&&!soft&&!window.__noAnim&&!RM.matches&&!busy;
+    if(changed&&a){
+      clearAll();
+      mode="fade";/* chỉ mờ dần nhẹ: không trượt, không gây chóng mặt, không làm nhảy thanh cố định */
+    }
     var r=v.apply(this,arguments);
     try{
-      var s=state();
-      if(lastKey!==null&&s.key!==lastKey&&!soft)run({pg:lastKey.split("|")[0],d:lastDepth},s);
-      lastKey=s.key;lastDepth=s.d;
-    }catch(e){}
+      a=app();
+      if(a&&mode){
+        if(mode==="fade")fade(a);
+        else if(oldL){mode==="push"?push(a,oldL):pop(a,oldL)}
+      }
+    }catch(e){clearAll()}
+    lastKey=s.key;lastDepth=s.d;
     return r;
   };
-  /* vuốt từ mép trái để quay lại (giống iPhone) */
-  var sx=0,sy=0,st=0,on=false;
+
+  /* ===== Vuốt mép trái để quay lại, bám theo ngón tay ===== */
+  var dr=null;
+  function modalOpen(){return !!$1(".ov,.mo")}
   document.addEventListener("touchstart",function(e){
-    var t=e.touches[0];on=e.touches.length===1&&t.clientX<24;sx=t.clientX;sy=t.clientY;st=Date.now();
+    dr=null;
+    if(e.touches.length!==1||busy||modalOpen())return;
+    var t=e.touches[0];
+    if(t.clientX>22||state().d===0)return;
+    dr={x:t.clientX,y:t.clientY,t:Date.now(),dx:0,lock:false,w:innerWidth};
   },{passive:true});
-  document.addEventListener("touchend",function(e){
-    if(!on)return;on=false;
-    var t=e.changedTouches[0],dx=t.clientX-sx,dy=Math.abs(t.clientY-sy);
-    if(dx<70||dy>60||Date.now()-st>700)return;
-    if(document.querySelector(".ov,.mo")){var m=document.querySelector(".ov,.mo");try{m.click()}catch(_){}return}
-    var s=state();
-    if(s.d>0&&typeof window.back==="function"){window.back()}
-    else if(history.length>1&&s.d===0&&false){history.back()}
+  document.addEventListener("touchmove",function(e){
+    if(!dr)return;
+    var t=e.touches[0],dx=t.clientX-dr.x,dy=t.clientY-dr.y;
+    if(!dr.lock){
+      if(Math.abs(dy)>10&&Math.abs(dy)>Math.abs(dx)){dr=null;return}
+      if(dx>8){
+        var a=app();if(!a){dr=null;return}
+        clearAll();dr.L=layer(a,22);a.style.visibility="hidden";dr.L.c.style.boxShadow=SH;
+        dr.dm=document.createElement("div");dr.dm.className="iosnap";
+        dr.dm.style.cssText="position:fixed;inset:0;background:#000;pointer-events:none;z-index:21;opacity:.14";
+        document.body.appendChild(dr.dm);dr.lock=true;
+      }else return;
+    }
+    if(e.cancelable)e.preventDefault();
+    dx=Math.max(0,dx);dr.dx=dx;
+    dr.L.c.style.transition="none";
+    dr.L.c.style.transform="translate3d("+dx+"px,0,0)";
+    dr.dm.style.opacity=String(.14*(1-Math.min(1,dx/dr.w)));
+  },{passive:false});
+  function endDrag(cancel){
+    var d=dr;dr=null;
+    if(!d||!d.lock)return;
+    var dt=Math.max(1,Date.now()-d.t),vel=d.dx/dt;
+    var go=!cancel&&(d.dx>d.w*.35||vel>.5);
+    busy=true;
+    d.L.c.style.transition="transform .26s "+EASE;
+    d.L.c.style.transform="translate3d("+(go?d.w:0)+"px,0,0)";
+    setTimeout(function(){
+      busy=false;
+      if(!go){clearAll();return}
+      buzz(8);
+      window.__noAnim=true;
+      try{window.back()}catch(e){}
+      window.__noAnim=false;
+      var s=state();lastKey=s.key;lastDepth=s.d;
+      var a=app();
+      d.L.w.remove();d.dm.remove();
+      if(a&&!RM.matches){
+        var nl=layer(a,21);a.style.visibility="hidden";
+        var dm=shade(nl,.14);A(dm,[{opacity:.14},{opacity:0}],D-80,{fill:"forwards"});
+        var an=A(nl.c,[{transform:"translate3d("+PAR+",0,0)"},{transform:"translate3d(0,0,0)"}],D-80,{fill:"forwards"});
+        var f=finish([nl]);if(an)an.onfinish=f;else f();setTimeout(f,D+100);
+      }else clearAll();
+    },280);
+  }
+  document.addEventListener("touchend",function(){endDrag(false)},{passive:true});
+  document.addEventListener("touchcancel",function(){endDrag(true)},{passive:true});
+
+  /* ===== Kéo bảng (popup) xuống để đóng ===== */
+  var sh=null;
+  function scrolledInside(el,root){
+    for(;el&&el!==root;el=el.parentElement){if(el.scrollTop>0)return true}
+    return root.scrollTop>0;
+  }
+  document.addEventListener("touchstart",function(e){
+    sh=null;
+    if(e.touches.length!==1||innerWidth>700)return;
+    var el=e.target.closest&&e.target.closest(".ov>*,.mo>*");
+    if(!el||/^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName)||scrolledInside(e.target,el))return;
+    var t=e.touches[0];
+    sh={el:el,ov:el.parentElement,x:t.clientX,y:t.clientY,t:Date.now(),dy:0,lock:false};
   },{passive:true});
+  document.addEventListener("touchmove",function(e){
+    if(!sh)return;
+    var t=e.touches[0],dy=t.clientY-sh.y,dx=t.clientX-sh.x;
+    if(!sh.lock){
+      if(Math.abs(dx)>10&&Math.abs(dx)>Math.abs(dy)){sh=null;return}
+      if(dy>8){sh.lock=true;sh.el.style.animation="none"}
+      else if(dy<-8){sh=null;return}
+      else return;
+    }
+    if(e.cancelable)e.preventDefault();
+    dy=Math.max(0,dy);sh.dy=dy;
+    sh.el.style.transition="none";
+    sh.el.style.transform="translate3d(0,"+dy+"px,0)";
+    sh.ov.style.backgroundColor="rgba(0,0,0,"+(.45*(1-Math.min(1,dy/sh.el.offsetHeight))).toFixed(3)+")";
+  },{passive:false});
+  function endSheet(){
+    var s=sh;sh=null;
+    if(!s||!s.lock)return;
+    var h=s.el.offsetHeight,vel=s.dy/Math.max(1,Date.now()-s.t),close=s.dy>Math.min(140,h*.3)||vel>.6;
+    s.el.style.transition="transform .3s "+EASE;
+    s.el.style.transform="translate3d(0,"+(close?h:0)+"px,0)";
+    s.ov.style.transition="background-color .3s";
+    if(close){buzz(8);setTimeout(function(){try{s.ov.click()}catch(e){}},260)}
+    else s.ov.style.backgroundColor="";
+    setTimeout(function(){
+      s.el.style.transition="";s.el.style.transform="";s.el.style.animation="";
+      s.ov.style.transition="";s.ov.style.backgroundColor="";
+    },close?700:340);
+  }
+  document.addEventListener("touchend",endSheet,{passive:true});
+  document.addEventListener("touchcancel",endSheet,{passive:true});
 })();
 </script>
 <script>document.addEventListener("wheel",function(e){var t=e.target;if(t&&t.tagName==="INPUT"&&t.type==="number"&&document.activeElement===t)t.blur()},{passive:true});</script><script>(function(){var b=document.createElement("div");b.id="offb";b.setAttribute("role","status");b.textContent="Mất kết nối mạng · dữ liệu vẫn lưu trên máy, sẽ đồng bộ lại khi có mạng";document.body.appendChild(b);var up=function(){b.style.display=navigator.onLine?"none":"block"};addEventListener("offline",up);addEventListener("online",function(){up();try{syTick(true)}catch(e){}});up()})();</script><script>
