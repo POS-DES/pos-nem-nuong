@@ -681,12 +681,12 @@ function vOrdersOld(){
   return `<h2 style="margin-top:0">Đơn hàng</h2><h3>Đang mở (${S.orders.filter(o=>o.items.length&&!o.paid).length})</h3><div class="card scroll"><table><tr><th>#</th><th>Bàn</th><th>NV</th><th>Tổng</th><th></th></tr>
   ${S.orders.filter(o=>o.items.length&&!o.paid).map(o=>`<tr><td>#${dnum(o)}</td><td>${o.tid!=null?esc(tbl(o.tid).name):"Mang về · "+esc(o.cust)}</td><td>${esc(o.staff)}</td><td>${fmt(stot(o))}</td><td><button onclick="nav('ban');cur=${o.no};view()">Mở</button></td></tr>`).join("")||`<tr><td colspan="5" class="mu">Không có đơn đang mở.</td></tr>`}</table></div>
   <h3>Đã thanh toán</h3><div class="card scroll"><table><tr><th>#</th><th>Giờ</th><th>Bàn / khách</th><th>NV</th><th>Hình thức</th><th>Tổng</th></tr>
-  ${S.sales.slice().reverse().slice(0,50).map(s=>`<tr style="cursor:pointer" onclick="openSale(${s.no})"><td>#${dnum(s)}</td><td>${new Date(s.ts).toLocaleDateString("vi-VN")} ${tm(s.ts)}</td><td>${esc(s.table)}${s.cust?" · "+esc(s.cust):""}<br><small>${s.items.map(i=>esc(i.name)+" ×"+i.q).join(", ")}</small></td><td>${esc(s.staff)}</td><td>${esc(s.method)}${s.cancel?` <span class="pill">Đã hủy</span>`:""}</td><td>${fmt(s.total)}</td></tr>`).join("")||`<tr><td colspan="6" class="mu">Chưa có đơn.</td></tr>`}</table></div>${vSale()}`;
+  ${salesV().slice().reverse().slice(0,50).map(s=>`<tr style="cursor:pointer" onclick="openSale(${s.no})"><td>#${dnum(s)}</td><td>${new Date(s.ts).toLocaleDateString("vi-VN")} ${tm(s.ts)}</td><td>${esc(s.table)}${s.cust?" · "+esc(s.cust):""}<br><small>${s.items.map(i=>esc(i.name)+" ×"+i.q).join(", ")}</small></td><td>${esc(s.staff)}</td><td>${esc(s.method)}${s.cancel?` <span class="pill">Đã hủy</span>`:""}</td><td>${fmt(s.total)}</td></tr>`).join("")||`<tr><td colspan="6" class="mu">Chưa có đơn.</td></tr>`}</table></div>${vSale()}`;
 }
 
-function openSale(n,f){if(!f&&!can("view"))return;sv=n;cx=false;view()}
+function openSale(n,f){if(!f&&!can("view"))return;const z=S.sales.find(x=>x.no===n);if(cxHid(z))return;sv=n;cx=false;view()}
 function closeSale(){sv=null;cx=false;view()}
-function cancelSale(n){const r=$("#cxr").value.trim(),s=S.sales.find(x=>x.no===n);if(!r||!s||s.cancel||!can("cancel"))return;s.cancel={ts:Date.now(),by:meName(),reason:r};cx=false;save();view()}
+function cancelSale(n){const r=$("#cxr").value.trim(),s=S.sales.find(x=>x.no===n);if(!r||!s||s.cancel||!can("cancel"))return;s.cancel={ts:Date.now(),by:meName(),bid:S.me,role:((S.staff.find(t=>t.id===S.me)||{}).role)||"Chủ quán",reason:r};cx=false;save();view()}
 const PAP={K58:["58mm",210],K80:["80mm",290],A6:["A6",400],A5:["A5",540],A4:["A4",720]};
 function printSale(n){const s=S.sales.find(x=>x.no===n);if(!s||!can("reprint"))return;const t=S.store,pp=PAP[t.paper||"K80"],R=(a,b,bd)=>`<div style="display:flex;justify-content:space-between${bd?";font-weight:700":""}"><span>${a}</span><span>${b}</span></div>`;
   $("#rc").style.width=pp[1]+"px";let g=$("#pgs");if(!g){g=document.createElement("style");g.id="pgs";document.head.appendChild(g)}
@@ -694,7 +694,7 @@ function printSale(n){const s=S.sales.find(x=>x.no===n);if(!s||!can("reprint"))r
   $("#rc").innerHTML=`<div style="text-align:center">${t.hdr?`<div>${esc(t.hdr)}</div>`:""}<b>${esc(t.name)}</b>${t.addr?`<br>${esc(t.addr)}`:""}${t.phone?`<br>ĐT: ${esc(t.phone)}`:""}<br>HÓA ĐƠN #${dnum(s)}${s.code?" · "+s.code:""}<br>${new Date(s.ts).toLocaleString("vi-VN")}</div><hr>${s.items.map(i=>R(i.q+" × "+esc(i.name),fmt(i.price*i.q))).join("")}<hr>${s.pd>0.5?R("Khuyến mãi","-"+fmt(s.pd)):""}${s.md>0.5?R("Giảm giá","-"+fmt(s.md)):""}${s.sv>0.5?R("Phí phục vụ",fmt(s.sv)):""}${s.vat>0.5?R("VAT",fmt(s.vat)):""}${s.ship>0.5?R("Phụ phí ship"+(s.km?" ("+s.km+" km)":""),fmt(s.ship)):""}${R("TỔNG",fmt(s.total),1)}<div>${esc(s.method)}${s.cancel?" · ĐÃ HỦY":""}</div><div style="text-align:center;margin-top:6px">${t.ftr?esc(t.ftr):"Cảm ơn quý khách!"}${t.wifi?`<br>Wifi: ${esc(t.wifi)}`:""}</div>`;
   window.print()}
 function vSale(){
-  const s=sv&&S.sales.find(x=>x.no===sv);if(!s)return"";
+  const s=sv&&S.sales.find(x=>x.no===sv);if(!s||cxHid(s))return"";
   const sub=s.sub!=null?s.sub:s.items.reduce((a,i)=>a+i.price*i.q,0),dis=sub-s.total,fm=t=>tm(t)+" "+new Date(t).toLocaleDateString("vi-VN");
   return `<div class="ov" onclick="if(event.target===this)closeSale()"><div class="md"><div class="top" style="padding:16px;border-bottom:1px solid var(--bd)"><b>Đơn #${dnum(s)} · ${s.type==="ship"||s.table==="Mang về"?"Ship ngoài":esc(s.table)}${s.code?" · "+s.code:""}</b><button onclick="closeSale()">✕</button></div>
   <div style="padding:16px">
@@ -717,7 +717,7 @@ function omore(){OLIM+=100;const r=olist();$("#ol").innerHTML=r.html}
 function olist(){
   const L=[];
   S.orders.filter(o=>o.items.length&&!o.paid).forEach(o=>L.push({k:"o",no:o.no,dn:dnum(o),ot:o.ts||Date.now(),ts:o.ts||Date.now(),title:o.tid!=null?(tbl(o.tid)||{name:"Bàn"}).name:"Ship ngoài",meta:["Mở "+tm(o.ts||Date.now()),o.cust,o.staff],st:"o",ty:o.tid!=null?"t":"s",sf:[o.staff],me:"",total:stot(o),txt:o.items.map(i=>(menuOf(i.id)||{}).name).join(" ")}));
-  S.sales.forEach(s=>L.push({k:"s",no:s.no,dn:dnum(s),ot:s.opened||s.ts,ts:s.ts,title:s.type==="ship"||s.table==="Mang về"?"Ship ngoài":s.table,meta:[s.code,(s.opened?tm(s.opened)+" → ":"")+tm(s.ts),s.payBy||s.staff],st:s.cancel?"c":"p",ty:s.type==="ship"||s.table==="Mang về"?"s":"t",sf:[s.staff,s.payBy],me:s.method||"",lb:s.cancel?"":s.method,pc:s.cancel?"":s.method==="Tiền mặt"?"pg":"pb",total:s.total,txt:[s.method,s.ref,s.cust,s.staff,s.payBy,s.items.map(i=>i.name).join(" ")].join(" ")}));
+  salesV().forEach(s=>L.push({k:"s",no:s.no,dn:dnum(s),ot:s.opened||s.ts,ts:s.ts,title:s.type==="ship"||s.table==="Mang về"?"Ship ngoài":s.table,meta:[s.code,(s.opened?tm(s.opened)+" → ":"")+tm(s.ts),s.payBy||s.staff],st:s.cancel?"c":"p",ty:s.type==="ship"||s.table==="Mang về"?"s":"t",sf:[s.staff,s.payBy],me:s.method||"",lb:s.cancel?"":s.method,pc:s.cancel?"":s.method==="Tiền mặt"?"pg":"pb",total:s.total,txt:[s.method,s.ref,s.cust,s.staff,s.payBy,s.items.map(i=>i.name).join(" ")].join(" ")}));
   const q=OF.q.trim().toLowerCase().replace(/^#/,"");const sw=OF.from&&OF.to&&OF.from>OF.to,lo=sw?OF.to:OF.from,hi=sw?OF.from:OF.to;
   const R=L.filter(x=>{const d=ymd(x.ts);if(lo&&d<lo)return false;if(hi&&d>hi)return false;
     if(OF.staff&&!x.sf.includes(OF.staff))return false;if(OF.ty&&x.ty!==OF.ty)return false;if(OF.me&&x.me!==OF.me)return false;
@@ -810,6 +810,11 @@ function openO(no){if(PG==="ban"){cur=no;view()}else{pend=no;nav("ban")}}
 /* ===== Chấm công ===== */
 const canPay=()=>isOwner()||can("staffMgr");
 const vis=s=>isOwner()||s.role!=="Chủ quán",nvOk=s=>s.role!=="Chủ quán",ownN=()=>S.staff.filter(s=>s.role==="Chủ quán").map(s=>s.name);
+/* Đơn do chủ quán hủy: quản lý (và mọi người không phải chủ quán) chỉ thấy khi chủ quán bật S.store.mgrSeeOwnCancel. Đơn cũ chưa lưu vai trò thì suy ra từ tên người hủy. */
+const cxRole=c=>c?(c.role||(((S.staff.find(t=>t.id===c.bid)||S.staff.find(t=>t.name===c.by)||{}).role)||"")):"";
+const wsCxHid=z=>!!(z&&z.cancel&&!isOwner()&&!S.store.mgrSeeOwnCancel&&(z.cbr||((S.staff.find(t=>t.name===z.cby)||{}).role)||"")==="Chủ quán");
+const cxHid=z=>!!(z&&z.cancel&&!isOwner()&&!S.store.mgrSeeOwnCancel&&cxRole(z.cancel)==="Chủ quán");
+const salesV=d=>(d||S.sales||[]).filter(z=>!cxHid(z));
 let rkP="m",rkM="q";
 function rkSet(k,v){if(k==="p")rkP=v;else rkM=v;view()}
 function vRank(){
@@ -1619,10 +1624,10 @@ function rpStores(){const all=CH.list.map((x,i)=>{const d=x.id===CH.cur?S:ldk(x.
   else if(own&&rpS!=="store"&&all.some(x=>x.id===rpS))use=all.filter(x=>x.id===rpS);
   else use=all.filter(x=>x.id===CH.cur);
   return{all,use}}
-function rpInfo(x,a,b){const sl=x.d.sales||[],L=sl.filter(z=>!z.cancel&&z.ts>=a&&z.ts<b),X=sl.filter(z=>z.cancel&&z.ts>=a&&z.ts<b),i=smInfo(x,a,b,a,a),f=k=>L.reduce((t,z)=>t+(z[k]||0),0);
+function rpInfo(x,a,b){const sl=(x.d.sales||[]).filter(z=>!cxHid(z)),L=sl.filter(z=>!z.cancel&&z.ts>=a&&z.ts<b),X=sl.filter(z=>z.cancel&&z.ts>=a&&z.ts<b),i=smInfo(x,a,b,a,a),f=k=>L.reduce((t,z)=>t+(z[k]||0),0);
   return{...x,L,X,chot:i.chot,haoV:i.haoV,impV:i.impV,low:i.low,pct:i.pct,rev:sum(L),n:L.length,pax:f("pax"),dis:f("pd")+f("md"),sv:f("sv"),vat:f("vat"),xn:X.length,xv:sum(X)}}
 function rpCsv(){const{use}=rpStores(),[a,b]=rpRange(),q=v=>'"'+String(v==null?"":v).replace(/"/g,'""')+'"',rows=[["Quán","Mã hóa đơn","Số","Ngày giờ","Loại","Bàn / Khách","Thu ngân","Hình thức","Tạm tính","Khuyến mãi","Giảm giá","Phí phục vụ","VAT","Tổng","Số khách","Trạng thái"]];
-  use.forEach(x=>(x.d.sales||[]).filter(z=>z.ts>=a&&z.ts<b).forEach(z=>rows.push([x.name,z.code,z.no,new Date(z.ts).toLocaleString("vi-VN"),z.type==="ship"?"Mang về":"Tại bàn",z.table+(z.cust?" · "+z.cust:""),z.payBy||z.staff,z.method,Math.round(z.sub||0),Math.round(z.pd||0),Math.round(z.md||0),Math.round(z.sv||0),Math.round(z.vat||0),Math.round(z.total),z.pax||0,z.cancel?"Đã hủy":"Đã thanh toán"])));
+  use.forEach(x=>(x.d.sales||[]).filter(z=>!cxHid(z)&&z.ts>=a&&z.ts<b).forEach(z=>rows.push([x.name,z.code,z.no,new Date(z.ts).toLocaleString("vi-VN"),z.type==="ship"?"Mang về":"Tại bàn",z.table+(z.cust?" · "+z.cust:""),z.payBy||z.staff,z.method,Math.round(z.sub||0),Math.round(z.pd||0),Math.round(z.md||0),Math.round(z.sv||0),Math.round(z.vat||0),Math.round(z.total),z.pax||0,z.cancel?"Đã hủy":"Đã thanh toán"])));
   return rows.map(r=>r.map(q).join(",")).join("\n")}
 function rpExport(){const t=rpCsv(),ok=()=>{rpCp=1;view();setTimeout(()=>{rpCp=0;view()},2200)},no=()=>{rpTxt=t;view();const e=$("#rp_t");if(e)e.select()};
   try{navigator.clipboard.writeText(t).then(ok,no)}catch(e){no()}}
@@ -2034,7 +2039,7 @@ function wsInSave(){if(!isOwner())return;const e=$("#wi_e"),P=wsI();let n=0;
   wsin=false;wiv={};wic={};if(n)save();view()}
 /* ---- Lịch sử ---- */
 function wHList(){const t=new Date();t.setHours(0,0,0,0);let a=0;if(wRange==="d")a=t.getTime();else if(wRange==="7")a=t.getTime()-6*DAY;else if(wRange==="m"){const m=new Date();m.setDate(1);m.setHours(0,0,0,0);a=m.getTime()}
-  const q=wlq.trim().toLowerCase();return wsL().filter(s=>s.ts>=a&&(!wlb||(s.by||"")===wlb)&&(!q||((s.cust||"")+" "+(s.ccode||"")+" "+(s.code||"")+" "+(s.cphone||"")+" "+(s.cship||s.caddr||"")+" "+(s.note||"")+" "+s.items.map(i=>i.name).join(" ")).toLowerCase().includes(q))&&(wlf==="all"||(wlf==="due"&&!s.cancel&&wsDue(s)>0)||(wlf==="paid"&&!s.cancel&&wsDue(s)<=0)||(wlf==="cancel"&&s.cancel))).sort((x,y)=>y.ts-x.ts)}
+  const q=wlq.trim().toLowerCase();return wsL().filter(s=>!wsCxHid(s)&&s.ts>=a&&(!wlb||(s.by||"")===wlb)&&(!q||((s.cust||"")+" "+(s.ccode||"")+" "+(s.code||"")+" "+(s.cphone||"")+" "+(s.cship||s.caddr||"")+" "+(s.note||"")+" "+s.items.map(i=>i.name).join(" ")).toLowerCase().includes(q))&&(wlf==="all"||(wlf==="due"&&!s.cancel&&wsDue(s)>0)||(wlf==="paid"&&!s.cancel&&wsDue(s)<=0)||(wlf==="cancel"&&s.cancel))).sort((x,y)=>y.ts-x.ts)}
 function wHRows(){const L=wHList(),ok=L.filter(s=>!s.cancel),tot=ok.reduce((a,s)=>a+s.total,0),got=ok.reduce((a,s)=>a+wsPaidAmt(s),0),due=ok.reduce((a,s)=>a+wsDue(s),0);
   let kc=0,kr=0;const by={},bp={};ok.forEach(s=>{by[s.cust]=(by[s.cust]||0)+s.total;s.items.forEach(i=>{if(+i.cost>0){kc+=i.cost*i.q;kr+=i.amt}const o=bp[i.name]||(bp[i.name]={q:0,a:0,u:i.su});o.q+=i.q;o.a+=i.amt})});
   const top=(o,f)=>Object.entries(o).sort((x,y)=>f(y[1])-f(x[1])).slice(0,5);
@@ -2090,7 +2095,7 @@ function wsRepeat(id){const s=wsL().find(x=>x.id===id);if(!s||!can("wsale"))retu
   s.items.forEach(i=>{const p=wsP(i.pid);if(!p)return;const pr=wsPr(custOf(wcid),p,i.q).v;wv[p.id]=pr>0?[String(i.q),String(pr),String(Math.round(i.q*pr)),0]:[String(i.q),String(i.price),String(i.amt),1]});
   if(s.vp)wx.vat=s.vp;if(s.dis)wx.dis=s.dis;if(s.ship)wx.ship=s.ship;wsd=null;cdel=false;wtab="ban";view()}
 function wsCancel(id){const s=wsL().find(x=>x.id===id);if(!s||s.cancel)return;if(!cdel){cdel=true;const b=$("#c_d");b.textContent="Bấm lần nữa để hủy phiếu";b.style.borderColor="#dc2626";return}
-  s.items.forEach(i=>{const p=wsP(i.pid);if(p)wsMove(p,i.q*i.f,"Hủy phiếu "+s.code)});const pd=wsPaidAmt(s);s.cancel=Date.now();s.cby=meName();lg("Bán sỉ","Hủy phiếu "+s.cust+" · "+fmt(s.total)+(pd>0?" · đã thu "+fmt(pd)+", cần hoàn lại khách":""));cdel=false;save();view()}
+  s.items.forEach(i=>{const p=wsP(i.pid);if(p)wsMove(p,i.q*i.f,"Hủy phiếu "+s.code)});const pd=wsPaidAmt(s);s.cancel=Date.now();s.cby=meName();s.cbr=((S.staff.find(t=>t.id===S.me)||{}).role)||"Chủ quán";lg("Bán sỉ","Hủy phiếu "+s.cust+" · "+fmt(s.total)+(pd>0?" · đã thu "+fmt(pd)+", cần hoàn lại khách":""));cdel=false;save();view()}
 function vMenu(){
   const C=catList();
   return `<h2 style="margin:0">Thực đơn</h2><p class="mu" style="margin:2px 0 16px">${S.menu.length} món · ${C.length} nhóm</p><div class="seg" style="margin-bottom:16px">${[["mon","Món"],["nhom","Nhóm món"]].map(t=>`<button class="${mtab===t[0]?"on":""}" onclick="mtab='${t[0]}';gEd=gDel=null;gErr='';view()">${t[1]}</button>`).join("")}</div>${mtab==="mon"?mItems():mGroups()}${mmod?menuModal():""}`;
@@ -2233,8 +2238,10 @@ function nvPerm(){
   const body=PERMG.map(g=>`<tr class="pgh"><td colspan="${n}">${g[0]}</td></tr>`+g[1].filter(k=>k in PL).map(k=>`<tr><td>${PL[k]}</td><td class="c own">${chk}</td>${RL.map(r=>`<td class="c"><input type="checkbox" class="ck" aria-label="${esc(r)}: ${esc(PL[k])}" ${rpD[r][k]?"checked":""} ${ed?"":"disabled"} onchange="rpSet('${r}','${k}',this.checked)"></td>`).join("")}</tr>`).join("")).join("");
   return `<div class="card rpc"><div class="rph"><div><b style="font-size:17px">Bảng quyền theo vai trò</b><p class="mu" style="margin:4px 0 0">${ed?"Tick để cấp quyền cho từng vai trò. Chủ quán luôn có đủ quyền.":"Chỉ chủ quán chỉnh được bảng quyền."}</p></div></div>
   <div class="scroll"><table class="pt"><tr><th>Quyền</th><th class="c own">Chủ quán</th>${RL.map(r=>`<th class="c">${esc(r)}<br><small class="mu" id="rpc_${esc(r)}">${PERMS.filter(p=>rpD[r][p[0]]).length}/${PERMS.length}</small></th>`).join("")}</tr>${body}</table></div>
-  <div class="rpb"><span id="rp_d" class="mu" hidden>● Có thay đổi chưa lưu</span><span class="rpa"><button ${ed?"":"disabled"} onclick="rpDef()">Về mặc định</button><button id="rp_s" class="p" ${ed?"":"disabled"} onclick="rpSavePerm()">Lưu bảng quyền</button></span></div></div>`;
+  <div class="rpb"><span id="rp_d" class="mu" hidden>● Có thay đổi chưa lưu</span><span class="rpa"><button ${ed?"":"disabled"} onclick="rpDef()">Về mặc định</button><button id="rp_s" class="p" ${ed?"":"disabled"} onclick="rpSavePerm()">Lưu bảng quyền</button></span></div></div>`+cxCard();
 }
+function cxCard(){const on=!!S.store.mgrSeeOwnCancel,ed=isOwner();return `<div class="card" style="margin-top:14px;display:flex;gap:14px;align-items:flex-start;justify-content:space-between;flex-wrap:wrap"><div style="flex:1;min-width:220px"><b style="font-size:16px">Đơn do chủ quán hủy</b><p class="mu" style="margin:4px 0 0">${on?"Đang BẬT: quản lý xem được cả đơn do chủ quán hủy.":"Đang TẮT: quản lý chỉ xem được đơn do nhân viên hủy hoặc quản lý khác hủy. Đơn chủ quán hủy bị ẩn khỏi danh sách đơn, báo cáo và file xuất."}</p>${ed?"":`<small class="mu">Chỉ chủ quán bật/tắt được.</small>`}</div><label style="display:flex;align-items:center;gap:8px;cursor:pointer"><input type="checkbox" class="ck" ${on?"checked":""} ${ed?"":"disabled"} onchange="cxSet(this.checked)"><span>Cho quản lý xem</span></label></div>`}
+function cxSet(v){if(!isOwner())return;S.store.mgrSeeOwnCancel=!!v;lg("Phân quyền",(v?"Bật":"Tắt")+" cho quản lý xem đơn chủ quán hủy");save();view();okToast(v?"Quản lý đã xem được đơn chủ quán hủy":"Đã ẩn đơn chủ quán hủy khỏi quản lý")}
 function rpSet(r,k,v){if(!isOwner())return;rpD[r][k]=v;rpCnt()}
 function rpSavePerm(){if(!isOwner()||!rpD)return;if(!rpDirty()){okToast("Chưa có thay đổi nào để lưu","#475569");return}try{S.store.rp=JSON.parse(JSON.stringify(rpD));lg("Phân quyền","Lưu bảng quyền theo vai trò");save();rpD=null;view();okToast("Đã lưu bảng quyền")}catch(e){console.error(e);okToast("Lưu không thành công, thử lại nhé","#dc2626")}}function okToast(t,c){const o=document.getElementById("okt");if(o)o.remove();const e=document.createElement("div");e.id="okt";e.setAttribute("role","status");e.textContent=(c?"":"✓ ")+t;e.style.cssText="position:fixed;left:50%;bottom:28px;transform:translateX(-50%) translateY(12px);background:"+(c||"#16a34a")+";color:#fff;padding:12px 22px;border-radius:12px;font-weight:600;font-size:15px;box-shadow:0 8px 24px rgba(0,0,0,.4);z-index:99999;opacity:0;transition:opacity .25s,transform .25s;pointer-events:none";document.body.appendChild(e);requestAnimationFrame(()=>{e.style.opacity="1";e.style.transform="translateX(-50%) translateY(0)"});setTimeout(()=>{e.style.opacity="0";e.style.transform="translateX(-50%) translateY(12px)";setTimeout(()=>e.remove(),300)},2200)}
 function rpDef(){if(!isOwner())return;rpD=JSON.parse(JSON.stringify(PD));view()}
