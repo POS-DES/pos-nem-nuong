@@ -1,6 +1,7 @@
-<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="app-build" content="2026-11-21.1"><meta name="theme-color" content="#f2500a"><link rel="manifest" href="manifest.webmanifest"><link rel="icon" type="image/png" href="icon-192.png"><link rel="apple-touch-icon" href="apple-touch-icon.png"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="POS Quán Ăn"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}input[type=number]{-moz-appearance:textfield;appearance:textfield}input[type=number]::-webkit-outer-spin-button,input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="app-build" content="2026-11-25.1"><meta name="theme-color" content="#f2500a"><link rel="manifest" href="manifest.webmanifest"><link rel="icon" type="image/png" href="icon-192.png"><link rel="apple-touch-icon" href="apple-touch-icon.png"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="POS Quán Ăn"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}input[type=number]{-moz-appearance:textfield;appearance:textfield}input[type=number]::-webkit-outer-spin-button,input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
 tr[data-ed]:hover td{background:var(--hov)}
-</style></head><body>
+</style><style>.rcb{position:absolute;top:6px;left:6px;z-index:2;width:34px;height:34px;min-width:34px!important;min-height:34px!important;padding:0;border-radius:99px;font-size:16px;line-height:1;background:var(--card);border:1px solid var(--bd);box-shadow:0 1px 4px rgba(0,0,0,.28);display:flex;align-items:center;justify-content:center}.rcs{border:1px solid var(--bd);border-radius:12px;padding:12px 14px;display:flex;flex-direction:column;gap:8px}.rcs h4{margin:0}.rcl{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:4px}.rcm textarea{min-height:90px}</style>
+</head><body>
 <title>POS Quán Ăn</title>
 <style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}.sct td,.sct th{border-bottom:1px solid var(--bd)}.sc{text-align:center;min-width:64px}.sc.ed{cursor:pointer}.sc.ed:hover{background:var(--hov)}.sc{min-width:104px}.sct th.tdy{color:var(--pr);border-top:3px solid var(--pr);background:color-mix(in srgb,var(--pr) 10%,transparent)}.sct td.tdy{background:color-mix(in srgb,var(--pr) 8%,transparent);box-shadow:inset 1px 0 0 color-mix(in srgb,var(--pr) 35%,transparent),inset -1px 0 0 color-mix(in srgb,var(--pr) 35%,transparent)}.sct .tdb{display:inline-block;margin-top:2px;background:var(--pr);color:#fff;border-radius:99px;padding:0 8px;font-size:11px;font-weight:700}
 .sct td:first-child,.sct th:first-child{min-width:96px;white-space:nowrap}.sct td{vertical-align:middle;padding:8px 6px}
@@ -380,7 +381,7 @@ const $=s=>document.querySelector(s);
 const _nfv=new Intl.NumberFormat("vi-VN"),fmt=n=>_nfv.format(Math.round(n))+"đ";
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const _tmf=new Intl.DateTimeFormat("vi-VN",{hour:"2-digit",minute:"2-digit"}),tm=t=>{const d=new Date(t);return isNaN(d)?"Invalid Date":_tmf.format(d)};
-const NAV=[["ban","Bàn","▦"],["bep","Bếp","🍳"],["donhang","Đơn hàng","🧾"],["chamcong","Chấm công","🕒"],["kho","Kho","📦"],["si","Bán sỉ","🏷"],["baocao","Báo cáo","📊"],["tonghop","Tổng hợp","🗂"],["menu","Thực đơn","🍴"],["sodo","Sơ đồ bàn","🪑"],["nhanvien","Nhân viên","👥"],["caidat","Cài đặt","⚙️"]];
+const NAV=[["ban","Bàn","▦"],["bep","Bếp","🍳"],["donhang","Đơn hàng","🧾"],["chamcong","Chấm công","🕒"],["kho","Kho","📦"],["si","Bán sỉ","🏷"],["baocao","Báo cáo","📊"],["tonghop","Tổng hợp","🗂"],["menu","Thực đơn","🍴"],["congthuc","Công thức","📖"],["sodo","Sơ đồ bàn","🪑"],["nhanvien","Nhân viên","👥"],["caidat","Cài đặt","⚙️"]];
 function seed(){
   const m=[["Phở bò",55000,"Món chính"],["Cơm tấm sườn",50000,"Món chính"],["Bún chả",55000,"Món chính"],["Bánh mì thịt",25000,"Món chính"],["Gỏi cuốn",35000,"Khai vị"],["Chả giò",40000,"Khai vị"],["Trà đá",5000,"Đồ uống"],["Cà phê sữa",25000,"Đồ uống"],["Nước cam",30000,"Đồ uống"],["Bia Tiger",20000,"Đồ uống"],["Chè khúc bạch",25000,"Tráng miệng"],["Sữa chua",15000,"Tráng miệng"]];
   return {store:{name:"Quán của bạn",owner:"Chủ quán"},me:1,
@@ -438,7 +439,7 @@ const PM={view:"report",reprint:"pay",cancel:"cancelItem"};
 const pv=(m,k)=>m.role==="Chủ quán"||!!((rpm()[m.role]||{})[PM[k]||k]);
 const isOwner=()=>{const m=S.staff.find(s=>s.id===S.me);return !m||m.role==="Chủ quán"};
 const can=k=>{const m=S.staff.find(s=>s.id===S.me);return !m||pv(m,k)};
-const navOk=k=>({ban:can("order"),bep:can("kitchen"),donhang:can("report"),chamcong:true,kho:can("stockCheck")||can("stockView")||can("stockIn"),baocao:can("report"),tonghop:can("sum"),menu:can("menuEdit"),si:can("wsale"),sodo:can("mapEdit"),nhanvien:can("staffMgr"),caidat:true})[k];
+const navOk=k=>({ban:can("order"),bep:can("kitchen"),donhang:can("report"),chamcong:true,congthuc:true,kho:can("stockCheck")||can("stockView")||can("stockIn"),baocao:can("report"),tonghop:can("sum"),menu:can("menuEdit"),si:can("wsale"),sodo:can("mapEdit"),nhanvien:can("staffMgr"),caidat:true})[k];
 
 const ico=p=>`<svg viewBox="0 0 24 24">${p}</svg>`;
 const SV=(p,s)=>`<svg viewBox="0 0 24 24" width="${s||15}" height="${s||15}" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${p}</svg>`,USERS='<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>',BIKE='<circle cx="18.5" cy="17.5" r="3.5"/><circle cx="5.5" cy="17.5" r="3.5"/><circle cx="15" cy="5" r="1"/><path d="M12 17.5V14l-3-3 4-3 2 3h2"/>';
@@ -451,6 +452,7 @@ kho:'<path d="M21 8 12 3 3 8l9 5 9-5Z"/><path d="M3 8v8l9 5 9-5V8"/><path d="M12
 baocao:'<path d="M3 3v18h18"/><path d="M8 17v-5M13 17V7M18 17v-8"/>',
 tonghop:'<path d="m12 3 9 5-9 5-9-5 9-5Z"/><path d="m3 13 9 5 9-5"/>',
 menu:'<path d="M5 3v7a2 2 0 0 0 2 2 2 2 0 0 0 2-2V3M7 3v18M17 21V3c-2 1-4 4-4 8 0 2 1 3 4 3"/>',
+congthuc:'<path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2Z"/><path d="M4 19V5"/><path d="M9 8h6M9 12h6"/>',
 sodo:'<path d="M5 11V8a3 3 0 0 1 3-3h8a3 3 0 0 1 3 3v3"/><path d="M3 13a2 2 0 0 1 4 0v2h10v-2a2 2 0 0 1 4 0v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2Z"/><path d="M6 19v2M18 19v2"/>',
 nhanvien:'<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.9M16 3.1a4 4 0 0 1 0 7.8"/>',
 caidat:'<path d="M4 6h10M18 6h2M4 12h4M12 12h8M4 18h12"/><circle cx="16" cy="6" r="2"/><circle cx="10" cy="12" r="2"/><circle cx="18" cy="18" r="2"/>',si:'<path d="M20.6 13.4 13.4 20.6a2 2 0 0 1-2.8 0L3 13V3h10l7.6 7.6a2 2 0 0 1 0 2.8Z"/><circle cx="7.5" cy="7.5" r="1.5"/>'};
@@ -523,11 +525,11 @@ function view(){
   setH($("#side"),`<div class="sw"><span class="logo">${ico(IC.store)}</span><div class="t"><b>${esc(S.store.name)}</b><small>${esc(me.name)} · ${esc(me.role)}</small></div>${isOwner()&&CH.list.length>1?stSw():needLogin()?"":`<span class="chev ic">${ico('<path d="m7 15 5 5 5-5M7 9l5-5 5 5"/>')}</span><select title="Đổi người thao tác" onchange="S.me=+this.value;save();view()">${S.staff.map(s=>`<option value="${s.id}" ${s.id===S.me?"selected":""}>${esc(s.name)} · ${esc(s.role)}</option>`).join("")}</select>`}</div>`+
    NAV.filter(n=>navOk(n[0])).map(n=>`<a href="#${n[0]}" onclick="return nav('${n[0]}')" class="${n[0]===k?"on":""}" title="${n[1]}"><span class="ic">${ico(IC[n[0]])}</span><span class="lb">${n[1]}</span>${n[0]==="bep"&&kcnt()?`<i class="bd kb">${kcnt()}</i>`:""}${n[0]==="chamcong"&&swIn()?`<i class="bd kb">${swIn()}</i>`:""}</a>`).join("")+(`<a class="lgo" href="#" onclick="logout();return false" title="Đăng xuất"><span class="ic">${ico('<path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/>')}</span><span class="lb">Đăng xuất</span></a>${syPill()}`));mobShell(k);
   $("#side").classList.add("lo");
-  const V={ban:()=>ordN(cur)?vOrder(ordN(cur)):vTables(),bep:vKitchen,donhang:vOrders,chamcong:vAtt,kho:vStock,baocao:vReport,tonghop:vSum,menu:vMenu,si:vWs,sodo:vMap,nhanvien:vStaff,caidat:vSet};
+  const V={ban:()=>ordN(cur)?vOrder(ordN(cur)):vTables(),bep:vKitchen,donhang:vOrders,chamcong:vAtt,kho:vStock,baocao:vReport,tonghop:vSum,menu:vMenu,congthuc:vRec,si:vWs,sodo:vMap,nhanvien:vStaff,caidat:vSet};
   applyColor();document.body.classList.toggle("ordp",k==="ban"&&!!ordN(cur));setH($("#app"),loginBn()+(!navOk(k)?`<div class="card" style="max-width:480px;margin:60px auto;text-align:center"><h3>Chưa có quyền</h3><p class="mu">Vai trò của bạn chưa được cấp quyền dùng mục này. Hãy nhờ chủ quán cấp trong Nhân viên → Phân quyền.</p></div>`:V[k]()));
   {const oh=$(".ohead");document.documentElement.style.setProperty("--oh",oh?oh.offsetHeight+"px":"0px")}const rph=$("#rphrs");if(rph)rph.scrollLeft=+rph.dataset.sl||0;
 }
-function leave(){wsel=null;wsdc=false;wprn=null;dmod=null;wpend=null;cmod=null;pmod=null;cSync=false;wsin=false;wsd=null;bo=false;mq="";ck=false;qrMode=false;edI=null;sv=null;cx=false;const o=ordN(cur);if(o&&!o.items.length){S.orders=S.orders.filter(x=>x!==o);save()}cur=null}
+function leave(){rcClose();wsel=null;wsdc=false;wprn=null;dmod=null;wpend=null;cmod=null;pmod=null;cSync=false;wsin=false;wsd=null;bo=false;mq="";ck=false;qrMode=false;edI=null;sv=null;cx=false;const o=ordN(cur);if(o&&!o.items.length){S.orders=S.orders.filter(x=>x!==o);save()}cur=null}
 function back(){leave();view()}
 
 /* ===== Bàn ===== */
@@ -558,7 +560,7 @@ function vOrder(o){if(qrMode)return vQR(o);if(ck)return vCheckout(o);
   return `<div class="ohead"><div class="bar" style="margin:0 0 10px;flex-wrap:nowrap"><button onclick="back()" aria-label="Quay lại" style="font-size:18px;padding:8px 14px">←</button><div style="min-width:0"><b style="font-size:16px">${t?esc(t.name):"Đơn mang về"}</b> <span class="mu">#${dnum(o)}</span><br><small class="mu">Mở ${tm(o.ts||Date.now())} · ${esc(o.staff)}</small></div></div>
   <div class="ib osr"><span class="ic su">${ico('<circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/>')}</span><input id="omq" type="search" placeholder="Tìm món" value="${esc(mq)}" style="text-align:left" oninput="mq=this.value;view();const e=$('#omq');e.focus();e.setSelectionRange(e.value.length,e.value.length)"></div>
   ${promoStrip(o)}<div class="chips">${cats.map(c=>`<button class="${c===cat?"on":""}" onclick="cat=this.dataset.c;view()" data-c="${esc(c)}">${esc(c)}</button>`).join("")}</div></div>
-  <div class="two ordw"><div class="omenu"><div class="grid">${list.map(m=>`<div class="card item ${m.off?"off":""}" onclick="add(${m.id})">${qn(o,m.id)?`<i class="qb">${qn(o,m.id)}</i>`:""}${m.img?`<img class="mi" src="${m.img}" alt="" loading="lazy" decoding="async">`:""}<b>${esc(m.name)}</b>${m.off?`<span class="mu">Hết món</span>`:(()=>{const b=pbest(m.id,m.price,o);return b.d>0.5?`<span class="kmp"><b>${fmt(m.price-b.d)}</b><s>${fmt(m.price)}</s><em class="kmb">-${Math.round(b.d/m.price*100)}%</em></span>`:`<span class="mu">${fmt(m.price)}</span>`+tierHint(m.id,o)})()}</div>`).join("")}</div></div>
+  <div class="two ordw"><div class="omenu"><div class="grid">${list.map(m=>`<div class="card item ${m.off?"off":""}" onclick="add(${m.id})">${recOf(m.id)?`<button type="button" class="rcb" aria-label="Xem công thức" title="Xem công thức" onclick="event.stopPropagation();openRec(${recOf(m.id).id})">📖</button>`:""}${qn(o,m.id)?`<i class="qb">${qn(o,m.id)}</i>`:""}${m.img?`<img class="mi" src="${m.img}" alt="" loading="lazy" decoding="async">`:""}<b>${esc(m.name)}</b>${m.off?`<span class="mu">Hết món</span>`:(()=>{const b=pbest(m.id,m.price,o);return b.d>0.5?`<span class="kmp"><b>${fmt(m.price-b.d)}</b><s>${fmt(m.price)}</s><em class="kmb">-${Math.round(b.d/m.price*100)}%</em></span>`:`<span class="mu">${fmt(m.price)}</span>`+tierHint(m.id,o)})()}</div>`).join("")}</div></div>
   ${bo?`<div class="obk" onclick="bo=false;view()"></div>`:""}<div class="card bill ${bo?"open":""}"><div class="bh"><b style="font-size:16px">Hóa đơn</b><button class="bx" onclick="bo=false;view()" aria-label="Đóng">×</button></div><div class="bb">
   ${o.tid==null?`<div class="row"><span>Khách</span><input value="${esc(o.cust)}" style="width:150px" onchange="ordN(cur).cust=this.value;save()"></div>`:""}${shipUI(o)}
   ${o.items.length?o.items.map((i,x)=>{const m=menuOf(i.id);if(!m)return"";const pr=i.p!=null?i.p:m.price;return `<div class="row"><span>${esc(m.name)} ${i.s>=i.q?"✓":""}<br><small>${i.p!=null?`<b style="color:var(--pr)">${fmt(pr)}</b> (gốc ${fmt(m.price)})`:fmt(pr)}${i.n?" · "+esc(i.n):""}${i.q>1?`<br>${i.q} × ${fmt(pr)} = ${fmt(pr*i.q)}`:""}</small>${(()=>{const L=LD[x];if(!L||L.d<=0.5)return"";return `<br><small style="color:var(--pr);font-weight:600">🎁 ${esc([...L.n.keys()].join(", "))}: -${fmt(L.d)} → ${fmt(pr*i.q-L.d)}${L.t?`<br>${grpU(L.u)}`:""}</small>`})()}</span><button onclick="openEd(${x})" title="Sửa giá / ghi chú">✎</button><button onclick="qty(${x},-1)">−</button><b>${i.q}</b><button onclick="qty(${x},1)">+</button></div>${edI===x?edForm(i,x,m):""}`}).join(""):`<p class="mu">Chưa có món nào.</p>`}
@@ -1786,6 +1788,48 @@ function vSum(){
   <div class="card"><b style="font-size:16px">Hình thức thanh toán</b>${[["Tiền mặt",cash],["Chuyển khoản",bank]].map(x=>`<div class="row" style="flex-wrap:wrap"><span>${x[0]}</span><b>${fmt(x[1])}</b><div class="sbar" style="width:100%"><i style="width:${tot.rev?Math.round(x[1]/tot.rev*100):0}%;background:var(--pr)"></i></div></div>`).join("")}</div></div>
   ${ops}</div>${smDet?smDetModal(R,a,b):""}`;
 }
+/* ===== Công thức: tra nguyên liệu, cách làm, sốt ===== */
+let rcQ="",rcE=null,rcV=null;
+const recs=()=>S.rec||(S.rec=[]),recOf=id=>recs().find(r=>r.menuId===id),rLines=t=>String(t||"").split("\n").map(x=>x.trim()).filter(Boolean);
+const rMenu=id=>S.menu.find(m=>m.id===id);
+function rcClose(){const e=$("#rcm");if(e)e.remove();rcV=null;rcE=null}
+function rcRender(h){let e=$("#rcm");if(!e){e=document.createElement("div");e.id="rcm";document.body.appendChild(e)}e.innerHTML=h}
+function openRec(id){const r=recs().find(x=>x.id===id);if(!r)return;rcV=id;rcE=null;rcRender(rcViewHtml(r))}
+const rcUl=a=>a.length?`<ul class="rcl">${a.map(x=>`<li>${esc(x)}</li>`).join("")}</ul>`:`<small class="mu">Chưa có.</small>`,rcOl=a=>a.length?`<ol class="rcl">${a.map(x=>`<li>${esc(x)}</li>`).join("")}</ol>`:`<small class="mu">Chưa có.</small>`;
+function rcViewHtml(r){const m=rMenu(r.menuId),ed=can("menuEdit");
+  return `<div class="mo" onclick="if(event.target===this)rcClose()"><div class="md" role="dialog" aria-modal="true"><div class="mh"><div><b>${esc(r.name)}</b>${m?`<br><small class="mu">Món: ${esc(m.name)}</small>`:""}</div><button class="mx" onclick="rcClose()">×</button></div><div class="mb">
+<div class="rcs"><h4>Nguyên liệu</h4>${rcUl(rLines(r.ings))}</div>
+<div class="rcs"><h4>Cách làm</h4>${rcOl(rLines(r.steps))}</div>
+${(r.sauces||[]).map(x=>`<div class="rcs"><h4>Sốt: ${esc(x.name||"")}</h4><b style="font-size:13px">Nguyên liệu</b>${rcUl(rLines(x.ings))}<b style="font-size:13px">Cách pha</b>${rcOl(rLines(x.steps))}</div>`).join("")}
+${r.note?`<div class="rcs"><h4>Ghi chú</h4><div style="white-space:pre-wrap">${esc(r.note)}</div></div>`:""}</div>
+<div class="mfoot">${ed?`<button onclick="rcDel(${r.id})" style="color:#dc2626">Xóa</button><button class="p" onclick="rcEdit(${r.id})">Sửa</button>`:`<button class="p" onclick="rcClose()">Đóng</button>`}</div></div></div>`}
+function rcEditHtml(){const r=rcE;
+  return `<div class="mo rcm"><div class="md" role="dialog" aria-modal="true"><div class="mh"><b>${r.id?"Sửa công thức":"Thêm công thức"}</b><button class="mx" onclick="rcCancel()">×</button></div><div class="mb">
+<label class="mf"><span>Tên công thức</span><input id="rc_n" value="${esc(r.name)}" placeholder="VD: Trà tắc"></label>
+<label class="mf"><span>Gắn với món trong thực đơn (để bấm 📖 ở màn gọi món)</span><select id="rc_m"><option value="">— Không gắn —</option>${S.menu.map(m=>`<option value="${m.id}" ${m.id===r.menuId?"selected":""}>${esc(m.name)}</option>`).join("")}</select></label>
+<label class="mf"><span>Nguyên liệu (mỗi dòng 1 thứ)</span><textarea id="rc_i" placeholder="3 quả tắc&#10;20ml siro&#10;Đá viên">${esc(r.ings)}</textarea></label>
+<label class="mf"><span>Cách làm (mỗi dòng 1 bước)</span><textarea id="rc_s">${esc(r.steps)}</textarea></label>
+${r.sauces.map((x,i)=>`<div class="rcs"><div style="display:flex;gap:8px;align-items:center"><b style="flex:1">Sốt ${i+1}</b><button type="button" onclick="rcSauce(${i})" style="color:#dc2626">Xóa sốt</button></div><label class="mf"><span>Tên sốt</span><input class="rc_sn" value="${esc(x.name)}" placeholder="VD: Sốt chấm nem"></label><label class="mf"><span>Nguyên liệu sốt (mỗi dòng 1 thứ)</span><textarea class="rc_si">${esc(x.ings)}</textarea></label><label class="mf"><span>Cách pha (mỗi dòng 1 bước)</span><textarea class="rc_ss">${esc(x.steps)}</textarea></label></div>`).join("")}
+<button type="button" onclick="rcSauce()">+ Thêm sốt / nước chấm</button>
+<label class="mf"><span>Ghi chú</span><textarea id="rc_t">${esc(r.note)}</textarea></label></div>
+<div class="mfoot"><button onclick="rcCancel()">Hủy</button><button class="p" onclick="rcSave()">Lưu</button></div></div></div>`}
+function rcRead(){const r=rcE;if(!r||!$("#rc_n"))return;r.name=$("#rc_n").value;r.menuId=+$("#rc_m").value||null;r.ings=$("#rc_i").value;r.steps=$("#rc_s").value;r.note=$("#rc_t").value;
+  const a=[...document.querySelectorAll(".rc_sn")],b=[...document.querySelectorAll(".rc_si")],c=[...document.querySelectorAll(".rc_ss")];r.sauces=a.map((e,i)=>({name:e.value,ings:b[i].value,steps:c[i].value}))}
+function rcSauce(i){rcRead();if(i===undefined)rcE.sauces.push({name:"",ings:"",steps:""});else rcE.sauces.splice(i,1);rcRender(rcEditHtml())}
+function rcAdd(){if(!can("menuEdit"))return;rcE={id:0,name:"",menuId:null,ings:"",steps:"",note:"",sauces:[]};rcRender(rcEditHtml())}
+function rcEdit(id){const r=recs().find(x=>x.id===id);if(!r||!can("menuEdit"))return;rcE={id:r.id,name:r.name||"",menuId:r.menuId||null,ings:r.ings||"",steps:r.steps||"",note:r.note||"",sauces:(r.sauces||[]).map(x=>({name:x.name||"",ings:x.ings||"",steps:x.steps||""}))};rcRender(rcEditHtml())}
+function rcCancel(){const id=rcE&&rcE.id;rcE=null;if(id)openRec(id);else rcClose()}
+function rcSave(){rcRead();const r=rcE;if(!r.name.trim()){alert("Nhập tên công thức");return}
+  const o={id:r.id||++S.nid,name:r.name.trim(),menuId:r.menuId,ings:r.ings,steps:r.steps,note:r.note,sauces:r.sauces.filter(x=>x.name.trim()||x.ings.trim()||x.steps.trim())};
+  if(o.menuId)recs().forEach(x=>{if(x.menuId===o.menuId&&x.id!==o.id)x.menuId=null});
+  const L=recs(),i=L.findIndex(x=>x.id===o.id);if(i>=0)L[i]=o;else L.push(o);
+  lg(r.id?"Sửa công thức":"Thêm công thức",o.name);save();rcClose();view()}
+function rcDel(id){const r=recs().find(x=>x.id===id);if(!r||!can("menuEdit"))return;if(!confirm("Xóa công thức "+r.name+"?"))return;S.rec=recs().filter(x=>x.id!==id);lg("Xóa công thức",r.name);save();rcClose();view()}
+function rcRows(){const q=rcQ.trim().toLowerCase(),L=recs().filter(r=>!q||(r.name||"").toLowerCase().includes(q)||(r.ings||"").toLowerCase().includes(q)).sort((a,b)=>(a.name||"").localeCompare(b.name||"","vi"));
+  if(!recs().length)return `<div class="card"><b>Chưa có công thức nào</b><p class="mu" style="margin:6px 0 0">${can("menuEdit")?"Bấm “Thêm công thức” để nhập món đầu tiên (nguyên liệu, cách làm, sốt).":"Chủ quán hoặc người có quyền sửa thực đơn sẽ nhập công thức."}</p></div>`;
+  if(!L.length)return `<div class="card"><small class="mu">Không tìm thấy công thức phù hợp.</small></div>`;
+  return `<div class="card" style="padding:0;overflow:hidden">${L.map(r=>{const m=rMenu(r.menuId),n=rLines(r.ings).length,sc=(r.sauces||[]).length;return `<div class="orow" onclick="openRec(${r.id})"><div style="flex:1;min-width:0"><b>${esc(r.name)}</b><br><small class="mu">${n} nguyên liệu${sc?" · "+sc+" sốt":""}${m?" · món "+esc(m.name):""}</small></div><span class="mu">›</span></div>`}).join("")}</div>`}
+function vRec(){return `<div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:14px"><h2 style="margin:0;flex:1">Công thức</h2>${can("menuEdit")?`<button class="p" onclick="rcAdd()">+ Thêm công thức</button>`:""}</div><input type="search" placeholder="Tìm công thức hoặc nguyên liệu…" value="${esc(rcQ)}" oninput="rcQ=this.value;$('#rc_list').innerHTML=rcRows()" style="width:100%;margin-bottom:14px"><div id="rc_list">${rcRows()}</div>`}
 /* ===== Thực đơn / Sơ đồ / Nhân viên / Cài đặt ===== */
 function catList(){const base=S.cats||[],ex=[...new Set(S.menu.map(m=>m.cat))].filter(c=>c&&!base.includes(c));if(!S.cats||ex.length)S.cats=[...base,...ex];return S.cats}
 const sortM=a=>{const c=catList();return a.slice().sort((x,y)=>c.indexOf(x.cat)-c.indexOf(y.cat))};
@@ -2517,7 +2561,7 @@ const sySave=()=>{try{localStorage.setItem(SYK,JSON.stringify(SY))}catch(e){}};
 const canon=v=>v===null||typeof v!=="object"?JSON.stringify(v):Array.isArray(v)?"["+v.map(x=>canon(x===undefined?null:x)).join(",")+"]":"{"+Object.keys(v).filter(k=>v[k]!==undefined).sort().map(k=>JSON.stringify(k)+":"+canon(v[k])).join(",")+"}";
 const hsh=s=>{let a=5381,b=52711;for(let i=0;i<s.length;i++){const c=s.charCodeAt(i);a=(a*33^c)>>>0;b=(b*31+c)>>>0}return a.toString(36)+b.toString(36)+s.length.toString(36)};
 /* del:1 = xóa ở máy này thì xóa luôn trên máy chủ. Còn lại chỉ thêm, không bao giờ xóa (lịch sử bán hàng, chấm công, kho, nhật ký). */
-const SYA={menu:{k:r=>r.id,del:1},tables:{k:r=>r.id,del:1},staff:{k:r=>r.id,del:1},areas:{k:r=>r.id,del:1},orders:{k:r=>r.no+"_"+r.ts,del:1},kitchen:{k:r=>r.id+"_"+r.ts,del:1},ing:{k:r=>r.id,del:1},cust:{k:r=>r.id,del:1},wsi:{k:r=>r.id,del:1},wsl:{k:r=>r.id},wsx:{k:r=>r.id+"_"+r.ts},swp:{k:r=>r.id},
+const SYA={menu:{k:r=>r.id,del:1},tables:{k:r=>r.id,del:1},staff:{k:r=>r.id,del:1},areas:{k:r=>r.id,del:1},orders:{k:r=>r.no+"_"+r.ts,del:1},kitchen:{k:r=>r.id+"_"+r.ts,del:1},ing:{k:r=>r.id,del:1},cust:{k:r=>r.id,del:1},wsi:{k:r=>r.id,del:1},wsl:{k:r=>r.id},wsx:{k:r=>r.id+"_"+r.ts},swp:{k:r=>r.id},rec:{k:r=>r.id,del:1},
   sales:{k:r=>r.no+"_"+r.ts},att:{k:r=>r.sk||r.sid+"_"+r.in},imp:{k:r=>r.id+"_"+r.ts,del:1},kk:{k:r=>r.iid+"_"+r.ts},log:{k:r=>r.ts+"_"+hsh(r.a+"|"+r.d+"|"+r.by)}};
 const SYN=["ono","nid","iid","kid"];
 let SYL={},SYC={s:null,init:false},SYS={st:SY.on?"sync":"off",msg:"",t:0},SYUI={},SYB=false,SYD=false,SYV=false,syKT=0,syN=0;
@@ -2586,7 +2630,7 @@ function syApply(rows,force,wipe){
   if(n){
     const mx=(a,f)=>(a||[]).reduce((m,x)=>Math.max(m,+f(x)||0),0);
     S.ono=Math.max(S.ono||0,mx(S.orders,o=>o.no),mx(S.sales,o=>o.no));S.kid=Math.max(S.kid||0,mx(S.kitchen,o=>o.id));
-    S.nid=Math.max(S.nid||0,mx(S.menu,o=>o.id),mx(S.tables,o=>o.id),mx(S.staff,o=>o.id),mx(S.areas,o=>o.id),mx(S.cust,o=>o.id),mx(S.wsi,o=>o.id),mx(S.wsl,o=>o.id),mx(S.wsx,o=>o.id),mx(S.swp,o=>o.id));S.iid=Math.max(S.iid||0,mx(S.ing,o=>o.id),mx(S.imp,o=>o.id));
+    S.nid=Math.max(S.nid||0,mx(S.menu,o=>o.id),mx(S.tables,o=>o.id),mx(S.staff,o=>o.id),mx(S.areas,o=>o.id),mx(S.cust,o=>o.id),mx(S.wsi,o=>o.id),mx(S.wsl,o=>o.id),mx(S.wsx,o=>o.id),mx(S.swp,o=>o.id),mx(S.rec,o=>o.id));S.iid=Math.max(S.iid||0,mx(S.ing,o=>o.id),mx(S.imp,o=>o.id));
     _save();
   }
   return n;
